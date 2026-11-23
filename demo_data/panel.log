@@ -1,0 +1,7 @@
+2026-11-23 17:13:03,513 INFO Demo verisi olusturuldu: 25 personel, 1405 okutma
+2026-11-23 17:13:03,517 WARNING DEMO MODU: veriler sahte, cihaza baglanilmiyor. Veri: /home/user/fabe-personel-giris/demo_data
+2026-11-23 17:13:03,518 INFO Panel acildi: http://localhost:8093  (LAN: http://<bu-pc-ip>:8093)
+2026-11-23 17:13:03,532 INFO Tur zamanlayici: OK okunan=1 yeni=1 DEMO: sahte okuma
+2026-11-23 17:15:03,542 INFO Tur zamanlayici: OK okunan=0 yeni=0 DEMO: sahte okuma
+2026-11-23 17:17:03,556 INFO Tur zamanlayici: OK okunan=1 yeni=1 DEMO: sahte okuma
+2026-11-23 17:19:03,574 INFO Tur zamanlayici: OK okunan=2 yeni=2 DEMO: sahte okuma

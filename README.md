@@ -10,19 +10,6 @@ kaydeder ve LAN'da bir web panelde gösterir. Bulut yok, ek paket yok (sadece Py
 | `index.html` | Panel arayüzü (mobil uyumlu) |
 | `install.ps1` | `C:\EnGoPerPanel` kurulumu, güvenlik duvarı, açılışta otomatik başlatma |
 
-## Başka bir PC'de deneme (demo modu)
-
-Cihaz, EnGoPer ve Personel.DBF gerekmez; sahte personel ve son 45 günün sahte okutmaları üretilir.
-Hiçbir şey kurulmaz, veriler sadece `demo_data\` klasörüne yazılır. Python 3.8+ yeterli.
-
-```powershell
-py panel.py --demo
-```
-
-Panel tarayıcıda kendiliğinden açılır (açılmazsa konsolda yazan `http://localhost:...` adresini açın). Durdurmak için konsolda `Ctrl+C`. Sıfırlamak için `demo_data`
-klasörünü silin. (Demo personeli sahte olduğu için gerçek nöbet çizelgesindeki isimler önizlemede
-"eşleşmedi" görünür; listeden demo personel seçerek kaydetmeyi deneyebilirsiniz.)
-
 ## Kurulum (KASA 1, yönetici PowerShell)
 
 Repo klasörüne geçin (indirdiğiniz yer):

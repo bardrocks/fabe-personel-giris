@@ -2,4 +2,3 @@ data/
 config.json
 __pycache__/
 *.pyc
-demo_data/
