@@ -68,6 +68,10 @@ Log: `C:\EnGoPerPanel\data\panel.log` · Veritabanı: `C:\EnGoPerPanel\data\pane
 - **Rapor:** tarih aralığı + kişi + durum filtresi (geç / çıkış yok), Excel ve CSV indirme.
 - **Nöbet:** aylık nöbet çizelgesi yükleme ve her cumartesi için *GELDİ / GELMEDİ / BEKLENİYOR / PLANLI*.
 - **Ham kayıt:** cihazdan gelen her okutma.
+- **Ayarlar:** genel mesai, kategoriler (örn. Depo 08:00–20:00, Manken 09:00–20:00) ve personel bazında
+  özel saat. Öncelik: **özel saat → kategori → genel mesai**; her kademede cumartesi saati ayrı girilebilir.
+  Geç kalma ve erken çıkış bu saatlere göre hesaplanır. (`config.json`'daki mesai değerleri sadece ilk
+  açılıştaki varsayılandır.)
 - **Sistem:** son okuma turları, hatalar, elle okuma.
 
 Cihaz giriş/çıkış ayırmadığı için günün ilk okutması giriş, son okutması çıkış sayılır;

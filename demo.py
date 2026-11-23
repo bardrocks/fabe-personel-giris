@@ -47,7 +47,9 @@ def tohumla(p):
         calisanlar = rnd.sample(kisiler, 6) if cumartesi else [k for k in kisiler if rnd.random() < 0.85]
         for k in calisanlar:
             giris = dt.datetime.combine(gun, dt.time(8, 40)) + dt.timedelta(minutes=rnd.randint(0, 45))
-            cikis = giris + dt.timedelta(hours=rnd.choice([5, 8, 9]), minutes=rnd.randint(0, 40))
+            cikis = dt.datetime.combine(gun, dt.time(19, 45)) + dt.timedelta(minutes=rnd.randint(0, 30))
+            if rnd.random() < 0.1:  # erken cikan
+                cikis -= dt.timedelta(minutes=rnd.randint(30, 150))
             for t in (giris, cikis):
                 if t <= simdi and not (t is cikis and rnd.random() < 0.05):
                     kayitlar.append((k, p.zstr(t), 0))
@@ -64,6 +66,24 @@ def tohumla(p):
                 con.execute("INSERT OR IGNORE INTO nobet(tarih,kisi_no,metin) VALUES(?,?,?)", (g, k, "demo"))
             gun += dt.timedelta(days=7)
     p.log.info("Demo verisi olusturuldu: %d personel, %d okutma", len(kisiler), len(kayitlar))
+
+
+def kategori_tohumla(p):
+    """Ornek kategoriler: Depo 08-20, Manken 09-20, bir personele ozel 09-19."""
+    with p.db() as con:
+        if con.execute("SELECT COUNT(*) FROM kategori").fetchone()[0]:
+            return
+        kisiler = [r[0] for r in con.execute("SELECT kisi_no FROM personel ORDER BY kisi_no")]
+        if len(kisiler) < 10:
+            return
+        depo = con.execute("INSERT INTO kategori(ad,giris,cikis) VALUES('Depo','08:00','20:00')").lastrowid
+        manken = con.execute("INSERT INTO kategori(ad,giris,cikis,cts_giris,cts_cikis) "
+                             "VALUES('Manken','09:00','20:00','10:00','18:00')").lastrowid
+        for k in kisiler[:3]:
+            con.execute("INSERT OR REPLACE INTO personel_ayar(kisi_no,kategori_id) VALUES(?,?)", (k, depo))
+        for k in kisiler[3:8]:
+            con.execute("INSERT OR REPLACE INTO personel_ayar(kisi_no,kategori_id) VALUES(?,?)", (k, manken))
+        con.execute("INSERT OR REPLACE INTO personel_ayar(kisi_no,giris,cikis) VALUES(?,?,?)", (kisiler[9], "09:00", "19:00"))
 
 
 def sahte_okuma(p):

@@ -7,8 +7,11 @@
   "backup_txt": "C:\\EnGoPer\\S300_Aktarim\\backup.txt",
   "http_port": 8080,
   "mesai_baslangic": "09:00",
+  "mesai_bitis": "20:00",
   "cumartesi_mesai_baslangic": "09:00",
+  "cumartesi_mesai_bitis": "20:00",
   "gec_tolerans_dk": 5,
+  "erken_tolerans_dk": 5,
   "tekrar_esik_dk": 3,
   "yonetim_sifresi": ""
 }

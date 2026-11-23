@@ -49,9 +49,13 @@ VARSAYILAN = {
     "personel_yenileme_sn": 1800,
     "http_adres": "0.0.0.0",
     "http_port": 8080,
+    # Ilk kurulumdaki genel mesai; sonra panelin Ayarlar sekmesinden degistirilir (DB'de saklanir).
     "mesai_baslangic": "09:00",
+    "mesai_bitis": "20:00",
     "cumartesi_mesai_baslangic": "09:00",
+    "cumartesi_mesai_bitis": "20:00",
     "gec_tolerans_dk": 5,
+    "erken_tolerans_dk": 5,
     "tekrar_esik_dk": 3,
     "yonetim_sifresi": "",
     # Test/gelistirme icin: toplayici yerine calisacak komut ("{cikti}" yer tutucusu).
@@ -146,6 +150,11 @@ CREATE TABLE IF NOT EXISTS tur_log(
 CREATE TABLE IF NOT EXISTS nobet(
   id INTEGER PRIMARY KEY, tarih TEXT NOT NULL, kisi_no INTEGER NOT NULL, metin TEXT,
   yukleme_id INTEGER, UNIQUE(tarih, kisi_no));
+CREATE TABLE IF NOT EXISTS ayar(anahtar TEXT PRIMARY KEY, deger TEXT);
+CREATE TABLE IF NOT EXISTS kategori(
+  id INTEGER PRIMARY KEY, ad TEXT NOT NULL UNIQUE, giris TEXT, cikis TEXT, cts_giris TEXT, cts_cikis TEXT);
+CREATE TABLE IF NOT EXISTS personel_ayar(
+  kisi_no INTEGER PRIMARY KEY, kategori_id INTEGER, giris TEXT, cikis TEXT, cts_giris TEXT, cts_cikis TEXT);
 CREATE TABLE IF NOT EXISTS nobet_yukleme(
   id INTEGER PRIMARY KEY, zaman TEXT, dosya TEXT, tarih_sayisi INTEGER, kayit_sayisi INTEGER);
 """
@@ -368,19 +377,65 @@ def ayikla(zamanlar):
     return out
 
 
-def mesai_bas(gun):
-    return CFG["cumartesi_mesai_baslangic"] if gun.weekday() == 5 else CFG["mesai_baslangic"]
+# ----------------------------------------------------------------- mesai saatleri
+# Oncelik: personel ozel saati > kategori saati > genel mesai. Her kademede cumartesi ayri olabilir.
+_SAAT_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+SAAT_ALANLARI = ("giris", "cikis", "cts_giris", "cts_cikis")
 
 
-def gun_ozeti(gun, ts, bugun):
-    """ts: ayiklanmis okutma zamanlari (bos olamaz)."""
+def saat_temiz(v):
+    v = (v or "").strip()[:5]
+    if v and not _SAAT_RE.match(v):
+        raise ValueError(f"Geçersiz saat: {v} (SS:DD olmalı)")
+    return v or None
+
+
+def genel_ayar(con):
+    g = {"giris": CFG["mesai_baslangic"], "cikis": CFG["mesai_bitis"],
+         "cts_giris": CFG["cumartesi_mesai_baslangic"], "cts_cikis": CFG["cumartesi_mesai_bitis"],
+         "gec_tolerans_dk": CFG["gec_tolerans_dk"], "erken_tolerans_dk": CFG["erken_tolerans_dk"]}
+    for a, d in con.execute("SELECT anahtar, deger FROM ayar"):
+        if a in g:
+            g[a] = int(d) if a.endswith("_dk") else d
+    return g
+
+
+class MesaiCozucu:
+    def __init__(self, con):
+        self.genel = genel_ayar(con)
+        self.kat = {r["id"]: dict(r) for r in con.execute("SELECT * FROM kategori")}
+        self.per = {r["kisi_no"]: dict(r) for r in con.execute("SELECT * FROM personel_ayar")}
+
+    def kategori_adi(self, k):
+        return (self.kat.get((self.per.get(k) or {}).get("kategori_id")) or {}).get("ad", "")
+
+    def al(self, k, gun):
+        """-> (giris, cikis, kaynak). cikis bos olabilir."""
+        cts = gun.weekday() == 5
+        pa = self.per.get(k) or {}
+        kat = self.kat.get(pa.get("kategori_id")) or {}
+        for kaynak, d in (("Özel", pa), (kat.get("ad", ""), kat), ("Genel", self.genel)):
+            if cts and d.get("cts_giris"):
+                return d["cts_giris"], d.get("cts_cikis") or d.get("cikis") or "", kaynak
+            if d.get("giris"):
+                return d["giris"], d.get("cikis") or "", kaynak
+        return "09:00", "", "Genel"
+
+
+def gun_ozeti(gun, ts, bugun, mesai, genel):
+    """ts: ayiklanmis okutma zamanlari (bos olamaz). mesai: (giris, cikis, kaynak)"""
+    m_giris, m_cikis, m_kaynak = mesai
     giris = ts[0]
     cikis = ts[-1] if len(ts) > 1 else None
     icerde = gun == bugun and len(ts) % 2 == 1
     if icerde:
         cikis = None
-    gec = (giris.hour * 60 + giris.minute) - dk(mesai_bas(gun))
-    gec_dk = gec if gec > CFG["gec_tolerans_dk"] else 0
+    gec = (giris.hour * 60 + giris.minute) - dk(m_giris)
+    gec_dk = gec if gec > genel["gec_tolerans_dk"] else 0
+    erken_dk = 0
+    if cikis and m_cikis:
+        e = dk(m_cikis) - (cikis.hour * 60 + cikis.minute)
+        erken_dk = e if e > genel["erken_tolerans_dk"] else 0
     if icerde:
         durum = "İÇERİDE"
     elif cikis is None:
@@ -392,25 +447,30 @@ def gun_ozeti(gun, ts, bugun):
         m = int((cikis - giris).total_seconds() // 60)
         sure = f"{m // 60}:{m % 60:02d}"
     return {"giris": giris.strftime("%H:%M"), "cikis": cikis.strftime("%H:%M") if cikis else "",
-            "sure": sure, "okutma": len(ts), "gec_dk": gec_dk, "durum": durum}
+            "sure": sure, "okutma": len(ts), "gec_dk": gec_dk, "erken_dk": erken_dk, "durum": durum,
+            "mesai": f"{m_giris}-{m_cikis}" if m_cikis else m_giris, "mesai_kaynak": m_kaynak}
 
 
 def gunluk_rapor(bas, bit, kisi=None, durum_filtre=None):
     bugun = simdi().date()
     with db() as con:
         per = personel_sozluk(con)
+        mc = MesaiCozucu(con)
         gruplar = {}
         for r in okutmalar(con, bas, bit, kisi):
             gruplar.setdefault((r["kisi_no"], r["zaman"][:10]), []).append(r["zaman"])
     satirlar = []
     for (k, g), zl in gruplar.items():
         gun = dt.date.fromisoformat(g)
-        o = gun_ozeti(gun, ayikla(zl), bugun)
+        o = gun_ozeti(gun, ayikla(zl), bugun, mc.al(k, gun), mc.genel)
         p = per.get(k)
-        o.update({"tarih": g, "kisi_no": k, "ad": ad_soyad(p, k), "sicil": p["sicilno"] if p else ""})
+        o.update({"tarih": g, "kisi_no": k, "ad": ad_soyad(p, k), "sicil": p["sicilno"] if p else "",
+                  "kategori": mc.kategori_adi(k)})
         satirlar.append(o)
     if durum_filtre == "GEC":
         satirlar = [s for s in satirlar if s["gec_dk"]]
+    elif durum_filtre == "ERKEN":
+        satirlar = [s for s in satirlar if s["erken_dk"]]
     elif durum_filtre:
         satirlar = [s for s in satirlar if s["durum"] == durum_filtre]
     satirlar.sort(key=lambda s: (s["tarih"], s["giris"]), reverse=False)
@@ -452,8 +512,7 @@ def durum_bilgisi():
             "ilk_kayit": ilk_son[0], "son_kayit": ilk_son[1], "son_tur": son[0] if son else None,
             "son_basarili_tur": son_ok[0] if son_ok else None, "uyari": uyari,
             "turlar": son_turlar(30), "aralik_sn": CFG["toplama_aralik_sn"],
-            "mesai": CFG["mesai_baslangic"], "cumartesi_mesai": CFG["cumartesi_mesai_baslangic"],
-            "tolerans": CFG["gec_tolerans_dk"], "sifre_gerekli": bool(CFG["yonetim_sifresi"]),
+            "sifre_gerekli": bool(CFG["yonetim_sifresi"]),
             "demo": bool(CFG["demo"])}
 
 
@@ -821,6 +880,7 @@ def nobet_durumu(bas, bit):
     bugun, an = simdi().date(), simdi()
     with db() as con:
         per = personel_sozluk(con)
+        mc = MesaiCozucu(con)
         plan = con.execute("SELECT tarih, kisi_no FROM nobet WHERE tarih >= ? AND tarih <= ? ORDER BY tarih",
                            (bas, bit)).fetchall()
         if not plan:
@@ -837,12 +897,14 @@ def nobet_durumu(bas, bit):
     for g in gunler:
         gun = dt.date.fromisoformat(g)
         gun_okut = okut.get(g, {})
-        bas_dk = dk(mesai_bas(gun)) + CFG["gec_tolerans_dk"]
         satirlar = []
         for k in planli[g]:
-            s = {"kisi_no": k, "ad": ad_soyad(per.get(k), k), "giris": "", "cikis": "", "gec_dk": 0}
+            mesai = mc.al(k, gun)
+            bas_dk = dk(mesai[0]) + mc.genel["gec_tolerans_dk"]
+            s = {"kisi_no": k, "ad": ad_soyad(per.get(k), k), "giris": "", "cikis": "", "gec_dk": 0,
+                 "mesai": f"{mesai[0]}-{mesai[1]}" if mesai[1] else mesai[0]}
             if k in gun_okut:
-                s.update({x: y for x, y in gun_ozeti(gun, ayikla(gun_okut[k]), bugun).items()
+                s.update({x: y for x, y in gun_ozeti(gun, ayikla(gun_okut[k]), bugun, mesai, mc.genel).items()
                           if x in ("giris", "cikis", "gec_dk")})
                 s["durum"] = "GELDİ"
             elif gun > bugun:
@@ -861,6 +923,84 @@ def nobet_durumu(bas, bit):
                       "planli": len(satirlar), "geldi": say["GELDİ"], "gelmedi": say["GELMEDİ"],
                       "nobetsiz_gelen": fazla})
     return sonuc
+
+
+# ----------------------------------------------------------------- ayarlar (panelden)
+def ayar_getir():
+    with db() as con:
+        mc = MesaiCozucu(con)
+        per = personel_sozluk(con)
+        son = {r[0]: r[1] for r in con.execute("SELECT kisi_no, MAX(zaman) FROM okutma GROUP BY kisi_no")}
+        sayi = {r[0]: r[1] for r in con.execute(
+            "SELECT kategori_id, COUNT(*) FROM personel_ayar WHERE kategori_id IS NOT NULL GROUP BY kategori_id")}
+    hi, cts = dt.date(2024, 1, 1), dt.date(2024, 1, 6)  # bir pazartesi ve bir cumartesi
+    sinir = (simdi() - dt.timedelta(days=60)).strftime("%Y-%m-%d")
+    liste = []
+    for k in sorted(set(per) | set(son)):
+        pa = mc.per.get(k) or {}
+        h, c = mc.al(k, hi), mc.al(k, cts)
+        liste.append({"kisi_no": k, "ad": ad_soyad(per.get(k), k), "sicil": per[k]["sicilno"] if k in per else "",
+                      "kategori_id": pa.get("kategori_id"), **{a: pa.get(a) or "" for a in SAAT_ALANLARI},
+                      "son_okutma": son.get(k) or "", "aktif": (son.get(k) or "") >= sinir,
+                      "gecerli": f"{h[0]}-{h[1]} ({h[2]})", "gecerli_cts": f"{c[0]}-{c[1]} ({c[2]})"})
+    liste.sort(key=lambda x: x["ad"])
+    kat = [dict(v, kisi_sayisi=sayi.get(v["id"], 0)) for v in sorted(mc.kat.values(), key=lambda x: x["ad"])]
+    return {"genel": mc.genel, "kategoriler": kat, "personel": liste}
+
+
+def ayar_genel_kaydet(js):
+    deger = {a: saat_temiz(js.get(a)) for a in SAAT_ALANLARI}
+    if not deger["giris"]:
+        raise ValueError("Genel giriş saati boş olamaz")
+    for a in ("gec_tolerans_dk", "erken_tolerans_dk"):
+        deger[a] = str(max(0, min(240, int(js.get(a) or 0))))
+    with db() as con:
+        con.executemany("INSERT INTO ayar(anahtar,deger) VALUES(?,?) ON CONFLICT(anahtar) DO UPDATE SET deger=excluded.deger",
+                        [(a, d or "") for a, d in deger.items()])
+
+
+def ayar_kategori_kaydet(js):
+    ad = " ".join(str(js.get("ad") or "").split())[:40]
+    if not ad:
+        raise ValueError("Kategori adı boş olamaz")
+    saat = [saat_temiz(js.get(a)) for a in SAAT_ALANLARI]
+    with db() as con:
+        try:
+            if js.get("id"):
+                con.execute("UPDATE kategori SET ad=?, giris=?, cikis=?, cts_giris=?, cts_cikis=? WHERE id=?",
+                            (ad, *saat, int(js["id"])))
+            else:
+                con.execute("INSERT INTO kategori(ad,giris,cikis,cts_giris,cts_cikis) VALUES(?,?,?,?,?)", (ad, *saat))
+        except sqlite3.IntegrityError:
+            raise ValueError(f"'{ad}' adında kategori zaten var")
+
+
+def ayar_kategori_sil(js):
+    with db() as con:
+        con.execute("UPDATE personel_ayar SET kategori_id=NULL WHERE kategori_id=?", (int(js["id"]),))
+        con.execute("DELETE FROM kategori WHERE id=?", (int(js["id"]),))
+
+
+def ayar_personel_kaydet(js):
+    """{kisi_nolar: [...], degisiklik: {kategori_id?, giris?, cikis?, cts_giris?, cts_cikis?}}"""
+    kisiler = [int(k) for k in js.get("kisi_nolar") or []]
+    dg = js.get("degisiklik") or {}
+    alan = {}
+    if "kategori_id" in dg:
+        alan["kategori_id"] = int(dg["kategori_id"]) if dg["kategori_id"] not in (None, "", 0) else None
+    for a in SAAT_ALANLARI:
+        if a in dg:
+            alan[a] = saat_temiz(dg[a])
+    if not kisiler or not alan:
+        raise ValueError("Değişiklik yok")
+    with db() as con:
+        if alan.get("kategori_id") and not con.execute("SELECT 1 FROM kategori WHERE id=?", (alan["kategori_id"],)).fetchone():
+            raise ValueError("Kategori bulunamadı")
+        set_ = ", ".join(f"{a}=?" for a in alan)
+        for k in kisiler:
+            con.execute("INSERT OR IGNORE INTO personel_ayar(kisi_no) VALUES(?)", (k,))
+            con.execute(f"UPDATE personel_ayar SET {set_} WHERE kisi_no=?", (*alan.values(), k))
+    return {"guncellenen": len(kisiler)}
 
 
 # ----------------------------------------------------------------- disa aktarma
@@ -922,15 +1062,16 @@ def disa_tablo(tur, q):
         b = ["Zaman", "Kişi No", "Ad Soyad"]
         return b, [[r["zaman"], r["kisi_no"], r["ad"]] for r in ham_kayitlar(bas, bit, kisi)]
     if tur == "nobet":
-        b = ["Tarih", "Kişi No", "Ad Soyad", "Durum", "Giriş", "Çıkış", "Geç (dk)"]
+        b = ["Tarih", "Kişi No", "Ad Soyad", "Mesai", "Durum", "Giriş", "Çıkış", "Geç (dk)"]
         out = []
         for g in nobet_durumu(bas, bit):
             for s in g["satirlar"]:
-                out.append([g["tarih"], s["kisi_no"], s["ad"], s["durum"], s["giris"], s["cikis"], s["gec_dk"]])
+                out.append([g["tarih"], s["kisi_no"], s["ad"], s["mesai"], s["durum"], s["giris"], s["cikis"], s["gec_dk"]])
         return b, out
-    b = ["Tarih", "Kişi No", "Sicil", "Ad Soyad", "Giriş", "Çıkış", "Süre", "Okutma", "Geç (dk)", "Durum"]
-    return b, [[r["tarih"], r["kisi_no"], r["sicil"], r["ad"], r["giris"], r["cikis"], r["sure"], r["okutma"],
-                r["gec_dk"], r["durum"]] for r in gunluk_rapor(bas, bit, kisi, q.get("durum") or None)]
+    b = ["Tarih", "Kişi No", "Sicil", "Ad Soyad", "Kategori", "Mesai", "Giriş", "Çıkış", "Süre", "Okutma",
+         "Geç (dk)", "Erken çıkış (dk)", "Durum"]
+    return b, [[r["tarih"], r["kisi_no"], r["sicil"], r["ad"], r["kategori"], r["mesai"], r["giris"], r["cikis"],
+                r["sure"], r["okutma"], r["gec_dk"], r["erken_dk"], r["durum"]] for r in gunluk_rapor(bas, bit, kisi, q.get("durum") or None)]
 
 
 def nobet_sablon():
@@ -1000,6 +1141,8 @@ class Istek(BaseHTTPRequestHandler):
                     return self.gonder(200, [dict(r) for r in rows])
             if yol == "/api/nobet":
                 return self.gonder(200, nobet_durumu(q["bas"], q["bit"]))
+            if yol == "/api/ayar":
+                return self.gonder(200, ayar_getir())
             if yol == "/disa":
                 tur = q.get("tur") if q.get("tur") in ("rapor", "ham", "nobet") else "rapor"
                 b, s = disa_tablo(tur, q)
@@ -1032,7 +1175,7 @@ class Istek(BaseHTTPRequestHandler):
             govde = self.rfile.read(n) if n else b""
             if yol == "/api/topla":
                 return self.gonder(200, TOPLAYICI.manuel())
-            if yol.startswith("/api/nobet/") and not self.yetkili():
+            if yol.startswith(("/api/nobet/", "/api/ayar/")) and not self.yetkili():
                 return self.gonder(403, {"hata": "Yönetim şifresi hatalı"})
             if yol == "/api/nobet/onizle":
                 ad = unquote(self.headers.get("X-Dosya-Adi", "dosya"))
@@ -1043,6 +1186,13 @@ class Istek(BaseHTTPRequestHandler):
             if yol == "/api/nobet/kaydet":
                 js = json.loads(govde)
                 return self.gonder(200, nobet_kaydet(js.get("dosya", ""), js.get("tarihler", []), js.get("kayitlar", [])))
+            ayar_islem = {"/api/ayar/genel": ayar_genel_kaydet, "/api/ayar/kategori": ayar_kategori_kaydet,
+                          "/api/ayar/kategori_sil": ayar_kategori_sil, "/api/ayar/personel": ayar_personel_kaydet}
+            if yol in ayar_islem:
+                try:
+                    return self.gonder(200, ayar_islem[yol](json.loads(govde)) or {"ok": True})
+                except (ValueError, KeyError, TypeError) as e:
+                    return self.gonder(400, {"hata": str(e)})
             if yol == "/api/nobet/sil":
                 nobet_sil(json.loads(govde).get("tarihler", []))
                 return self.gonder(200, {"ok": True})
@@ -1131,6 +1281,7 @@ def main():
     if CFG["demo"]:
         import demo
         demo.tohumla(sys.modules[__name__])
+        demo.kategori_tohumla(sys.modules[__name__])
         log.warning("DEMO MODU: veriler sahte, cihaza baglanilmiyor. Veri: %s", CFG["veri_klasoru"])
     threading.Thread(target=TOPLAYICI.dongu, daemon=True, name="toplayici").start()
     log.info("Panel acildi: http://localhost:%s  (LAN: http://<bu-pc-ip>:%s)", CFG["http_port"], CFG["http_port"])
