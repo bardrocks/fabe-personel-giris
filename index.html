@@ -299,8 +299,9 @@ async function ustDurum() {
     const d = await api("/api/durum");
     const t = d.son_basarili_tur;
     $("#durumcuk").textContent = t ? `Son okuma ${t.zaman.slice(11, 16)}` : "Okuma bekleniyor";
-    $("#uyari").classList.toggle("gizli", !d.uyari);
-    $("#uyari").textContent = d.uyari ? "⚠ " + d.uyari + " Sistem sekmesine bakın." : "";
+    const uy = (d.demo ? "DEMO MODU: veriler sahte, cihaza bağlanılmıyor. " : "") + (d.uyari ? "⚠ " + d.uyari + " Sistem sekmesine bakın." : "");
+    $("#uyari").classList.toggle("gizli", !uy);
+    $("#uyari").textContent = uy;
   } catch (e) { $("#durumcuk").textContent = "Sunucuya ulaşılamıyor"; }
 }
 async function personelDoldur() {

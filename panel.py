@@ -4,6 +4,7 @@
   py panel.py                      servisi baslat (toplayici + web panel)
   py panel.py --bir-kez            tek okuma turu yap, sonucu yaz, cik
   py panel.py --ice-aktar-backup   EnGoPer backup.txt ham logunu bir kerelik ice aktar
+  py panel.py --demo               cihaz/EnGoPer olmadan sahte veriyle dene (demo_data\\)
 
 KURAL: C:\\EnGoPer\\ altina hicbir sey yazilmaz; DBF/TXT yalnizca okunur.
 """
@@ -55,6 +56,7 @@ VARSAYILAN = {
     "yonetim_sifresi": "",
     # Test/gelistirme icin: toplayici yerine calisacak komut ("{cikti}" yer tutucusu).
     "toplayici_komut": None,
+    "demo": False,
 }
 
 log = logging.getLogger("panel")
@@ -204,6 +206,8 @@ _personel_mtime = None
 def personel_yenile(zorla=False):
     global _personel_mtime
     yol = CFG["personel_dbf"]
+    if CFG["demo"]:
+        return
     try:
         mt = os.path.getmtime(yol)
         if not zorla and mt == _personel_mtime:
@@ -274,8 +278,12 @@ class Toplayici:
         bas = time.time()
         durum, okunan, yeni, mesaj = "HATA", 0, 0, ""
         try:
-            engel = engel_surec()
-            if engel:
+            engel = None if CFG["demo"] else engel_surec()
+            if CFG["demo"]:
+                import demo
+                okunan, yeni = okutma_ekle([(r["k"], r["t"], r["vm"]) for r in demo.sahte_okuma(sys.modules[__name__])], "demo")
+                durum, mesaj = "OK", "DEMO: sahte okuma"
+            elif engel:
                 durum, mesaj = "ATLANDI", f"{engel} çalışıyor"
             else:
                 cikti = os.path.join(CFG["veri_klasoru"], "son_okuma.json")
@@ -445,7 +453,8 @@ def durum_bilgisi():
             "son_basarili_tur": son_ok[0] if son_ok else None, "uyari": uyari,
             "turlar": son_turlar(30), "aralik_sn": CFG["toplama_aralik_sn"],
             "mesai": CFG["mesai_baslangic"], "cumartesi_mesai": CFG["cumartesi_mesai_baslangic"],
-            "tolerans": CFG["gec_tolerans_dk"], "sifre_gerekli": bool(CFG["yonetim_sifresi"])}
+            "tolerans": CFG["gec_tolerans_dk"], "sifre_gerekli": bool(CFG["yonetim_sifresi"]),
+            "demo": bool(CFG["demo"])}
 
 
 def bugun_ozeti():
@@ -1080,9 +1089,13 @@ def main():
     ap = argparse.ArgumentParser(description="EnGoPer Panel")
     ap.add_argument("--ayar", default=os.path.join(KOK, "config.json"))
     ap.add_argument("--bir-kez", action="store_true", help="tek okuma turu yap ve cik")
+    ap.add_argument("--demo", action="store_true", help="sahte veriyle dene (cihaz/EnGoPer gerekmez)")
     ap.add_argument("--ice-aktar-backup", nargs="?", const="", metavar="YOL", help="backup.txt ice aktar")
     a = ap.parse_args()
     CFG = ayar_yukle(a.ayar)
+    if a.demo:
+        import demo
+        demo.ayarla(CFG, KOK)
     log_hazirla(konsol=True)
     db_hazirla()
 
@@ -1103,6 +1116,10 @@ def main():
         sys.exit(1)
     srv.daemon_threads = True
     personel_yenile(zorla=True)
+    if CFG["demo"]:
+        import demo
+        demo.tohumla(sys.modules[__name__])
+        log.warning("DEMO MODU: veriler sahte, cihaza baglanilmiyor. Veri: %s", CFG["veri_klasoru"])
     threading.Thread(target=TOPLAYICI.dongu, daemon=True, name="toplayici").start()
     log.info("Panel: http://%s:%s", CFG["http_adres"], CFG["http_port"])
     srv.serve_forever()
