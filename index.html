@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personel Giriş-Çıkış</title>
+<style>
+:root{--bg:#f4f5f7;--kart:#fff;--yazi:#1d2330;--soluk:#6b7280;--cizgi:#e3e6eb;--ana:#2457c5;--yesil:#1d8a4e;--kirmizi:#c62f2f;--sari:#b7791f;--gri:#8a919e}
+@media (prefers-color-scheme:dark){:root{--bg:#14171c;--kart:#1d2128;--yazi:#e7e9ee;--soluk:#9aa1ad;--cizgi:#2d333d;--ana:#6b9bff;--yesil:#4cc184;--kirmizi:#ff6b6b;--sari:#e2b25a;--gri:#8a919e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--yazi);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--kart);border-bottom:1px solid var(--cizgi);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;top:0;z-index:5}
+header h1{font-size:17px;margin:0 12px 0 0}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{border:0;background:none;color:var(--soluk);padding:7px 11px;border-radius:7px;font:inherit;cursor:pointer}
+nav button.aktif{background:var(--ana);color:#fff}
+#durumcuk{margin-left:auto;font-size:13px;color:var(--soluk)}
+main{max-width:1150px;margin:0 auto;padding:16px}
+.kart{background:var(--kart);border:1px solid var(--cizgi);border-radius:10px;padding:14px;margin-bottom:14px}
+.kart h2{font-size:15px;margin:0 0 10px}
+.ozet{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.ozet div{background:var(--kart);border:1px solid var(--cizgi);border-radius:10px;padding:12px}
+.ozet b{display:block;font-size:26px}
+.ozet span{color:var(--soluk);font-size:13px}
+.tablo{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--cizgi);white-space:nowrap}
+th{color:var(--soluk);font-weight:600;font-size:12.5px}
+td.ad{white-space:normal}
+.e{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.yesil{color:var(--yesil)}.kirmizi{color:var(--kirmizi)}.sari{color:var(--sari)}.gri{color:var(--gri)}.mavi{color:var(--ana)}
+.filtre{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
+.filtre label{display:flex;flex-direction:column;font-size:12px;color:var(--soluk);gap:3px}
+input,select,button.d{font:inherit;padding:7px 9px;border:1px solid var(--cizgi);border-radius:7px;background:var(--kart);color:var(--yazi)}
+button.d{cursor:pointer}
+button.ana{background:var(--ana);color:#fff;border-color:var(--ana)}
+.uyari{background:#fff3cd;color:#7a5a00;border:1px solid #f0d27a;border-radius:8px;padding:9px 12px;margin-bottom:12px}
+@media (prefers-color-scheme:dark){.uyari{background:#3a3115;color:#f1d58a;border-color:#6d5b22}}
+.soluk{color:var(--soluk);font-size:13px}
+.gizli{display:none}
+.cip{display:inline-block;background:var(--bg);border:1px solid var(--cizgi);border-radius:20px;padding:2px 9px;margin:2px;font-size:13px}
+@media (max-width:600px){main{padding:10px}th,td{padding:6px 5px}#durumcuk{width:100%;margin:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Personel Giriş-Çıkış</h1>
+  <nav>
+    <button data-s="simdi" class="aktif">Şimdi</button>
+    <button data-s="rapor">Rapor</button>
+    <button data-s="nobet">Nöbet</button>
+    <button data-s="ham">Ham kayıt</button>
+    <button data-s="sistem">Sistem</button>
+  </nav>
+  <span id="durumcuk"></span>
+</header>
+<main>
+  <div id="uyari" class="uyari gizli"></div>
+
+  <section id="s-simdi">
+    <div class="ozet">
+      <div><b id="o-icerde">-</b><span>Şu an içeride</span></div>
+      <div><b id="o-gelen">-</b><span>Bugün gelen</span></div>
+      <div><b id="o-gec">-</b><span>Geç kalan</span></div>
+      <div id="o-nobet-kutu" class="gizli"><b id="o-nobet">-</b><span>Nöbetçi gelmedi</span></div>
+    </div>
+    <div id="bugun-nobet"></div>
+    <div class="kart"><h2>Şu an içeride</h2><div id="icerde-liste" class="soluk">-</div></div>
+    <div class="kart"><h2>Bugünün giriş-çıkışları</h2><div class="tablo" id="bugun-tablo"></div>
+      <p class="soluk">Cihaz giriş/çıkış ayırmıyor: günün ilk okutması giriş, son okutması çıkış sayılır. Tek sayıda okutma = içeride.</p></div>
+    <div class="kart"><h2>Son okutmalar</h2><div class="tablo" id="son-tablo"></div></div>
+  </section>
+
+  <section id="s-rapor" class="gizli">
+    <div class="kart">
+      <div class="filtre">
+        <label>Başlangıç<input type="date" id="r-bas"></label>
+        <label>Bitiş<input type="date" id="r-bit"></label>
+        <label>Personel<select id="r-kisi" class="kisi-sec"><option value="">Tümü</option></select></label>
+        <label>Durum<select id="r-durum"><option value="">Tümü</option><option value="GEC">Geç kalan</option>
+          <option value="ÇIKIŞ YOK">Çıkış yapmayan</option><option value="İÇERİDE">İçeride</option></select></label>
+        <button class="d ana" id="r-getir">Göster</button>
+        <button class="d" data-disa="rapor" data-bicim="xlsx">Excel</button>
+        <button class="d" data-disa="rapor" data-bicim="csv">CSV</button>
+      </div>
+      <div class="soluk" id="r-ozet"></div>
+      <div class="tablo" id="r-tablo"></div>
+    </div>
+  </section>
+
+  <section id="s-nobet" class="gizli">
+    <div class="kart">
+      <h2>Nöbet takibi</h2>
+      <div class="filtre">
+        <label>Ay<input type="month" id="n-ay"></label>
+        <button class="d ana" id="n-getir">Göster</button>
+        <button class="d" data-disa="nobet" data-bicim="xlsx">Excel</button>
+      </div>
+      <div id="n-liste"></div>
+    </div>
+    <div class="kart">
+      <h2>Nöbet çizelgesi yükle</h2>
+      <p class="soluk">Aylık çizelgeyi Excel (.xlsx) ya da CSV olarak seçin. Tarihler ve isimler otomatik bulunur;
+        kaydetmeden önce eşleşmeleri kontrol edebilirsiniz. Aynı tarihler tekrar yüklenirse eski plan değiştirilir.
+        Biçim tanınmazsa <a href="/nobet_sablon.xlsx">boş şablonu</a> kullanın.</p>
+      <div class="filtre"><input type="file" id="n-dosya" accept=".xlsx,.csv"><button class="d ana" id="n-yukle">Önizle</button></div>
+      <div id="n-onizle"></div>
+    </div>
+  </section>
+
+  <section id="s-ham" class="gizli">
+    <div class="kart">
+      <div class="filtre">
+        <label>Başlangıç<input type="date" id="h-bas"></label>
+        <label>Bitiş<input type="date" id="h-bit"></label>
+        <label>Personel<select id="h-kisi" class="kisi-sec"><option value="">Tümü</option></select></label>
+        <button class="d ana" id="h-getir">Göster</button>
+        <button class="d" data-disa="ham" data-bicim="xlsx">Excel</button>
+        <button class="d" data-disa="ham" data-bicim="csv">CSV</button>
+      </div>
+      <div class="soluk" id="h-ozet"></div>
+      <div class="tablo" id="h-tablo"></div>
+    </div>
+  </section>
+
+  <section id="s-sistem" class="gizli">
+    <div class="kart"><h2>Durum</h2><div id="sis-bilgi"></div>
+      <p><button class="d ana" id="topla">Şimdi cihazdan oku</button> <span id="topla-sonuc" class="soluk"></span></p></div>
+    <div class="kart"><h2>Son okuma turları</h2><div class="tablo" id="sis-turlar"></div></div>
+  </section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const bugun = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+const esc = v => String(v ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GELDİ": "yesil", "GELMEDİ": "kirmizi",
+  "BEKLENİYOR": "sari", "PLANLI": "gri", "VERİ YOK": "gri", "OK_": "yesil", "HATA": "kirmizi", "ATLANDI": "sari",
+  "tam": "yesil", "tahmini": "sari", "belirsiz": "kirmizi", "yok": "kirmizi"};
+const IPUCU = {"VERİ YOK": "O gün cihazdan hiç kayıt alınamamış; gelip gelmediği bilinemiyor",
+  "tahmini": "Kısmi isimle eşleşti, kontrol edin", "belirsiz": "Birden fazla personel uyuyor, listeden seçin"};
+const etiket = d => `<span class="e ${RENK[d] || "gri"}"${IPUCU[d] ? ` title="${IPUCU[d]}"` : ""}>${esc(d)}</span>`;
+let sifre = "";
+
+async function api(yol, secenek = {}) {
+  secenek.headers = Object.assign({}, secenek.headers, sifre ? {"X-Sifre": encodeURIComponent(sifre)} : {});
+  const r = await fetch(yol, secenek);
+  const j = await r.json().catch(() => ({hata: "Geçersiz yanıt"}));
+  if (r.status === 403 && yol.startsWith("/api/nobet/")) {
+    const s = prompt("Yönetim şifresi:"); if (s !== null) { sifre = s; return api(yol, secenek); }
+  }
+  if (!r.ok) throw new Error(j.hata || r.status);
+  return j;
+}
+
+function tablo(basliklar, satirlar, bos = "Kayıt yok") {
+  if (!satirlar.length) return `<p class="soluk">${bos}</p>`;
+  return `<table><thead><tr>${basliklar.map(b => `<th>${b}</th>`).join("")}</tr></thead><tbody>` +
+    satirlar.map(s => `<tr>${s.map((h, i) => `<td${i === 1 ? ' class="ad"' : ""}>${h}</td>`).join("")}</tr>`).join("") + "</tbody></table>";
+}
+const gecHucre = g => g ? `<span class="kirmizi">${g} dk</span>` : "";
+const tarihTR = t => { const [y, m, d] = t.split("-"); const g = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"][new Date(t + "T12:00").getDay()]; return `${d}.${m}.${y} ${g}`; };
+
+// ---- sekmeler
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => sekme(b.dataset.s));
+function sekme(s) {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("aktif", b.dataset.s === s));
+  document.querySelectorAll("main section").forEach(x => x.classList.toggle("gizli", x.id !== "s-" + s));
+  ({simdi: yukleSimdi, rapor: yukleRapor, ham: yukleHam, nobet: yukleNobet, sistem: yukleSistem})[s]();
+  try { localStorage.setItem("sekme", s); } catch (e) {}
+}
+
+// ---- şimdi
+function nobetKarti(g, baslik) {
+  return `<div class="kart"><h2>${baslik} – ${tarihTR(g.tarih)} <span class="soluk">(${g.geldi}/${g.planli} geldi)</span></h2>` +
+    tablo(["Durum", "Ad Soyad", "Giriş", "Çıkış", "Geç"], g.satirlar.map(s => [etiket(s.durum), esc(s.ad), s.giris, s.cikis, gecHucre(s.gec_dk)])) +
+    (g.nobetsiz_gelen.length ? `<p class="soluk">Nöbet listesinde olmayıp gelen: ${g.nobetsiz_gelen.map(a => `<span class="cip">${esc(a)}</span>`).join("")}</p>` : "") + "</div>";
+}
+async function yukleSimdi() {
+  const d = await api("/api/bugun");
+  $("#o-icerde").textContent = d.icerde.length;
+  $("#o-gelen").textContent = d.satirlar.length;
+  $("#o-gec").textContent = d.gec.length;
+  $("#icerde-liste").innerHTML = d.icerde.length ? d.icerde.map(s => `<span class="cip">${esc(s.ad)} <span class="soluk">${s.giris}</span></span>`).join("") : "Kimse yok";
+  $("#bugun-tablo").innerHTML = tablo(["Durum", "Ad Soyad", "Giriş", "Çıkış", "Süre", "Geç"],
+    d.satirlar.map(s => [etiket(s.durum), esc(s.ad), s.giris, s.cikis, s.sure, gecHucre(s.gec_dk)]), "Bugün henüz okutma yok");
+  $("#son-tablo").innerHTML = tablo(["Saat", "Ad Soyad"], d.son_okutmalar.map(s => [s.zaman.slice(11), esc(s.ad)]));
+  const n = d.nobet[0];
+  $("#o-nobet-kutu").classList.toggle("gizli", !n);
+  if (n) $("#o-nobet").textContent = n.gelmedi;
+  $("#bugun-nobet").innerHTML = n ? nobetKarti(n, "Bugünkü nöbet") : "";
+}
+
+// ---- rapor
+async function yukleRapor() {
+  const q = new URLSearchParams({bas: $("#r-bas").value, bit: $("#r-bit").value, kisi: $("#r-kisi").value, durum: $("#r-durum").value});
+  const d = await api("/api/rapor?" + q);
+  $("#r-ozet").textContent = `${d.length} satır · ${d.filter(s => s.gec_dk).length} geç · ${d.filter(s => s.durum === "ÇIKIŞ YOK").length} çıkış yok`;
+  $("#r-tablo").innerHTML = tablo(["Tarih", "Ad Soyad", "Giriş", "Çıkış", "Süre", "Okutma", "Geç", "Durum"],
+    d.map(s => [tarihTR(s.tarih), esc(s.ad), s.giris, s.cikis, s.sure, s.okutma, gecHucre(s.gec_dk), etiket(s.durum)]));
+}
+$("#r-getir").onclick = yukleRapor;
+
+// ---- ham
+async function yukleHam() {
+  const q = new URLSearchParams({bas: $("#h-bas").value, bit: $("#h-bit").value, kisi: $("#h-kisi").value});
+  const d = await api("/api/ham?" + q);
+  $("#h-ozet").textContent = `${d.length} okutma`;
+  $("#h-tablo").innerHTML = tablo(["Zaman", "Ad Soyad", "Kişi No"], d.map(s => [s.zaman, esc(s.ad), s.kisi_no]));
+}
+$("#h-getir").onclick = yukleHam;
+
+// ---- dışa aktarma
+document.querySelectorAll("[data-disa]").forEach(b => b.onclick = () => {
+  const t = b.dataset.disa; let q;
+  if (t === "nobet") { const [b1, b2] = ayAraligi(); q = {bas: b1, bit: b2}; }
+  else { const p = t === "rapor" ? "r" : "h"; q = {bas: $(`#${p}-bas`).value, bit: $(`#${p}-bit`).value, kisi: $(`#${p}-kisi`).value, durum: t === "rapor" ? $("#r-durum").value : ""}; }
+  location.href = "/disa?" + new URLSearchParams(Object.assign({tur: t, bicim: b.dataset.bicim}, q));
+});
+
+// ---- nöbet
+function ayAraligi() {
+  const [y, m] = $("#n-ay").value.split("-").map(Number);
+  const son = new Date(y, m, 0).getDate();
+  return [`${y}-${String(m).padStart(2, "0")}-01`, `${y}-${String(m).padStart(2, "0")}-${son}`];
+}
+async function yukleNobet() {
+  const [b1, b2] = ayAraligi();
+  const d = await api(`/api/nobet?bas=${b1}&bit=${b2}`);
+  $("#n-liste").innerHTML = d.length ? d.map(g => nobetKarti(g, g.cumartesi ? "Cumartesi nöbeti" : "Nöbet")).join("")
+    : `<p class="soluk">Bu ay için yüklenmiş nöbet çizelgesi yok.</p>`;
+}
+$("#n-getir").onclick = yukleNobet;
+
+let onizleme = null;
+$("#n-yukle").onclick = async () => {
+  const f = $("#n-dosya").files[0];
+  if (!f) return alert("Önce dosya seçin");
+  $("#n-onizle").innerHTML = `<p class="soluk">Okunuyor…</p>`;
+  try {
+    onizleme = await api("/api/nobet/onizle", {method: "POST", body: await f.arrayBuffer(), headers: {"X-Dosya-Adi": encodeURIComponent(f.name)}});
+    onizlemeGoster();
+  } catch (e) { $("#n-onizle").innerHTML = `<div class="uyari">${esc(e.message)}</div>`; }
+};
+function onizlemeGoster() {
+  const o = onizleme;
+  const sec = (g, i) => `<select data-i="${i}"><option value="">— yok say —</option>` +
+    (g.adaylar.length && g.durum === "belirsiz" ? `<optgroup label="Adaylar">${g.adaylar.map(a => `<option value="${a.kisi_no}">${esc(a.ad)}</option>`).join("")}</optgroup>` : "") +
+    `<optgroup label="Tüm personel">${o.personel.map(p => `<option value="${p.kisi_no}"${p.kisi_no === g.kisi_no ? " selected" : ""}>${esc(p.ad)}</option>`).join("")}</optgroup></select>`;
+  const sorun = o.girdiler.filter(g => !g.kisi_no).length;
+  $("#n-onizle").innerHTML =
+    o.uyarilar.map(u => `<div class="uyari">${esc(u)}</div>`).join("") +
+    `<p><b>${o.tarihler.length}</b> tarih, <b>${o.girdiler.length}</b> isim bulundu. ` +
+    (sorun ? `<span class="kirmizi">${sorun} isim eşleşmedi</span> – listeden seçin ya da yok sayın (başlık/not satırları da burada görünebilir).` : `Hepsi eşleşti.`) +
+    ` <span class="soluk">Sarı = tahmini eşleşme, kontrol edin.</span></p>` +
+    `<div class="tablo">` + tablo(["Tarih", "Dosyadaki yazı", "Eşleşme", "Personel", "Hücre"],
+      o.girdiler.map((g, i) => [tarihTR(g.tarih), esc(g.metin), etiket(g.durum), sec(g, i), `<span class="soluk">${esc(g.hucre)}</span>`])) + `</div>` +
+    `<p><button class="d ana" id="n-kaydet">Kaydet</button> <button class="d" id="n-vazgec">Vazgeç</button></p>`;
+  $("#n-vazgec").onclick = () => { onizleme = null; $("#n-onizle").innerHTML = ""; };
+  $("#n-kaydet").onclick = async () => {
+    const kayitlar = [];
+    document.querySelectorAll("#n-onizle select[data-i]").forEach(s => {
+      if (s.value) { const g = o.girdiler[+s.dataset.i]; kayitlar.push({tarih: g.tarih, kisi_no: +s.value, metin: g.metin}); }
+    });
+    if (!confirm(`${o.tarihler.length} tarih için ${kayitlar.length} nöbet kaydı yazılacak. Bu tarihlerdeki eski plan silinir. Devam?`)) return;
+    try {
+      const r = await api("/api/nobet/kaydet", {method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({dosya: o.dosya, tarihler: o.tarihler, kayitlar})});
+      $("#n-onizle").innerHTML = `<p class="yesil">Kaydedildi: ${r.tarih_sayisi} tarih, ${r.kayit_sayisi} kayıt.</p>`;
+      if (o.tarihler.length) $("#n-ay").value = o.tarihler[0].slice(0, 7);
+      yukleNobet();
+    } catch (e) { alert(e.message); }
+  };
+}
+
+// ---- sistem
+async function yukleSistem() {
+  const d = await api("/api/durum");
+  const t = d.son_basarili_tur;
+  $("#sis-bilgi").innerHTML = tablo(["Bilgi", "Değer"], [
+    ["Son başarılı okuma", t ? `${t.zaman} (${t.okunan} okundu, ${t.yeni} yeni)` : "-"],
+    ["Okuma aralığı", `${d.aralik_sn / 60} dk`],
+    ["Toplam okutma (DB)", d.toplam_okutma],
+    ["Kayıt aralığı", `${d.ilk_kayit || "-"} → ${d.son_kayit || "-"}`],
+    ["Personel (Personel.DBF)", d.personel],
+    ["Mesai başlangıcı", `${d.mesai} (cumartesi ${d.cumartesi_mesai}), tolerans ${d.tolerans} dk`]]);
+  $("#sis-turlar").innerHTML = tablo(["Zaman", "Durum", "Okunan", "Yeni", "Süre", "Mesaj"],
+    d.turlar.map(r => [r.zaman, etiket(r.durum), r.okunan, r.yeni, (r.sure_ms / 1000).toFixed(1) + " sn", esc(r.mesaj)]));
+}
+$("#topla").onclick = async () => {
+  $("#topla-sonuc").textContent = "Okunuyor…";
+  try { const r = await api("/api/topla", {method: "POST"}); $("#topla-sonuc").textContent = `${r.durum}: ${r.mesaj || ""} ${r.yeni != null ? "(" + r.yeni + " yeni)" : ""}`; }
+  catch (e) { $("#topla-sonuc").textContent = e.message; }
+  yukleSistem();
+};
+
+// ---- genel
+async function ustDurum() {
+  try {
+    const d = await api("/api/durum");
+    const t = d.son_basarili_tur;
+    $("#durumcuk").textContent = t ? `Son okuma ${t.zaman.slice(11, 16)}` : "Okuma bekleniyor";
+    $("#uyari").classList.toggle("gizli", !d.uyari);
+    $("#uyari").textContent = d.uyari ? "⚠ " + d.uyari + " Sistem sekmesine bakın." : "";
+  } catch (e) { $("#durumcuk").textContent = "Sunucuya ulaşılamıyor"; }
+}
+async function personelDoldur() {
+  const p = await api("/api/personel");
+  document.querySelectorAll(".kisi-sec").forEach(s => s.insertAdjacentHTML("beforeend",
+    p.map(x => `<option value="${x.kisi_no}">${esc((x.adi + " " + x.soyadi).trim())} (${x.kisi_no})</option>`).join("")));
+}
+const g = bugun();
+const ayBasi = g.slice(0, 8) + "01";
+$("#r-bas").value = ayBasi; $("#r-bit").value = g; $("#h-bas").value = g; $("#h-bit").value = g; $("#n-ay").value = g.slice(0, 7);
+personelDoldur().catch(() => {});
+ustDurum();
+let ilk = "simdi"; try { ilk = localStorage.getItem("sekme") || "simdi"; } catch (e) {}
+sekme(ilk);
+setInterval(() => { ustDurum(); if (!$("#s-simdi").classList.contains("gizli")) yukleSimdi(); }, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "cihaz_ip": "192.168.1.224",
+  "cihaz_port": 5005,
+  "makine_no": 1,
+  "toplama_aralik_sn": 300,
+  "personel_dbf": "C:\\EnGoPer\\Data\\Personel.DBF",
+  "backup_txt": "C:\\EnGoPer\\S300_Aktarim\\backup.txt",
+  "http_port": 8080,
+  "mesai_baslangic": "09:00",
+  "cumartesi_mesai_baslangic": "09:00",
+  "gec_tolerans_dk": 5,
+  "tekrar_esik_dk": 3,
+  "yonetim_sifresi": ""
+}
