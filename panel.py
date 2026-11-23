@@ -1089,6 +1089,7 @@ def main():
     ap = argparse.ArgumentParser(description="EnGoPer Panel")
     ap.add_argument("--ayar", default=os.path.join(KOK, "config.json"))
     ap.add_argument("--bir-kez", action="store_true", help="tek okuma turu yap ve cik")
+    ap.add_argument("--port", type=int, help="web panel portu (varsayilan config/8080)")
     ap.add_argument("--demo", action="store_true", help="sahte veriyle dene (cihaz/EnGoPer gerekmez)")
     ap.add_argument("--ice-aktar-backup", nargs="?", const="", metavar="YOL", help="backup.txt ice aktar")
     a = ap.parse_args()
@@ -1109,10 +1110,21 @@ def main():
         print(json.dumps(TOPLAYICI.tur("elle"), ensure_ascii=False))
         return
 
-    try:
-        srv = ThreadingHTTPServer((CFG["http_adres"], CFG["http_port"]), Istek)
-    except OSError as e:
-        log.error("Port %s acilamadi (servis zaten calisiyor olabilir): %s", CFG["http_port"], e)
+    if a.port:
+        CFG["http_port"] = a.port
+    # Demo'da port doluysa/yasakliysa siradaki portlari dene; serviste sabit port kullan.
+    denenecek = [CFG["http_port"]] + ([CFG["http_port"] + i for i in range(1, 20)] + [18080] if CFG["demo"] else [])
+    srv = None
+    for port in denenecek:
+        try:
+            srv = ThreadingHTTPServer((CFG["http_adres"], port), Istek)
+            CFG["http_port"] = port
+            break
+        except OSError as e:
+            log.error("Port %s acilamadi: %s", port, e)
+    if srv is None:
+        log.error("Port kullanilamiyor. Baska port deneyin:  py panel.py --port 8090   "
+                  "(Windows'un ayirdigi portlar: netsh interface ipv4 show excludedportrange protocol=tcp)")
         sys.exit(1)
     srv.daemon_threads = True
     personel_yenile(zorla=True)
@@ -1121,7 +1133,7 @@ def main():
         demo.tohumla(sys.modules[__name__])
         log.warning("DEMO MODU: veriler sahte, cihaza baglanilmiyor. Veri: %s", CFG["veri_klasoru"])
     threading.Thread(target=TOPLAYICI.dongu, daemon=True, name="toplayici").start()
-    log.info("Panel: http://%s:%s", CFG["http_adres"], CFG["http_port"])
+    log.info("Panel acildi: http://localhost:%s  (LAN: http://<bu-pc-ip>:%s)", CFG["http_port"], CFG["http_port"])
     srv.serve_forever()
 
 

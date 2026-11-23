@@ -83,7 +83,7 @@ if ($profiller -contains 'Public') {
 }
 
 # --- zamanlanmis gorev
-$eylem = New-ScheduledTaskAction -Execute $pyw -Argument ('"' + (Join-Path $Hedef 'panel.py') + '" --ayar "' + $ayar + '"') -WorkingDirectory $Hedef
+$eylem = New-ScheduledTaskAction -Execute $pyw -Argument ('"' + (Join-Path $Hedef 'panel.py') + '" --ayar "' + $ayar + '" --port ' + $Port) -WorkingDirectory $Hedef
 if ($Tetik -eq 'Baslangic') {
     $tetikleyici = New-ScheduledTaskTrigger -AtStartup
     $sorumlu = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
