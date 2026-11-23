@@ -13,5 +13,6 @@
   "gec_tolerans_dk": 5,
   "erken_tolerans_dk": 5,
   "tekrar_esik_dk": 3,
-  "yonetim_sifresi": ""
+  "yonetim_sifresi": "",
+  "ek_yedek_klasoru": ""
 }

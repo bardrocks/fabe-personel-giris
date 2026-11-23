@@ -82,6 +82,18 @@ Durumlar: **GELDİ** (giriş saati, geç kaldıysa dakika) · **GELMEDİ** · **
 tolerans dolmadı) · **PLANLI** (ileri tarih) · **VERİ YOK** (o gün cihazdan hiç kayıt alınamamış).
 `yonetim_sifresi` ayarlanırsa çizelge yükleme şifre ister.
 
+## Sürüm ve yedekler
+
+Güncel sürüm panelin sol alt köşesinde yazar; değişiklikler `DEGISIKLIKLER.md` dosyasında.
+Veritabanı (`data\panel.db`) otomatik yedeklenir: her gün, yeni sürüm ilk açıldığında (güncellemeden önce) ve
+`install.ps1` her çalıştığında. Yedekler `data\yedekler` klasöründe; Sistem sayfasından indirilebilir. İkinci bir
+kopya için `config.json` içine `"ek_yedek_klasoru": "C:\\Users\\KASA 1\\OneDrive\\PanelYedek"` gibi bir klasör yazın.
+
+**Güncelleme:** yeni ZIP'i açıp `install.ps1`'i tekrar çalıştırın. `C:\EnGoPerPanel\data` ve `config.json` korunur.
+
+**Geri yükleme:** `Stop-ScheduledTask "EnGoPer Panel"` → istenen yedeği `data\panel.db` adıyla kopyalayın →
+`Start-ScheduledTask "EnGoPer Panel"`.
+
 ## Güvenlik kuralları
 
 `CLAUDE.md` içindeki kesin kurallar geçerlidir: `C:\EnGoPer` altına yazılmaz; cihazda yalnızca okuma

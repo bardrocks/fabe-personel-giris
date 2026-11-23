@@ -41,7 +41,22 @@ if ($hedefTam.StartsWith('C:\EnGoPer\', [StringComparison]::OrdinalIgnoreCase)) 
     throw 'Hedef klasor C:\EnGoPer altinda olamaz.'
 }
 
-# --- dosyalari kopyala
+# --- calisan servisi durdur ve mevcut veritabanini yedekle (guncellemede veri kaybi olmasin)
+Stop-ScheduledTask -TaskName $GorevAdi -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+$db = Join-Path $Hedef 'data\panel.db'
+if (Test-Path $db) {
+    $yedekKlasor = Join-Path $Hedef 'data\yedekler'
+    New-Item -ItemType Directory -Force -Path $yedekKlasor | Out-Null
+    $yedekAd = 'panel_' + (Get-Date -Format 'yyyy-MM-dd_HHmmss') + '_kurulum.db'
+    Copy-Item -LiteralPath $db -Destination (Join-Path $yedekKlasor $yedekAd)
+    foreach ($ek in '-wal', '-shm') {
+        if (Test-Path ($db + $ek)) { Copy-Item -LiteralPath ($db + $ek) -Destination (Join-Path $yedekKlasor ($yedekAd + $ek)) }
+    }
+    Write-Host "Mevcut veritabani yedeklendi: $yedekKlasor\$yedekAd" -ForegroundColor Green
+}
+
+# --- dosyalari kopyala (data klasoru ve config.json korunur)
 $kaynak = $PSScriptRoot
 New-Item -ItemType Directory -Force -Path $Hedef, (Join-Path $Hedef 'data') | Out-Null
 foreach ($dosya in 'panel.py', 'index.html', 'collector.ps1') {
@@ -67,9 +82,6 @@ $pyw = Join-Path (Split-Path $py) 'pythonw.exe'
 if (-not (Test-Path $pyw)) { $pyw = $py }
 Write-Host "Python: $py ($ver)"
 
-# --- calisan eski servisi durdur
-Stop-ScheduledTask -TaskName $GorevAdi -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 2
 
 # --- tek seferlik test okumasi
 if (-not $TestAtla) {
