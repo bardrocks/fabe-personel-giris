@@ -172,9 +172,9 @@ const bugun = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getT
 const esc = v => String(v ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GELDİ": "yesil", "GELMEDİ": "kirmizi",
   "BEKLENİYOR": "sari", "PLANLI": "gri", "VERİ YOK": "gri", "OK_": "yesil", "HATA": "kirmizi", "ATLANDI": "sari",
-  "tam": "yesil", "tahmini": "sari", "belirsiz": "kirmizi", "yok": "kirmizi"};
+  "tam": "yesil", "kayıtlı": "yesil", "tahmini": "sari", "belirsiz": "kirmizi", "yok": "kirmizi"};
 const IPUCU = {"VERİ YOK": "O gün cihazdan hiç kayıt alınamamış; gelip gelmediği bilinemiyor",
-  "tahmini": "Kısmi isimle eşleşti, kontrol edin", "belirsiz": "Birden fazla personel uyuyor, listeden seçin"};
+  "tahmini": "Kısmi isimle eşleşti, kontrol edin", "kayıtlı": "Daha önce sizin onayladığınız eşleşme", "belirsiz": "Birden fazla personel uyuyor, listeden seçin"};
 const etiket = d => `<span class="e ${RENK[d] || "gri"}"${IPUCU[d] ? ` title="${IPUCU[d]}"` : ""}>${esc(d)}</span>`;
 let sifre = "";
 
@@ -283,21 +283,29 @@ function onizlemeGoster() {
   const o = onizleme;
   const sec = (g, i) => `<select data-i="${i}"><option value="">— yok say —</option>` +
     (g.adaylar.length && g.durum === "belirsiz" ? `<optgroup label="Adaylar">${g.adaylar.map(a => `<option value="${a.kisi_no}">${esc(a.ad)}</option>`).join("")}</optgroup>` : "") +
-    `<optgroup label="Tüm personel">${o.personel.map(p => `<option value="${p.kisi_no}"${p.kisi_no === g.kisi_no ? " selected" : ""}>${esc(p.ad)}</option>`).join("")}</optgroup></select>`;
+    [["Son 60 günde okutanlar", true], ["Diğer personel", false]].map(([lbl, akt]) => `<optgroup label="${lbl}">` +
+      o.personel.filter(p => p.aktif === akt).map(p => `<option value="${p.kisi_no}"${p.kisi_no === g.kisi_no ? " selected" : ""}>${esc(p.ad)}</option>`).join("") + `</optgroup>`).join("") + `</select>`;
   const sorun = o.girdiler.filter(g => !g.kisi_no).length;
   $("#n-onizle").innerHTML =
     o.uyarilar.map(u => `<div class="uyari">${esc(u)}</div>`).join("") +
     `<p><b>${o.tarihler.length}</b> tarih, <b>${o.girdiler.length}</b> isim bulundu. ` +
     (sorun ? `<span class="kirmizi">${sorun} isim eşleşmedi</span> – listeden seçin ya da yok sayın (başlık/not satırları da burada görünebilir).` : `Hepsi eşleşti.`) +
-    ` <span class="soluk">Sarı = tahmini eşleşme, kontrol edin.</span></p>` +
+    ` <span class="soluk">Sarı = tahmini eşleşme, kontrol edin. Kaydettiğiniz eşleşmeler hatırlanır; sonraki aylarda aynı isim otomatik eşleşir.</span></p>` +
     `<div class="tablo">` + tablo(["Tarih", "Dosyadaki yazı", "Eşleşme", "Personel", "Hücre"],
       o.girdiler.map((g, i) => [tarihTR(g.tarih), esc(g.metin), etiket(g.durum), sec(g, i), `<span class="soluk">${esc(g.hucre)}</span>`])) + `</div>` +
     `<p><button class="d ana" id="n-kaydet">Kaydet</button> <button class="d" id="n-vazgec">Vazgeç</button></p>`;
+  // Ayni isim her hafta tekrarlanir: bir satirda secilen kisi, ayni yazili bos satirlara da uygulanir.
+  document.querySelectorAll("#n-onizle select[data-i]").forEach(sel => sel.onchange = () => {
+    const ta = o.girdiler[+sel.dataset.i].tam_anahtar;
+    document.querySelectorAll("#n-onizle select[data-i]").forEach(d => {
+      if (d !== sel && !d.value && o.girdiler[+d.dataset.i].tam_anahtar === ta) d.value = sel.value;
+    });
+  });
   $("#n-vazgec").onclick = () => { onizleme = null; $("#n-onizle").innerHTML = ""; };
   $("#n-kaydet").onclick = async () => {
     const kayitlar = [];
     document.querySelectorAll("#n-onizle select[data-i]").forEach(s => {
-      if (s.value) { const g = o.girdiler[+s.dataset.i]; kayitlar.push({tarih: g.tarih, kisi_no: +s.value, metin: g.metin}); }
+      if (s.value) { const g = o.girdiler[+s.dataset.i]; kayitlar.push({tarih: g.tarih, kisi_no: +s.value, metin: g.metin, anahtar: g.anahtar, tam_anahtar: g.tam_anahtar}); }
     });
     if (!confirm(`${o.tarihler.length} tarih için ${kayitlar.length} nöbet kaydı yazılacak. Bu tarihlerdeki eski plan silinir. Devam?`)) return;
     try {

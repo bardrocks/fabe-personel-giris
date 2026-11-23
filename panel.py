@@ -155,6 +155,7 @@ CREATE TABLE IF NOT EXISTS kategori(
   id INTEGER PRIMARY KEY, ad TEXT NOT NULL UNIQUE, giris TEXT, cikis TEXT, cts_giris TEXT, cts_cikis TEXT);
 CREATE TABLE IF NOT EXISTS personel_ayar(
   kisi_no INTEGER PRIMARY KEY, kategori_id INTEGER, giris TEXT, cikis TEXT, cts_giris TEXT, cts_cikis TEXT);
+CREATE TABLE IF NOT EXISTS nobet_eslesme(anahtar TEXT PRIMARY KEY, kisi_no INTEGER);
 CREATE TABLE IF NOT EXISTS nobet_yukleme(
   id INTEGER PRIMARY KEY, zaman TEXT, dosya TEXT, tarih_sayisi INTEGER, kayit_sayisi INTEGER);
 """
@@ -659,7 +660,8 @@ _DURAK = set(_AYLAR) | {
     "NO", "HAFTA", "HAFTASI", "AY", "AYI", "YIL", "IZIN", "IZINLI", "IZINLILER", "MAGAZA", "FABE", "VE",
     "CALISACAK", "CALISACAKLAR", "CALISAN", "CALISANLAR", "MESAI", "SAAT", "NOT", "ACIKLAMA", "YEDEK",
     "SORUMLU", "OFF", "TATIL", "DEPO", "KASA", "SATIS", "REYON", "MUDUR", "SEF", "BOLUM", "GOREV", "VARDIYA",
-    "VEYA", "SABAH", "AKSAM", "OGLE", "TAM", "YARIM", "GUNLUK", "AYLIK", "HAFTALIK", "PROGRAM", "PROGRAMI", "PLAN"}
+    "VEYA", "SABAH", "AKSAM", "OGLE", "TAM", "YARIM", "GUNLUK", "AYLIK", "HAFTALIK", "PROGRAM", "PROGRAMI", "PLAN",
+    "SATICI", "SATICILAR", "MANKEN", "MANKENLER", "TEKSTIL", "KAT", "ZEMIN", "STUDYO"}
 _GUN_KELIME = {"PAZARTESI", "SALI", "CARSAMBA", "PERSEMBE", "CUMA", "CUMARTESI", "PAZAR", "CTS", "CMT"}
 
 
@@ -711,14 +713,27 @@ def metinden_tarih(s):
     return None, k
 
 
+_KAT_EKI = re.compile(r"\s*-\s*[A-ZÇĞİÖŞÜ0-9]{1,2}\s*$")
+
+
 def _isim_parcalari(metin):
-    parcalar = re.split(r"[,;/\n+&]| - | VE |\(|\)", " " + tr_upper(str(metin)) + " ")
+    """-> [(gosterim, ad_anahtari, tam_anahtar)].
+    'NASTYA (DAL)-Z' -> ad 'NASTYA', tam 'NASTYA DAL': parantez ici (marka/reyon) ve -Z/-1 (kat) eki
+    addan ayiklanir; tam anahtar ayni ilk ada sahip kisileri ayirt etmek icin hatirlanir."""
     out = []
-    for p in parcalar:
-        k = katla(p)
-        kel = [w for w in k.split() if w not in _DURAK and not re.fullmatch(r"\d{1,2}", w)]
-        if kel:
-            out.append((p.strip(), " ".join(kel)))
+    for parca in re.split(r"[,;/\n+&]| VE ", " " + tr_upper(str(metin)) + " "):
+        gos = " ".join(parca.split())
+        if not gos:
+            continue
+        not_ = katla(" ".join(re.findall(r"\(([^)]*)\)", gos)))
+        govde = _KAT_EKI.sub("", re.sub(r"\([^)]*\)", " ", gos).strip())
+        isimler = re.split(r"\s+-\s+", govde)
+        for isim in isimler:
+            kel = [w for w in katla(isim).split() if w not in _DURAK and not re.fullmatch(r"\d{1,2}", w)]
+            if not kel or (len(kel) == 1 and len(kel[0]) == 1):
+                continue
+            ad = " ".join(kel)
+            out.append((gos if len(isimler) == 1 else isim.strip(), ad, f"{ad} {not_}".strip()))
     return out
 
 
@@ -728,6 +743,7 @@ class Eslestirici:
             per = list(con.execute("SELECT * FROM personel"))
             son = (simdi() - dt.timedelta(days=60)).strftime("%Y-%m-%d")
             self.aktif = {r[0] for r in con.execute("SELECT DISTINCT kisi_no FROM okutma WHERE zaman >= ?", (son,))}
+            self.hafiza = {a: k for a, k in con.execute("SELECT anahtar, kisi_no FROM nobet_eslesme")}
         self.per = {r["kisi_no"]: r for r in per}
         self.tam, self.bas_harf, self.ilk = {}, {}, {}
         for r in per:
@@ -750,8 +766,15 @@ class Eslestirici:
                 return akt, True
         return aday, len(aday) == 1
 
-    def bul(self, anahtar):
+    def bul(self, anahtar, tam_anahtar=None):
         """-> (kisi_no|None, durum, adaylar)"""
+        # Daha once onizlemede onaylanmis eslesme ("NASTYA DAL" -> 123)
+        k = self.hafiza.get(tam_anahtar or anahtar)
+        if k in self.per:
+            return k, "kayıtlı", [k]
+        k = self.hafiza.get(anahtar)
+        if k in self.per:  # sadece ilk ad hatirlaniyor: kontrol edilsin
+            return k, "tahmini", [k]
         if anahtar.isdigit():
             k = int(anahtar)
             return (k, "tam", [k]) if k in self.per else (None, "yok", [])
@@ -794,7 +817,7 @@ def nobet_cozumle(dosya_adi, veri):
                 continue
             if isinstance(v, float):
                 if v.is_integer() and int(v) in es.per:
-                    adaylar[rc] = [(str(int(v)), str(int(v)))]
+                    adaylar[rc] = [(str(int(v)), str(int(v)), str(int(v)))]
                 continue
             t, kalan = metinden_tarih(v)
             if t:
@@ -825,13 +848,14 @@ def nobet_cozumle(dosya_adi, veri):
             if not hedef:
                 continue
             tarih = tarihler[hedef]
-            for metin, anahtar in parcalar:
-                k, seviye, aday = es.bul(anahtar)
+            for metin, anahtar, tam in parcalar:
+                k, seviye, aday = es.bul(anahtar, tam)
                 if k is None and anahtar.replace(" ", "").isdigit():
                     continue  # yil, adet vb. sayi; personel degil
-                girdiler.append({"tarih": tarih.isoformat(), "metin": metin, "kisi_no": k, "ad": es.ad(k) if k else "",
+                girdiler.append({"tarih": tarih.isoformat(), "metin": metin, "anahtar": anahtar, "tam_anahtar": tam,
+                                 "kisi_no": k, "ad": es.ad(k) if k else "",
                                  "durum": seviye, "adaylar": [{"kisi_no": a, "ad": es.ad(a)} for a in aday[:8]],
-                                 "hucre": f"{sayfa}!{_sutun_adi(rc[1])}{rc[0]}"})
+                                 "hucre": f"{sayfa}!{_sutun_adi(rc[1])}{rc[0]}", "_sira": (sayfa, rc[1], rc[0])})
     # ayni tarih+kisi tekrarlarini birlestir
     gor, tekil = set(), []
     for g in girdiler:
@@ -839,7 +863,9 @@ def nobet_cozumle(dosya_adi, veri):
         if anahtar not in gor:
             gor.add(anahtar)
             tekil.append(g)
-    tekil.sort(key=lambda g: (g["tarih"], g["hucre"]))
+    tekil.sort(key=lambda g: (g["tarih"], g["_sira"]))
+    for g in tekil:
+        del g["_sira"]
     tarihler = sorted({g["tarih"] for g in tekil})
     for t in tarihler:
         if dt.date.fromisoformat(t).weekday() != 5:
@@ -847,18 +873,33 @@ def nobet_cozumle(dosya_adi, veri):
     if not tekil:
         uyarilar.append("Dosyada tarih + personel eşleşmesi bulunamadı. Şablonu kullanmayı deneyin.")
     return {"dosya": dosya_adi, "tarihler": tarihler, "girdiler": tekil, "uyarilar": uyarilar,
-            "personel": [{"kisi_no": k, "ad": es.ad(k)} for k in sorted(es.per, key=lambda x: es.ad(x))]}
+            "personel": [{"kisi_no": k, "ad": es.ad(k), "aktif": k in es.aktif}
+                         for k in sorted(es.per, key=lambda x: es.ad(x))]}
 
 
 def nobet_kaydet(dosya, tarihler, kayitlar):
     tarihler = sorted({dt.date.fromisoformat(t).isoformat() for t in tarihler})
-    temiz = set()
+    temiz, hafiza = set(), []
     for r in kayitlar:
         t = dt.date.fromisoformat(r["tarih"]).isoformat()
-        temiz.add((t, int(r["kisi_no"]), str(r.get("metin", ""))[:100]))
+        k = int(r["kisi_no"])
+        temiz.add((t, k, str(r.get("metin", ""))[:100]))
+        hafiza.append((str(r.get("anahtar") or "")[:100], str(r.get("tam_anahtar") or "")[:100], k))
         if t not in tarihler:
             tarihler.append(t)
     with db() as con:
+        # Onaylanan eslesmeleri hatirla: tam anahtar her zaman; sadece ilk ad, farkli kisilere
+        # gidiyorsa NULL (cakisma) yapilir ve artik kullanilmaz.
+        for ad, tam, k in hafiza:
+            if tam and not tam.isdigit():
+                con.execute("INSERT INTO nobet_eslesme(anahtar,kisi_no) VALUES(?,?) "
+                            "ON CONFLICT(anahtar) DO UPDATE SET kisi_no=excluded.kisi_no", (tam, k))
+            if ad and ad != tam and not ad.isdigit():
+                eski = con.execute("SELECT kisi_no FROM nobet_eslesme WHERE anahtar=?", (ad,)).fetchone()
+                if eski is None:
+                    con.execute("INSERT INTO nobet_eslesme(anahtar,kisi_no) VALUES(?,?)", (ad, k))
+                elif eski[0] is not None and eski[0] != k:
+                    con.execute("UPDATE nobet_eslesme SET kisi_no=NULL WHERE anahtar=?", (ad,))
         cur = con.execute("INSERT INTO nobet_yukleme(zaman,dosya,tarih_sayisi,kayit_sayisi) VALUES(?,?,?,?)",
                           (zstr(simdi()), str(dosya)[:200], len(tarihler), len(temiz)))
         yid = cur.lastrowid
