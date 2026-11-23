@@ -52,7 +52,8 @@ Log: `C:\EnGoPerPanel\data\panel.log` · Veritabanı: `C:\EnGoPerPanel\data\pane
 
 ## Panel
 
-- **Şimdi:** içerideki personel, bugünün giriş/çıkışları, geç kalanlar; cumartesi ise nöbetçilerin durumu.
+- **Şimdi:** içerideki personel, bugünün giriş/çıkışları, geç kalanlar; cumartesi ise nöbetçilerin durumu. Tatil günü başlıkta yazar;
+  "ÇIKIŞ YOK" (ya da mesai bitmiş ve hâlâ içeride) satırlarında hızlı **Çıkış ekle** düğmesi vardır.
 - **Rapor:** tarih aralığı + kişi + durum filtresi (geç / çıkış yok), Excel ve CSV indirme.
 - **Nöbet:** aylık nöbet çizelgesi yükleme ve her cumartesi için *GELDİ / GELMEDİ / BEKLENİYOR / PLANLI*.
 - **Ham kayıt:** cihazdan gelen her okutma.
@@ -60,10 +61,48 @@ Log: `C:\EnGoPerPanel\data\panel.log` · Veritabanı: `C:\EnGoPerPanel\data\pane
   özel saat. Öncelik: **özel saat → kategori → genel mesai**; her kademede cumartesi saati ayrı girilebilir.
   Geç kalma ve erken çıkış bu saatlere göre hesaplanır. (`config.json`'daki mesai değerleri sadece ilk
   açılıştaki varsayılandır.)
-- **Sistem:** son okuma turları, hatalar, elle okuma.
+- **Sistem:** son okuma turları, hatalar, elle okuma. Cihazdan okuma toplama aralığının 3 katından uzun süredir yapılamıyorsa
+  panelin üstünde kırmızı uyarı şeridi çıkar.
 
 Cihaz giriş/çıkış ayırmadığı için günün ilk okutması giriş, son okutması çıkış sayılır;
 3 dk içindeki tekrar okutmalar tek sayılır.
+
+## Çalışma günleri
+
+Mağaza Pazar kapalıdır; diğer günler kişiden kişiye değişebilir (kimi Cumartesi hiç çalışmaz, kimi ayda bir nöbetle, kimi her Cumartesi çalışır;
+hafta içi izin günü olan da olabilir). **Ayarlar > Genel mesai** genel günleri, **Kategoriler** ve **Personel saatleri** tabloları kategori/kişi bazında günleri (Pt Sa Ça Pe Cu Ct) belirler.
+Öncelik: **personel → kategori → genel**; "devral" işaretliyse üst kademe geçerlidir ve kaynağı yanında yazar.
+Bir gün şu durumlarda kişi için **beklenmez** (gelmedi sayılmaz): Pazar, tam gün resmi tatil, tam gün izin, işten çıkış tarihinden sonra, işe giriş tarihinden önce,
+kişinin çalışma günü olmayan gün. Cumartesi işaretli değilse kişi **sadece nöbet listesindeki cumartesilerde** beklenir (nöbet takibi açıkken).
+Toplu izin girişinde de kişinin çalışmadığı günler (ve tatiller) atlanır.
+
+## Okutma düzeltme
+
+Okutmayı unutan ya da yanlış okutan personel için (Ayarlar > Özellikler > *Okutma düzeltme* açıkken):
+
+- **Personel sayfası > Günlük kayıtlar > Düzelt** ya da takvimde güne tıklayıp **Okutmaları düzelt**: o günün okutmaları (cihaz/elle, gizliler üstü çizili) listelenir;
+  yanlış kayıt **Gizle**, unutulan okutma **Saat ekle** ile eklenir, **Geri al** işlemi geri çevirir. Açıklama zorunludur.
+- Okutma silinmez: yanlışlar `gizli=1` olur (cihaz tekrar okusa da gizli kalır), eklenenler `cihaz=ELLE`, `kaynak=elle` olarak yazılır.
+  Gizli okutmalar bütün rapor ve hesaplardan düşer. Her işlem `duzeltme_log` tablosuna zaman, kişi, saat, açıklama ve istemci IP'siyle kaydedilir.
+- Düzeltilen günler rapor ve tablolarda ✎ ile işaretlenir; Excel'de "Düzeltme" sütunu vardır. `yonetim_sifresi` ayarlıysa düzeltme de şifre ister.
+- Düzeltme özelliği kapatılırsa düğmeler kalkar, ama yapılmış düzeltmeler hesaplarda geçerli kalır.
+
+## Resmi tatiller
+
+**Ayarlar > Resmi tatiller**: yıl seçimi, liste, ekleme (tarih, ad, yarım gün) ve silme. İlk kurulumda 2026-2027 sabit tatilleri ve 2026 dini bayramları yüklenir;
+**2027 dini bayramlarını Diyanet takviminden kontrol edip kendiniz ekleyin** (sayfada uyarı çıkar). Tam gün tatilde kimse beklenmez; yarım günde (arife) öğleden sonra tatildir,
+mesai çıkışı 13:00 kabul edilir. Tatilde çalışan kişi o günü normal çalışmış sayılır ve satırda "Tatil" rozeti görür (ileride puantajda "tatil çalışması" olacak).
+
+## Özellik anahtarları
+
+**Ayarlar > Özellikler**: nöbet takibi, izin takibi, okutma düzeltme ve resmi tatiller tek tek kapatılabilir (`ayar` tablosunda `ozellik_<ad>` = 1/0).
+Kapalı özellik menü, kart ve düğmelerden kalkar **ve hesaplara katılmaz** (izin kapalıysa izinler mesai/gelmedi hesabını etkilemez, tatil kapalıysa tatiller yok sayılır,
+nöbet kapalıysa cumartesi beklentisi nöbetten gelmez). Veri silinmez, tekrar açınca geri gelir. Puantaj, izin bakiyesi, panel şifresi ve Telegram bildirimi "yakında" olarak görünür, henüz açılamaz.
+
+## İşe giriş / işten çıkış
+
+Personel sayfasında **Düzenle** ile girilir. İşten çıkış tarihinden sonraki günlerde kişi beklenmez, Gelmeyenler listesine ve (çıkış tarihi dönem başından önceyse) Personel sayfasına girmez.
+Ayarlar > Personel saatleri'nde ayrılanlar varsayılan olarak gizlenir.
 
 ## Nöbet çizelgesi
 

@@ -10,12 +10,13 @@
   --bg:#0d121c;--kart:#151c2a;--kart2:#1b2435;--cizgi:#26304a;--yazi:#e8ebf2;--soluk:#8e97ad;
   --ana:#5b8cff;--yesil:#34c38f;--sari:#f1b44c;--kirmizi:#f46a6a;--mor:#a78bfa;--gri:#6b7489;--turkuaz:#2dd4bf;
   --turkuaz-z:rgba(45,212,191,.14);
+  --pembe:#f472b6;--pembe-z:rgba(244,114,182,.15);
   --ana-z:rgba(91,140,255,.14);--yesil-z:rgba(52,195,143,.14);--sari-z:rgba(241,180,76,.15);--kirmizi-z:rgba(244,106,106,.14);--mor-z:rgba(167,139,250,.15);--gri-z:rgba(107,116,137,.16);
   --golge:0 1px 2px rgba(0,0,0,.3);
 }
 [data-tema="acik"]{
   --bg:#eef1f7;--kart:#ffffff;--kart2:#f5f7fb;--cizgi:#e1e5ee;--yazi:#1c2333;--soluk:#6b7486;
-  --ana:#3b6ef0;--yesil:#1f9d6c;--sari:#c98612;--kirmizi:#d64545;--mor:#7c5cdb;--gri:#8a92a3;--turkuaz:#0f9488;
+  --ana:#3b6ef0;--yesil:#1f9d6c;--sari:#c98612;--kirmizi:#d64545;--mor:#7c5cdb;--gri:#8a92a3;--turkuaz:#0f9488;--pembe:#c93d8c;--pembe-z:rgba(201,61,140,.12);
   --golge:0 1px 3px rgba(20,30,60,.08);
 }
 *{box-sizing:border-box}
@@ -69,7 +70,7 @@ td.ad{white-space:normal;min-width:140px}
 tr.tikla{cursor:pointer}
 .sayi{text-align:right;font-variant-numeric:tabular-nums}
 .e{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600;background:var(--z,var(--gri-z));color:var(--c,var(--gri))}
-.e.yesil{--z:var(--yesil-z);--c:var(--yesil)}.e.kirmizi{--z:var(--kirmizi-z);--c:var(--kirmizi)}.e.sari{--z:var(--sari-z);--c:var(--sari)}.e.mavi{--z:var(--ana-z);--c:var(--ana)}.e.mor{--z:var(--mor-z);--c:var(--mor)}.e.turkuaz{--z:var(--turkuaz-z);--c:var(--turkuaz)}
+.e.yesil{--z:var(--yesil-z);--c:var(--yesil)}.e.kirmizi{--z:var(--kirmizi-z);--c:var(--kirmizi)}.e.sari{--z:var(--sari-z);--c:var(--sari)}.e.mavi{--z:var(--ana-z);--c:var(--ana)}.e.mor{--z:var(--mor-z);--c:var(--mor)}.e.turkuaz{--z:var(--turkuaz-z);--c:var(--turkuaz)}.e.pembe{--z:var(--pembe-z);--c:var(--pembe)}
 .yesil-y{color:var(--yesil)}.turkuaz-y{color:var(--turkuaz)}.kirmizi-y{color:var(--kirmizi)}.sari-y{color:var(--sari)}.mor-y{color:var(--mor)}.mavi-y{color:var(--ana)}
 .soluk{color:var(--soluk);font-size:13px}
 .filtre{display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-bottom:12px}
@@ -84,6 +85,9 @@ button.kucuk{padding:4px 9px;font-size:12.5px}
 .cipler button{border:0;background:none;color:var(--soluk);padding:6px 12px;border-radius:7px;font:inherit;font-size:13px;cursor:pointer}
 .cipler button.aktif{background:var(--ana);color:#fff}
 .uyari{background:var(--sari-z);color:var(--sari);border:1px solid color-mix(in srgb,var(--sari) 40%,transparent);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.uyari.kirmizi{background:#c62828;color:#fff;border:0;border-left:6px solid rgba(0,0,0,.35);padding:14px 16px;font-size:15px;font-weight:500;box-shadow:0 2px 10px rgba(198,40,40,.4);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.uyari.kirmizi a{color:#fff;font-weight:700;text-decoration:underline;white-space:nowrap}
+.uyari.kirmizi .ik{width:22px;height:22px}
 .cip{display:inline-flex;gap:6px;align-items:center;background:var(--kart2);border:1px solid var(--cizgi);border-radius:20px;padding:3px 10px;margin:2px;font-size:12.5px}
 .gizli{display:none!important}
 .grafik svg{width:100%;height:auto;display:block}
@@ -94,7 +98,7 @@ button.kucuk{padding:4px 9px;font-size:12.5px}
 .takvim{display:grid;grid-template-columns:repeat(7,38px);gap:5px}
 .takvim .ay{grid-column:1/-1;font-weight:600;font-size:13px;margin-bottom:2px}
 .takvim .gb{font-size:10.5px;color:var(--soluk);text-align:center}
-.takvim .g{height:38px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:600;background:var(--kart2);color:var(--soluk);border:1px solid var(--cizgi)}
+.takvim .g{position:relative;height:38px;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:600;background:var(--kart2);color:var(--soluk);border:1px solid var(--cizgi)}
 .g.zamaninda{background:var(--yesil-z);color:var(--yesil);border-color:transparent}
 .g.gec{background:var(--sari-z);color:var(--sari);border-color:transparent}
 .g.erken{background:var(--mor-z);color:var(--mor);border-color:transparent}
@@ -103,11 +107,45 @@ button.kucuk{padding:4px 9px;font-size:12.5px}
 .g.icerde{background:var(--ana-z);color:var(--ana);border-color:transparent}
 .g.izinli{background:var(--turkuaz-z);color:var(--turkuaz);border-color:transparent}
 .g.izinli-saat{box-shadow:inset 0 -3px 0 var(--turkuaz)}
+.g.tatil{background:var(--pembe-z);color:var(--pembe);border-color:transparent}
+.g.tatil-yarim{box-shadow:inset 0 -3px 0 var(--pembe)}
+.g.duz::after{content:"✎";position:absolute;top:1px;right:3px;font-size:9px;line-height:1;color:var(--soluk)}
+.duz-r{color:var(--mor);font-weight:700;cursor:help}
+.menu{position:fixed;z-index:60;background:var(--kart);border:1px solid var(--cizgi);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.35);padding:4px;display:flex;flex-direction:column;min-width:170px}
+.menu .m-baslik{padding:6px 10px;font-size:12px;color:var(--soluk)}
+.menu button{border:0;background:none;color:var(--yazi);text-align:left;padding:8px 10px;border-radius:7px;font:inherit;font-size:13.5px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.menu button:hover{background:var(--kart2)}
+.anahtar{position:relative;display:inline-block;width:46px;height:26px;flex:none}
+.anahtar input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1}
+.anahtar .kaydirak{position:absolute;inset:0;background:var(--kart2);border:1px solid var(--cizgi);border-radius:26px;transition:background .2s,border-color .2s}
+.anahtar .kaydirak::before{content:"";position:absolute;width:20px;height:20px;left:2px;top:2px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.anahtar input:checked+.kaydirak{background:var(--yesil);border-color:var(--yesil)}
+.anahtar input:checked+.kaydirak::before{transform:translateX(20px)}
+.anahtar input:focus-visible+.kaydirak{outline:2px solid var(--ana);outline-offset:2px}
+.anahtar input:disabled{cursor:not-allowed}
+.anahtar input:disabled+.kaydirak{opacity:.45}
+.ozellik{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--cizgi)}
+.ozellik:last-child{border-bottom:0}
+.ozellik b{font-weight:600}
+.gun-sec{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;white-space:nowrap}
+.gun-sec .gun{display:inline-block;position:relative}
+.gun-sec .gun input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.gun-sec .gun span{display:inline-block;min-width:27px;text-align:center;padding:4px 0;border-radius:6px;font-size:11.5px;font-weight:600;background:var(--kart2);color:var(--soluk);border:1px solid var(--cizgi)}
+.gun-sec .gun input:checked+span{background:var(--ana);border-color:var(--ana);color:#fff}
+.gun-sec .gun input:disabled+span{opacity:.55}
+.gun-sec .gun input:disabled:checked+span{background:var(--ana-z);color:var(--ana);border-color:transparent}
+.gun-sec .gun input:focus-visible+span{outline:2px solid var(--ana)}
+.gun-sec .devral{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--soluk);margin-right:4px;cursor:pointer}
+.gun-sec .devral input{margin:0}
+.gun-sec small{color:var(--soluk);font-size:11px;margin-left:4px}
+.modal.genis .kart{width:min(720px,100%)}
+s.iptal{color:var(--soluk)}
 .takvim .g.tik{cursor:pointer}
 .takvim .g.tik:hover{outline:2px solid var(--ana)}
 .modal{position:fixed;inset:0;background:rgba(5,8,15,.6);display:grid;place-items:center;z-index:50;padding:16px}
 .modal .kart{width:min(520px,100%);max-height:92vh;overflow:auto}
-.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.form input,.form select{width:100%;min-width:0}
 .form label{display:flex;flex-direction:column;font-size:12px;color:var(--soluk);gap:4px}
 .form .tam{grid-column:1/-1}
 .radyo{display:flex;gap:16px;color:var(--yazi);font-size:13.5px}
@@ -132,6 +170,8 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   .takvim .g{height:auto;aspect-ratio:1}
   .kpi{grid-template-columns:repeat(2,minmax(0,1fr))}
   .esit{grid-template-columns:minmax(0,1fr)}
+  .form{grid-template-columns:minmax(0,1fr)}
+  .gun-sec{flex-wrap:wrap}
   .filtre label{flex:1 1 140px}
   .filtre input,.filtre select{width:100%}
   aside{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;padding:8px 10px;z-index:10;gap:6px}
@@ -153,8 +193,8 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   <nav>
     <a href="#bugun" data-r="bugun"><i data-ik="bugun"></i>Bugün</a>
     <a href="#personel" data-r="personel"><i data-ik="personel"></i>Personel</a>
-    <a href="#nobet" data-r="nobet"><i data-ik="nobet"></i>Nöbet</a>
-    <a href="#izin" data-r="izin"><i data-ik="izin"></i>İzinler</a>
+    <a href="#nobet" data-r="nobet" data-oz="nobet"><i data-ik="nobet"></i>Nöbet</a>
+    <a href="#izin" data-r="izin" data-oz="izin"><i data-ik="izin"></i>İzinler</a>
     <a href="#rapor" data-r="rapor"><i data-ik="rapor"></i>Raporlar</a>
     <a href="#ayarlar" data-r="ayarlar"><i data-ik="ayarlar"></i>Ayarlar</a>
     <a href="#sistem" data-r="sistem"><i data-ik="sistem"></i>Sistem</a>
@@ -223,9 +263,16 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <div class="lejant">
           <span><i style="background:var(--yesil)"></i>Zamanında</span><span><i style="background:var(--sari)"></i>Geç</span>
           <span><i style="background:var(--mor)"></i>Erken çıkış</span><span><i style="background:var(--kirmizi)"></i>Çıkış yok / gelmedi</span>
-          <span><i style="background:var(--ana)"></i>İçeride</span><span><i style="background:var(--turkuaz)"></i>İzinli</span><span><i style="background:var(--gri)"></i>Kayıt yok</span></div>
-        <p class="soluk" style="margin:8px 0 0">İzin girmek için takvimde güne tıklayın.</p></div>
-      <div class="kart"><h2><i data-ik="bilgi"></i>Bilgi <span class="sag"><button class="d kucuk" id="k-izin-ekle">+ İzin ekle</button></span></h2><div id="k-bilgi"></div></div>
+          <span><i style="background:var(--ana)"></i>İçeride</span><span data-oz="izin"><i style="background:var(--turkuaz)"></i>İzinli</span>
+          <span data-oz="resmi_tatil"><i style="background:var(--pembe)"></i>Resmi tatil</span><span><i style="background:var(--gri)"></i>Kayıt yok / çalışılmayan gün</span>
+          <span data-oz="duzeltme"><b class="duz-r">✎</b> Okutması düzeltilmiş</span></div>
+        <p class="soluk" style="margin:8px 0 0" id="k-takvim-not"></p></div>
+      <div class="kart"><h2><i data-ik="bilgi"></i>Bilgi <span class="sag"><button class="d kucuk" id="k-duzenle">Düzenle</button> <button class="d kucuk" id="k-izin-ekle" data-oz="izin">+ İzin ekle</button></span></h2><div id="k-bilgi"></div>
+        <div id="k-duzenle-form" class="gizli" style="margin-top:12px"><div class="form">
+          <label>İşe giriş tarihi<input type="date" id="kd-ise"></label><label>İşten çıkış tarihi<input type="date" id="kd-isten"></label>
+          <p class="tam soluk" style="margin:0">İşten çıkış tarihinden sonraki günlerde kişi beklenmez, Gelmeyen listesine ve (dönem başından önce ayrıldıysa) Personel sayfasına girmez.
+            İşe giriş tarihinden önceki günler de gelmedi sayılmaz. Boş bırakılırsa ilk okutma tarihi esas alınır.</p></div>
+          <p style="margin:12px 0 0;display:flex;gap:8px;justify-content:flex-end"><button class="d" id="kd-vazgec">Vazgeç</button><button class="d ana" id="kd-kaydet">Kaydet</button></p></div></div>
     </div>
     <div class="kart" style="margin-top:14px"><h2>Günlük kayıtlar <span class="sag"><button class="d kucuk" id="k-excel">Excel</button></span></h2>
       <div class="tablo" id="k-tablo"></div></div>
@@ -306,7 +353,8 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   <section data-sayfa="ayarlar" class="gizli">
     <div class="ust"><h1>Ayarlar</h1>
       <div class="sag"><div class="cipler" data-altgrup="ayar">
-        <button data-alt="mesai" class="aktif">Genel mesai</button><button data-alt="kategori">Kategoriler</button><button data-alt="kisiler">Personel saatleri</button></div></div></div>
+        <button data-alt="mesai" class="aktif">Genel mesai</button><button data-alt="kategori">Kategoriler</button><button data-alt="kisiler">Personel saatleri</button>
+        <button data-alt="ozellik">Özellikler</button><button data-alt="tatil" data-oz="resmi_tatil">Resmi tatiller</button></div></div></div>
     <div data-altgrup-icerik="ayar" data-alt="mesai" class="kart">
       <h2>Genel mesai</h2>
       <p class="soluk">Kategorisi ve özel saati olmayan herkese uygulanır. Cumartesi boş bırakılırsa hafta içi saatleri geçerli olur.</p>
@@ -319,11 +367,16 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <label>Erken çıkış tol. (dk)<input type="number" min="0" max="240" id="g-erken_tolerans_dk" style="width:100px"></label>
         <button class="d ana" id="g-kaydet">Kaydet</button>
       </div>
+      <h2 style="margin-top:18px">Çalışma günleri</h2>
+      <p class="soluk">Bu günler herkes için "beklenen gün"dür (gelmezse <i>gelmedi</i> sayılır); kategori ve personel bazında değiştirilebilir. Pazar her zaman kapalıdır.
+        Cumartesi işaretli değilse kişi sadece nöbet listesindeki cumartesilerde beklenir.</p>
+      <div id="g-gunler"></div>
     </div>
     <div data-altgrup-icerik="ayar" data-alt="kategori" class="kart gizli">
       <h2>Kategoriler</h2>
       <p class="soluk">Örn. Depo 08:00–20:00, Manken 09:00–20:00. Kategori saati genel mesainin önüne geçer.</p>
       <div class="tablo" id="k-tablo-kat"></div>
+      <p class="soluk">Çalışma günleri: <b>devral</b> işaretliyse genel çalışma günleri geçerlidir. Cumartesi işaretli değilse kişi sadece nöbet listesindeki cumartesilerde beklenir.</p>
     </div>
     <div data-altgrup-icerik="ayar" data-alt="kisiler" class="kart gizli">
       <h2>Personel saatleri</h2>
@@ -332,10 +385,33 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <label>Ara<input type="search" id="a-ara" placeholder="Ad, no"></label>
         <label>Kategori<select id="a-kat-filtre"><option value="">Tümü</option><option value="-">Kategorisiz</option></select></label>
         <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="a-aktif" checked> Son 60 günde okutanlar</label>
+        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="a-ayrilan" checked> Ayrılanları gizle</label>
         <span style="margin-left:auto;display:flex;gap:8px;align-items:center"><span class="soluk" id="a-secili">0 seçili</span>
           <select id="a-toplu-kat"></select><button class="d" id="a-toplu">Seçilenleri ata</button></span>
       </div>
       <div class="tablo" id="a-tablo"></div>
+      <p class="soluk">Çalışma günleri: <b>devral</b> işaretliyse kategorinin (yoksa genel) günleri geçerlidir; kaynağı yanında yazar.
+        Cumartesi işaretli değilse kişi sadece nöbet listesindeki cumartesilerde beklenir. İşe giriş / işten çıkış tarihleri personel sayfasındaki "Düzenle" ile girilir.</p>
+    </div>
+    <div data-altgrup-icerik="ayar" data-alt="ozellik" class="kart gizli">
+      <h2>Özellikler</h2>
+      <p class="soluk">Kullanmadığınız özellikleri kapatın: menü, kart ve düğmeler gizlenir, hesaplara da katılmaz (örn. izin kapalıysa izinler mesai/gelmedi hesabını etkilemez).
+        Kapatmak veri silmez; tekrar açınca her şey geri gelir.</p>
+      <div id="oz-liste"></div>
+    </div>
+    <div data-altgrup-icerik="ayar" data-alt="tatil" class="kart gizli">
+      <h2>Resmi tatiller</h2>
+      <p class="soluk">Tam gün tatilde kimse beklenmez (gelmedi sayılmaz). Yarım gün (arife) öğleden sonra tatildir: mesai çıkışı 13:00 kabul edilir.
+        Tatilde çalışan kişi o günü normal çalışmış sayılır ve satırda "Tatil" rozeti görür.</p>
+      <div class="filtre">
+        <label>Yıl<select id="t-yil"></select></label>
+        <label>Tarih<input type="date" id="t-tarih"></label>
+        <label>Ad<input id="t-ad" placeholder="ör. Ramazan Bayramı 1. gün" style="width:220px"></label>
+        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="t-yarim"> Yarım gün (arife)</label>
+        <button class="d ana" id="t-ekle">Ekle / güncelle</button>
+      </div>
+      <div class="uyari gizli" id="t-uyari"></div>
+      <div class="tablo" id="t-tablo"></div>
     </div>
   </section>
 
@@ -356,6 +432,23 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   </section>
 </main>
 </div>
+
+<div class="modal genis gizli" id="duz-modal">
+  <div class="kart">
+    <h2><i data-ik="duzelt"></i><span id="dz-baslik">Okutmaları düzelt</span> <span class="sag"><button class="d kucuk" data-kapat>✕</button></span></h2>
+    <p class="soluk" id="dz-mesai" style="margin:0 0 10px"></p>
+    <div class="tablo" id="dz-liste"></div>
+    <div class="form" style="margin-top:14px">
+      <label>Eklenecek saat<input type="time" id="dz-saat"></label>
+      <label>Açıklama (zorunlu)<input id="dz-aciklama" maxlength="200" placeholder="ör. Çıkışta okutmayı unuttu"></label>
+      <p class="tam soluk" style="margin:0">Okutma silinmez: yanlış kaydı <b>Gizle</b>, unutulanı <b>Saat ekle</b> ile ekleyin. Gizle ve Ekle için açıklama gerekir;
+        her işlem kayıt altına alınır (Geri al ile eski haline döner).</p>
+    </div>
+    <p style="margin:12px 0 0;display:flex;gap:8px;justify-content:flex-end"><button class="d" data-kapat>Kapat</button><button class="d ana" id="dz-ekle">Saat ekle</button></p>
+    <details style="margin-top:12px" id="dz-log-kap"><summary>Bu günün düzeltme kaydı</summary><div class="tablo" id="dz-log"></div></details>
+  </div>
+</div>
+<div class="menu gizli" id="gun-menu"></div>
 
 <div class="modal gizli" id="izin-modal">
   <div class="kart">
@@ -403,6 +496,8 @@ const IKON = {
   bilgi: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
   yedek: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
   izin: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+  duzelt: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/><path d="m15 5 4 4"/>',
+  tatil: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
 };
 const ikon = (ad, boy = 18) => `<svg class="ik" width="${boy}" height="${boy}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IKON[ad] || ""}</svg>`;
 document.querySelectorAll("[data-ik]").forEach(el => el.innerHTML = ikon(el.dataset.ik, el.dataset.ik === "logo" ? 17 : 18));
@@ -415,7 +510,8 @@ const bugun = () => isoGun(new Date());
 const esc = v => String(v ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 const GUNLER = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
-const tarihTR = t => { const [y, m, d] = t.split("-"); return `${d}.${m}.${y} ${GUNLER[new Date(t + "T12:00").getDay()].slice(0, 3)}`; };
+const GUN_KISA = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
+const tarihTR = t => { const [y, m, d] = t.split("-"); return `${d}.${m}.${y} ${GUN_KISA[new Date(t + "T12:00").getDay()]}`; };
 const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GELDİ": "yesil", "GELMEDİ": "kirmizi",
   "BEKLENİYOR": "sari", "İZİNLİ": "turkuaz", "PLANLI": "", "VERİ YOK": "", "HATA": "kirmizi", "ATLANDI": "sari",
   "tam": "yesil", "kayıtlı": "yesil", "tahmini": "sari", "belirsiz": "kirmizi", "yok": "kirmizi"};
@@ -427,6 +523,15 @@ const sureYaz = d => { d = Math.round(d || 0); if (d <= 0) return ""; const h = 
   return [h ? `${h} saat` : "", m ? `${m} dakika` : ""].filter(Boolean).join(" "); };
 const dkYaz = (d, renk = "kirmizi-y") => d ? `<span class="${renk}">${sureYaz(d)}</span>` : "";
 const izinRozet = s => s && s.izin ? ` <span class="e turkuaz" title="${esc(s.izin)}">${esc(s.izin.includes("tam gün") ? "İzinli" : "İzin " + s.izin.split(" ").pop())}</span>` : "";
+// özellik anahtarları (sunucudan /api/durum ile gelir; yüklenene kadar ilk dört açık varsayılır)
+let OZ = {nobet: true, izin: true, duzeltme: true, resmi_tatil: true};
+const oz = a => OZ[a] === true;
+function ozellikUygula() {
+  $$("[data-oz]").forEach(e => e.classList.toggle("gizli", !oz(e.dataset.oz)));
+}
+const duzRozet = s => s && s.duzeltildi ? ` <span class="duz-r" title="Bu günün okutmaları elle düzeltilmiş (eklenen ya da gizlenen kayıt var)">✎</span>` : "";
+const tatilRozet = s => s && s.tatil ? ` <span class="e pembe" title="${esc(s.tatil)}${s.tatil_yarim ? " (yarım gün)" : ""} – tatilde çalıştı">Tatil</span>` : "";
+const rozetler = s => izinRozet(s) + tatilRozet(s) + duzRozet(s);
 const kisiLink = (k, ad) => `<a href="#personel/${k}">${esc(ad)}</a>`;
 const mesaiHucre = s => `<span class="soluk" title="${esc(s.mesai_kaynak || "")}">${esc(s.mesai || "")}</span>`;
 let sifre = "";
@@ -480,7 +585,8 @@ $$("[data-altgrup]").forEach(g => g.querySelectorAll("button").forEach(b => b.on
 function altSec(grup, alt) {
   $$(`[data-altgrup="${grup}"] button`).forEach(b => b.classList.toggle("aktif", b.dataset.alt === alt));
   $$(`[data-altgrup-icerik="${grup}"]`).forEach(x => x.classList.toggle("gizli", x.dataset.alt !== alt));
-  const yukle = {nobet: {takip: yukleNobet, eslesme: yukleEslesme}, rapor: {gunluk: yukleRapor, ham: yukleRapor}}[grup]?.[alt];
+  const yukle = {nobet: {takip: yukleNobet, eslesme: yukleEslesme}, rapor: {gunluk: yukleRapor, ham: yukleRapor},
+    ayar: {tatil: yukleTatil}}[grup]?.[alt];
   if (yukle) yukle();
 }
 const altAktif = g => $(`[data-altgrup="${g}"] button.aktif`).dataset.alt;
@@ -514,6 +620,7 @@ function rota() {
   const h = (location.hash || "#bugun").slice(1).split("/");
   let s = h[0] in SAYFA ? h[0] : "bugun";
   if (s === "personel" && h[1]) s = "kisi";
+  if ((s === "nobet" && !oz("nobet")) || (s === "izin" && !oz("izin"))) { location.hash = "#bugun"; return; }  // kapalı özellik
   $$("main section").forEach(x => x.classList.toggle("gizli", x.dataset.sayfa !== s));
   $$("aside nav a").forEach(a => a.classList.toggle("aktif", a.dataset.r === (s === "kisi" ? "personel" : s)));
   donemCiz();
@@ -545,7 +652,8 @@ async function yukleBugun() {
   const [d, tr] = await Promise.all([api("/api/bugun"), api("/api/trend")]);
   BUGUN = d;
   const t = new Date(d.tarih + "T12:00");
-  $("#b-tarih").textContent = `${t.getDate()} ${AYLAR[t.getMonth()]} ${GUNLER[t.getDay()]}`;
+  $("#b-tarih").innerHTML = `${t.getDate()} ${AYLAR[t.getMonth()]} ${GUNLER[t.getDay()]}` +
+    (d.tatil ? ` · <span class="e pembe">${ikon("tatil", 13)} ${esc(d.tatil.ad)}${d.tatil.yarim ? " (yarım gün, çıkış 13:00)" : ""}</span>` : "");
   bugunCiz();
   $("#g-trend").innerHTML = cubukGrafik(tr.map(v => Object.assign({}, v, {kisa: v.tarih.slice(8), etiket: tarihTR(v.tarih),
     soluk: new Date(v.tarih + "T12:00").getDay() === 0})), [{a: "gelen", ad: "Gelen", renk: "ana"}, {a: "gec", ad: "Geç", renk: "sari"}, {a: "erken", ad: "Erken", renk: "mor"}]);
@@ -556,7 +664,7 @@ async function yukleBugun() {
     const i = Math.min(dil.length - 1, Math.max(0, Math.floor((x - 7 * 60) / 30))); dil[i].n++; });
   $("#g-saat").innerHTML = cubukGrafik(dil, [{a: "n", ad: "Kişi", renk: "yesil"}], {h: 140});
   const n = d.nobet[0];
-  $("#b-nobet").innerHTML = n ? `<div style="margin-bottom:14px">${nobetKarti(n, "Bugünkü nöbet")}</div>` : "";
+  $("#b-nobet").innerHTML = n && oz("nobet") ? `<div style="margin-bottom:14px">${nobetKarti(n, "Bugünkü nöbet")}</div>` : "";
 }
 function bugunCiz() {
   const d = BUGUN;
@@ -566,7 +674,8 @@ function bugunCiz() {
     {tikla: "gec", deger: d.gec.length, ad: "Geç kalan", renk: "sari", ikon: "gec", alt: d.gec.length ? `toplam ${sureYaz(d.gec.reduce((a, s) => a + s.gec_dk, 0))}` : ""},
     {tikla: "erken", deger: d.erken.length, ad: "Erken çıkan", renk: "mor", ikon: "erken"},
     {tikla: "gelmeyen", deger: d.gelmeyen.length, ad: "Gelmeyen", renk: "kirmizi", ikon: "gelmeyen", alt: "son 2 haftada çalışan"},
-    {tikla: "izinli", deger: d.izinli.length, ad: "İzinli", renk: "turkuaz", ikon: "izin"}];
+    {tikla: "izinli", deger: d.izinli.length, ad: "İzinli", renk: "turkuaz", ikon: "izin"}].filter(k => k.tikla !== "izinli" || oz("izin"));
+  if (bFiltre === "izinli" && !oz("izin")) bFiltre = "gelen";
   $("#b-kpi").innerHTML = kartlar.map(k => kpiKart(Object.assign(k, {secili: k.tikla === bFiltre}))).join("");
   $$("#b-kpi [data-kpi]").forEach(b => b.onclick = () => { bFiltre = b.dataset.kpi; bugunCiz(); });
   const basliklar = {icerde: "Şu an içeride", gelen: "Bugün gelenler", gec: "Geç kalanlar", erken: "Erken çıkanlar", gelmeyen: "Gelmeyenler", izinli: "Bugün izinli olanlar"};
@@ -587,11 +696,22 @@ function bugunCiz() {
     return;
   }
   const l = (bFiltre === "gelen" ? d.satirlar : d[bFiltre]).filter(uy);
-  $("#b-tablo").innerHTML = tablo(["Durum", "Ad Soyad", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken"],
-    l.map(s => [etiket(s.durum) + izinRozet(s), kisiLink(s.kisi_no, s.ad), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y")]),
+  const dz = oz("duzeltme");
+  $("#b-tablo").innerHTML = tablo(["Durum", "Ad Soyad", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken"].concat(dz ? [""] : []),
+    l.map(s => [etiket(s.durum) + rozetler(s), kisiLink(s.kisi_no, s.ad), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y")]
+      .concat(dz ? [cikisEkleDugme(s, d.tarih)] : [])),
     "Kayıt yok", {tikla: i => "#personel/" + l[i].kisi_no});
 }
 $("#b-ara").oninput = () => BUGUN && bugunCiz();
+// "ÇIKIŞ YOK" (ya da mesai bitmiş ve hâlâ içeride) satırlarına hızlı çıkış ekleme
+function cikisEkleDugme(s, tarih) {
+  const bitis = ((s.mesai || "").split("-")[1] || "").trim(), an = new Date();
+  const simdiDk = an.getHours() * 60 + an.getMinutes();
+  const bitti = bitis && simdiDk >= (+bitis.slice(0, 2)) * 60 + (+bitis.slice(3, 5));
+  if (!(s.durum === "ÇIKIŞ YOK" || (s.durum === "İÇERİDE" && bitti))) return "";
+  const oneri = bitis && tarih === bugun() && !bitti ? "" : bitis || "";
+  return `<button class="d kucuk" data-cikis-ekle="${s.kisi_no}|${tarih}|${esc(oneri)}">Çıkış ekle</button>`;
+}
 
 // ===================================================================== PERSONEL
 let PER = null, pSira = {a: "ad", yon: 1};
@@ -608,8 +728,8 @@ async function yuklePersonel() {
     {deger: t("gec"), ad: "Geç kalma", renk: "sari", ikon: "gec", alt: t("gec_dk") ? `toplam ${sureYaz(t("gec_dk"))}` : ""},
     {deger: t("erken"), ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: t("erken_dk") ? `toplam ${sureYaz(t("erken_dk"))}` : ""},
     {deger: t("cikis_yok"), ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
-    {deger: t("gelmedi"), ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: "hafta içi, kayıt olmayan"},
-    {deger: t("nobet_gelmedi"), ad: "Nöbete gelmedi", renk: "kirmizi", ikon: "nobet", alt: `${t("nobet")} planlı nöbet`}].map(kpiKart).join("");
+    {deger: t("gelmedi"), ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: "beklenen günlerde kayıt olmayan"}]
+    .concat(oz("nobet") ? [{deger: t("nobet_gelmedi"), ad: "Nöbete gelmedi", renk: "kirmizi", ikon: "nobet", alt: `${t("nobet")} planlı nöbet`}] : []).map(kpiKart).join("");
   const liste = (a, birim) => top(a).map(p => `<a href="#personel/${p.kisi_no}"><span>${esc(p.ad)}</span><b class="${a === "gec" ? "sari-y" : "kirmizi-y"}">${p[a]} ${birim}${a === "gec" ? ` · ${sureYaz(p.gec_dk)}` : ""}</b></a>`).join("") || `<p class="soluk">Yok</p>`;
   $("#p-top-gec").innerHTML = liste("gec", "kez");
   $("#p-top-gelmedi").innerHTML = liste("gelmedi", "gün");
@@ -623,11 +743,16 @@ function personelCiz() {
     (!kf || (kf === "-" ? !p.kategori : p.kategori === kf)) && (!hat || p.hatali || p.gelmedi || p.nobet_gelmedi));
   l.sort((x, y) => { const a = x[pSira.a], b = y[pSira.a]; return (typeof a === "string" ? a.localeCompare(b, "tr") : a - b) * pSira.yon; });
   const say = (v, r) => v ? `<span class="${r}">${v}</span>` : `<span class="soluk">0</span>`;
-  const bas = P_SUTUN.map(([a, ad]) => `<span data-sira="${a}">${ad}${pSira.a === a ? (pSira.yon > 0 ? " ▲" : " ▼") : ""}</span>`);
-  $("#p-tablo").innerHTML = tablo(bas, l.map(p => [kisiLink(p.kisi_no, p.ad), `<span class="soluk">${esc(p.kategori)}</span>`, p.gun,
-    say(p.gec, "sari-y"), p.gec_dk ? `<span class="sari-y">${sureYaz(p.gec_dk)}</span>` : `<span class="soluk">–</span>`, say(p.erken, "mor-y"), say(p.cikis_yok, "kirmizi-y"), say(p.gelmedi, "kirmizi-y"), say(p.izinli_gun, "turkuaz-y"),
-    p.nobet ? `${say(p.nobet_gelmedi, "kirmizi-y")}<span class="soluk">/${p.nobet}</span>` : `<span class="soluk">–</span>`, p.ort_giris, p.calisma]),
-    "Bu dönemde kayıt yok", {tikla: i => "#personel/" + l[i].kisi_no});
+  const sutunlar = P_SUTUN.filter(([a]) => (a !== "nobet_gelmedi" || oz("nobet")) && (a !== "izinli_gun" || oz("izin")));
+  const bas = sutunlar.map(([a, ad]) => `<span data-sira="${a}">${ad}${pSira.a === a ? (pSira.yon > 0 ? " ▲" : " ▼") : ""}</span>`);
+  $("#p-tablo").innerHTML = tablo(bas, l.map(p => {
+    const h = {ad: kisiLink(p.kisi_no, p.ad), kategori: `<span class="soluk">${esc(p.kategori)}</span>`, gun: p.gun,
+      gec: say(p.gec, "sari-y"), gec_dk: p.gec_dk ? `<span class="sari-y">${sureYaz(p.gec_dk)}</span>` : `<span class="soluk">–</span>`,
+      erken: say(p.erken, "mor-y"), cikis_yok: say(p.cikis_yok, "kirmizi-y"), gelmedi: say(p.gelmedi, "kirmizi-y"), izinli_gun: say(p.izinli_gun, "turkuaz-y"),
+      nobet_gelmedi: p.nobet ? `${say(p.nobet_gelmedi, "kirmizi-y")}<span class="soluk">/${p.nobet}</span>` : `<span class="soluk">–</span>`,
+      ort_giris: p.ort_giris, calisma_dk: p.calisma};
+    return sutunlar.map(([a]) => h[a]);
+  }), "Bu dönemde kayıt yok", {tikla: i => "#personel/" + l[i].kisi_no});
   $$("#p-tablo th").forEach(th => th.classList.add("sirala"));
   $$("#p-tablo [data-sira]").forEach(s => s.parentElement.onclick = () => {
     const a = s.dataset.sira; pSira = {a, yon: pSira.a === a ? -pSira.yon : (a === "ad" || a === "kategori" || a === "ort_giris" ? 1 : -1)}; personelCiz(); });
@@ -637,14 +762,17 @@ $("#p-excel").onclick = () => location.href = `/disa?${new URLSearchParams({tur:
 
 // ===================================================================== PERSONEL DETAY
 let KISI_NO = null;
+let KISI_DETAY = null;
 async function yukleKisi(k) {
   KISI_NO = k;
   // takvim için ay başı/sonu tamamlanmış aralık
   const d = await api(`/api/personel_detay?kisi=${k}&bas=${DONEM.bas}&bit=${DONEM.bit}`);
+  KISI_DETAY = d;
   const p = d.kisi, o = d.ozet;
   const bas = (p.ad.split(" ").map(x => x[0]).slice(0, 2).join("")) || "?";
   $("#k-bas").innerHTML = `<div class="avatar">${esc(bas)}</div><div><h1 style="font-size:19px;margin:0">${esc(p.ad)}</h1>
-    <div class="soluk">${p.kategori ? `<span class="e mavi">${esc(p.kategori)}</span> ` : ""}No ${p.kisi_no}${p.sicil ? " · Sicil " + esc(p.sicil) : ""}</div></div>`;
+    <div class="soluk">${p.kategori ? `<span class="e mavi">${esc(p.kategori)}</span> ` : ""}No ${p.kisi_no}${p.sicil ? " · Sicil " + esc(p.sicil) : ""}
+    ${p.isten_cikis && p.isten_cikis < bugun() ? ` · <span class="e kirmizi">${tarihTR(p.isten_cikis)} tarihinde ayrıldı</span>` : ""}</div></div>`;
   $("#k-kpi").innerHTML = [
     {deger: o.gun, ad: "Geldiği gün", renk: "yesil", ikon: "gelen", alt: `ort. giriş ${o.ort_giris || "–"}`},
     {deger: o.gec, ad: "Geç kalma", renk: "sari", ikon: "gec", alt: o.gec ? `toplam ${sureYaz(o.gec_dk)}` : ""},
@@ -652,36 +780,124 @@ async function yukleKisi(k) {
     {deger: o.cikis_yok, ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
     {deger: o.gelmedi, ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: o.izinli_gun || o.saatlik_izin ? `${o.izinli_gun} gün izinli${o.saatlik_izin ? `, ${o.saatlik_izin} saatlik` : ""}` : ""},
     {deger: o.calisma, ad: "Toplam çalışma", renk: "ana", ikon: "saat"}].map(kpiKart).join("");
+  const izinli = oz("izin"), duzeltme = oz("duzeltme");
+  $("#k-takvim-not").textContent = izinli && duzeltme ? "Güne tıklayarak izin ekleyebilir ya da o günün okutmalarını düzeltebilirsiniz." :
+    izinli ? "İzin girmek için takvimde güne tıklayın." : duzeltme ? "Okutmaları düzeltmek için takvimde güne tıklayın." : "";
   // takvim: aylara böl
   const aylar = {};
   d.takvim.forEach(t => (aylar[t.tarih.slice(0, 7)] ||= []).push(t));
-  const IP = {izinli: "İzinli", zamaninda: "Zamanında", gec: "Geç", erken: "Erken çıkış", cikis_yok: "Çıkış yok", gelmedi: "Gelmedi", icerde: "İçeride", gelecek: "", veri_yok: "Sistemde veri yok", bos: "Kayıt yok"};
+  const IP = {izinli: "İzinli", zamaninda: "Zamanında", gec: "Geç", erken: "Erken çıkış", cikis_yok: "Çıkış yok", gelmedi: "Gelmedi", icerde: "İçeride", gelecek: "", veri_yok: "Sistemde veri yok", bos: "Kayıt yok / çalışılmayan gün", tatil: "Resmi tatil"};
   $("#k-takvim").innerHTML = Object.entries(aylar).map(([ay, gunler]) => {
     const [y, m] = ay.split("-").map(Number);
     const ilk = (new Date(gunler[0].tarih + "T12:00").getDay() + 6) % 7;
     return `<div class="takvim"><div class="ay">${AYLAR[m - 1]} ${y}</div>` + ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"].map(g => `<div class="gb">${g}</div>`).join("") +
       "<div></div>".repeat(ilk) + gunler.map(t => {
-        const ip = [tarihTR(t.tarih), IP[t.durum], t.izin, t.giris && `Giriş ${t.giris}`, t.cikis && `Çıkış ${t.cikis}`, t.gec_dk && `${sureYaz(t.gec_dk)} geç`, t.erken_dk && `${sureYaz(t.erken_dk)} erken`].filter(Boolean).join(" · ");
-        const saatlik = t.izin && !t.izin.includes("tam gün") ? " izinli-saat" : "";
-        return `<div class="g ${t.durum}${saatlik} tik" data-gun="${t.tarih}" title="${esc(ip)}">${Number(t.tarih.slice(8))}</div>`; }).join("") + "</div>";
+        const ip = [tarihTR(t.tarih), IP[t.durum], t.tatil && `Tatil: ${t.tatil}${t.tatil_yarim ? " (yarım gün)" : ""}`, t.izin, t.giris && `Giriş ${t.giris}`, t.cikis && `Çıkış ${t.cikis}`,
+          t.gec_dk && `${sureYaz(t.gec_dk)} geç`, t.erken_dk && `${sureYaz(t.erken_dk)} erken`, t.duzeltildi && "okutması düzeltilmiş"].filter(Boolean).join(" · ");
+        const ek = (t.izin && !t.izin.includes("tam gün") ? " izinli-saat" : "") + (t.tatil_yarim ? " tatil-yarim" : "") + (t.duzeltildi && duzeltme ? " duz" : "");
+        const tik = izinli || (duzeltme && t.tarih <= bugun()) ? " tik" : "";
+        return `<div class="g ${t.durum}${ek}${tik}" data-gun="${t.tarih}" title="${esc(ip)}">${Number(t.tarih.slice(8))}</div>`; }).join("") + "</div>";
   }).join("");
+  const gunYazi = l => l.map(i => GUN_AD[i]).join(" ");
   $("#k-bilgi").innerHTML = tablo(["", ""], [
-    ["Mesai", esc(p.mesai)], ["Cumartesi", esc(p.mesai_cts)], ["Son okutma", esc(p.son_okutma || "–")],
-    ["Planlı nöbet", o.nobet ? `${o.nobet} gün, <span class="${o.nobet_gelmedi ? "kirmizi-y" : "yesil-y"}">${o.nobet_gelmedi} gelmedi</span>` : "–"],
+    ["Mesai", esc(p.mesai)], ["Cumartesi", esc(p.mesai_cts)],
+    ["Çalışma günleri", `${gunYazi(p.calisma_gunleri)} <span class="soluk">(${p.calisma_gunleri_kaynak === "Özel" ? "kişiye özel" : p.calisma_gunleri_kaynak === "Genel" ? "genel" : "kategori: " + esc(p.calisma_gunleri_kaynak)})</span>` +
+      (p.calisma_gunleri.includes(5) ? "" : oz("nobet") ? `<br><span class="soluk">Cumartesi sadece nöbet listesinde beklenir</span>` : `<br><span class="soluk">Cumartesi beklenmez</span>`)],
+    ["İşe giriş / çıkış", `${p.ise_giris ? tarihTR(p.ise_giris) : "–"} / ${p.isten_cikis ? `<span class="${p.isten_cikis < bugun() ? "kirmizi-y" : ""}">${tarihTR(p.isten_cikis)}</span>` : "–"}`],
+    ["Son okutma", esc(p.son_okutma || "–")],
+    oz("nobet") ? ["Planlı nöbet", o.nobet ? `${o.nobet} gün, <span class="${o.nobet_gelmedi ? "kirmizi-y" : "yesil-y"}">${o.nobet_gelmedi} gelmedi</span>` : "–"] : null,
     ["Gelmediği günler", o.gelmedi_gunler.map(g => `<span class="cip">${tarihTR(g)}</span>`).join("") || "–"],
-    ["İzinler", d.izinler.map(iz => `<span class="cip">${iz.bas_tarih === iz.bit_tarih ? tarihTR(iz.bas_tarih) : `${tarihTR(iz.bas_tarih)} – ${tarihTR(iz.bit_tarih)}`} · ${esc(iz.yazi)}
-      <a href="javascript:void 0" title="Sil" data-izin-sil="${iz.ids.join(",")}">✕</a></span>`).join("") || "–"]]).replace("<thead><tr><th></th><th></th></tr></thead>", "");
-  $("#k-tablo").innerHTML = tablo(["Tarih", "Durum", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken"],
-    d.gunler.map(s => [tarihTR(s.tarih), etiket(s.durum) + izinRozet(s), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y")]), "Bu dönemde kayıt yok");
+    izinli ? ["İzinler", d.izinler.map(iz => `<span class="cip">${iz.bas_tarih === iz.bit_tarih ? tarihTR(iz.bas_tarih) : `${tarihTR(iz.bas_tarih)} – ${tarihTR(iz.bit_tarih)}`} · ${esc(iz.yazi)}
+      <a href="javascript:void 0" title="Sil" data-izin-sil="${iz.ids.join(",")}">✕</a></span>`).join("") || "–"] : null].filter(Boolean)).replace("<thead><tr><th></th><th></th></tr></thead>", "");
+  $("#k-tablo").innerHTML = tablo(["Tarih", "Durum", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken"].concat(duzeltme ? [""] : []),
+    d.gunler.map(s => [tarihTR(s.tarih), etiket(s.durum) + rozetler(s), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y")]
+      .concat(duzeltme ? [`<button class="d kucuk" data-duzelt="${s.tarih}">Düzelt</button>`] : [])), "Bu dönemde kayıt yok");
 }
 $("#k-izin-ekle").onclick = () => izinFormAc({kisi_no: +KISI_NO, tarih: bugun()});
+// işe giriş / işten çıkış düzenleme
+$("#k-duzenle").onclick = () => {
+  const p = KISI_DETAY && KISI_DETAY.kisi; if (!p) return;
+  $("#kd-ise").value = p.ise_giris || ""; $("#kd-isten").value = p.isten_cikis || "";
+  $("#k-duzenle-form").classList.toggle("gizli");
+};
+$("#kd-vazgec").onclick = () => $("#k-duzenle-form").classList.add("gizli");
+$("#kd-kaydet").onclick = async () => {
+  try {
+    await postJ("/api/ayar/personel", {kisi_nolar: [+KISI_NO], degisiklik: {ise_giris: $("#kd-ise").value, isten_cikis: $("#kd-isten").value}});
+    $("#k-duzenle-form").classList.add("gizli"); rota();
+  } catch (e) { alert(e.message); }
+};
+// takvimde güne tıklayınca küçük menü: izin ekle / okutmaları düzelt
+function menuKapat() { $("#gun-menu").classList.add("gizli"); }
+function gunTiklandi(el) {
+  const tarih = el.dataset.gun, izin = oz("izin"), duz = oz("duzeltme") && tarih <= bugun();
+  if (izin && duz) {
+    const m = $("#gun-menu"), r = el.getBoundingClientRect();
+    m.innerHTML = `<div class="m-baslik">${tarihTR(tarih)}</div><button data-menu="izin">${ikon("izin", 16)} İzin ekle</button><button data-menu="duzelt">${ikon("duzelt", 16)} Okutmaları düzelt</button>`;
+    m.dataset.tarih = tarih; m.classList.remove("gizli");
+    const w = m.offsetWidth, h = m.offsetHeight;
+    m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + "px";
+    m.style.top = (r.bottom + h + 8 > window.innerHeight ? Math.max(8, r.top - h - 4) : r.bottom + 4) + "px";
+  } else if (izin) izinFormAc({kisi_no: +KISI_NO, tarih});
+  else if (duz) duzeltmeAc({kisi_no: +KISI_NO, tarih});
+}
 document.addEventListener("click", e => {
+  if (!e.target.closest("#gun-menu")) menuKapat();
   const g = e.target.closest("#k-takvim [data-gun]");
-  if (g) izinFormAc({kisi_no: +KISI_NO, tarih: g.dataset.gun});
+  if (g) gunTiklandi(g);
+  const mn = e.target.closest("#gun-menu [data-menu]");
+  if (mn) { const t = $("#gun-menu").dataset.tarih; menuKapat();
+    if (mn.dataset.menu === "izin") izinFormAc({kisi_no: +KISI_NO, tarih: t}); else duzeltmeAc({kisi_no: +KISI_NO, tarih: t}); }
+  const dz = e.target.closest("[data-duzelt]");
+  if (dz) duzeltmeAc({kisi_no: +KISI_NO, tarih: dz.dataset.duzelt});
+  const ce = e.target.closest("[data-cikis-ekle]");
+  if (ce) { const [k, t, oneri] = ce.dataset.cikisEkle.split("|");
+    duzeltmeAc({kisi_no: +k, tarih: t, saat: oneri || (t === bugun() ? new Date().toTimeString().slice(0, 5) : ""), aciklama: "Çıkışta okutmayı unuttu"}); }
   const sil = e.target.closest("[data-izin-sil]");
   if (sil) { e.preventDefault(); izinSil(sil.dataset.izinSil.split(",").map(Number)); }
 });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { menuKapat(); $("#duz-modal").classList.add("gizli"); } });
 $("#k-excel").onclick = () => location.href = `/disa?${new URLSearchParams({tur: "rapor", bicim: "xlsx", bas: DONEM.bas, bit: DONEM.bit, kisi: KISI_NO})}`;
+
+// ===================================================================== OKUTMA DÜZELTME
+let DUZ = null;
+async function duzeltmeAc({kisi_no, tarih, saat = "", aciklama = ""}) {
+  if (!oz("duzeltme")) return;
+  DUZ = {kisi_no, tarih};
+  $("#dz-saat").value = saat; $("#dz-aciklama").value = aciklama;
+  $("#duz-modal").classList.remove("gizli");
+  try { await duzeltmeYukle(); } catch (e) { alert(e.message); $("#duz-modal").classList.add("gizli"); }
+  if (saat) $("#dz-aciklama").focus();
+}
+async function duzeltmeYukle() {
+  const d = await api(`/api/okutma_gun?kisi=${DUZ.kisi_no}&tarih=${DUZ.tarih}`);
+  $("#dz-baslik").textContent = `${d.ad} · ${tarihTR(d.tarih)}`;
+  $("#dz-mesai").textContent = `Mesai ${d.mesai}. Birkaç dakika içindeki tekrar okutmalar tek sayılır; çok yakın saat eklenemez.`;
+  $("#dz-liste").innerHTML = tablo(["Saat", "Kaynak", "Not", "Durum", ""], d.okutmalar.map(r => [
+    r.gizli ? `<s class="iptal">${r.saat}</s>` : `<b>${r.saat}</b>`,
+    r.kaynak === "elle" ? `<span class="e mor">elle</span>` : `<span class="e mavi">cihaz</span>`,
+    `<span class="soluk">${esc(r.not)}</span>`, r.gizli ? `<span class="e">gizli</span>` : `<span class="e yesil">geçerli</span>`,
+    r.gizli || r.kaynak === "elle" ? `<button class="d kucuk" data-dz-geri="${r.id}">Geri al</button>` : `<button class="d kucuk" data-dz-gizle="${r.id}">Gizle</button>`]),
+    "Bu gün için okutma yok. Aşağıdan saat ekleyebilirsiniz.");
+  $("#dz-log").innerHTML = tablo(["Zaman", "İşlem", "Okutma", "Açıklama", "Kimden"], d.log.map(l => [l.zaman, esc(l.islem), l.okutma_zaman.slice(11), `<span class="soluk">${esc(l.aciklama)}</span>`, `<span class="soluk">${esc(l.istemci)}</span>`]),
+    "Bu gün için düzeltme yapılmamış");
+}
+async function duzeltmeIslem(yol, veri) {
+  try { await postJ(yol, veri); await duzeltmeYukle(); rota(); return true; } catch (e) { alert(e.message); return false; }
+}
+function dzAciklama() { const a = $("#dz-aciklama").value.trim(); if (!a) { alert("Açıklama zorunlu"); $("#dz-aciklama").focus(); } return a; }
+$("#dz-ekle").onclick = async () => {
+  const saat = $("#dz-saat").value; if (!saat) return alert("Eklenecek saati girin");
+  const a = dzAciklama(); if (!a) return;
+  if (await duzeltmeIslem("/api/duzeltme/ekle", {kisi_no: DUZ.kisi_no, tarih: DUZ.tarih, saat, aciklama: a})) { $("#dz-saat").value = ""; $("#dz-aciklama").value = ""; }
+};
+$("#duz-modal").addEventListener("click", async e => {
+  if (e.target.id === "duz-modal") return $("#duz-modal").classList.add("gizli");
+  const gz = e.target.closest("[data-dz-gizle]"), gr = e.target.closest("[data-dz-geri]");
+  if (gz) { const a = dzAciklama(); if (a) { if (await duzeltmeIslem("/api/duzeltme/gizle", {id: +gz.dataset.dzGizle, aciklama: a})) $("#dz-aciklama").value = ""; } }
+  if (gr) await duzeltmeIslem("/api/duzeltme/geri_al", {id: +gr.dataset.dzGeri, aciklama: $("#dz-aciklama").value.trim()});
+  if (e.target.closest("[data-kapat]")) $("#duz-modal").classList.add("gizli");
+});
 
 // ===================================================================== NÖBET
 function nobetKarti(g, baslik, duzenle = false) {
@@ -887,12 +1103,13 @@ function raporCiz(hepsi) {
   const {ham, d} = RAPOR, sinir = hepsi ? 0 : 100;
   if (ham) {
     $("#r-ozet").textContent = `${d.length} okutma`;
-    $("#r-tablo").innerHTML = tablo(["Zaman", "Ad Soyad", "Kişi No"], d.map(s => [s.zaman, kisiLink(s.kisi_no, s.ad), s.kisi_no]), "Kayıt yok", {sinir});
+    $("#r-tablo").innerHTML = tablo(["Zaman", "Ad Soyad", "Kişi No", "Kaynak"], d.map(s => [s.zaman, kisiLink(s.kisi_no, s.ad), s.kisi_no,
+      s.kaynak === "elle" ? `<span class="e mor" title="Elle eklenmiş okutma">elle</span>` : `<span class="soluk">cihaz</span>`]), "Kayıt yok", {sinir});
   } else {
     $("#r-ozet").textContent = `${d.length} satır · ${d.filter(s => s.gec_dk).length} geç · ${d.filter(s => s.erken_dk).length} erken çıkış · ${d.filter(s => s.durum === "ÇIKIŞ YOK").length} çıkış yok`;
     $("#r-tablo").innerHTML = tablo(["Tarih", "Ad Soyad", "Kategori", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken", "Durum"],
       d.map(s => [tarihTR(s.tarih), kisiLink(s.kisi_no, s.ad), `<span class="soluk">${esc(s.kategori)}</span>`, mesaiHucre(s), s.giris, s.cikis, s.sure,
-        dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y"), etiket(s.durum) + izinRozet(s)]), "Kayıt yok", {sinir});
+        dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y"), etiket(s.durum) + rozetler(s)]), "Kayıt yok", {sinir});
   }
   dahaBagla($("#r-tablo"), raporCiz);
 }
@@ -904,21 +1121,55 @@ $("#r-csv").onclick = () => raporDisa("csv");
 
 // ===================================================================== AYARLAR
 let AYAR = null;
+const GUN_AD = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct"];
 const saatIn = (v, ek = "") => `<input type="time" value="${esc(v || "")}" ${ek}>`;
+// Çalışma günü seçici (Pt..Ct). devral: undefined -> kutucuk yok (genel); {acik, kaynak} -> "devral" onay kutusu
+function gunSecici(kimlik, secili, devral) {
+  const kilit = devral && devral.acik;
+  return `<span class="gun-sec" data-gs="${kimlik}">` +
+    (devral ? `<label class="devral" title="İşaretliyse üst kademenin (kategori ya da genel) günleri geçerlidir"><input type="checkbox" data-gs-devral${devral.acik ? " checked" : ""}>devral</label>` : "") +
+    GUN_AD.map((g, i) => `<label class="gun"><input type="checkbox" data-gun-i="${i}"${secili.includes(i) ? " checked" : ""}${kilit ? " disabled" : ""}><span>${g}</span></label>`).join("") +
+    (devral ? `<small data-gs-kaynak>${esc(devral.acik ? devral.kaynak : "özel")}</small>` : "") + `</span>`;
+}
+// seçili günler; devral işaretliyse null; hiç gün seçilmemişse undefined
+function gunOku(kimlik) {
+  const k = document.querySelector(`[data-gs="${kimlik}"]`);
+  if (!k) return null;
+  const dv = k.querySelector("[data-gs-devral]");
+  if (dv && dv.checked) return null;
+  const l = [...k.querySelectorAll("[data-gun-i]:checked")].map(i => +i.dataset.gunI);
+  return l.length ? l : undefined;
+}
+document.addEventListener("change", e => {
+  const dv = e.target.closest("[data-gs-devral]");
+  if (!dv) return;
+  const k = dv.closest("[data-gs]");
+  k.querySelectorAll("[data-gun-i]").forEach(i => i.disabled = dv.checked);
+  const kay = k.querySelector("[data-gs-kaynak]");
+  if (kay) kay.textContent = dv.checked ? (kay.dataset.devral || "devralınıyor") : "özel";
+});
+
 async function yukleAyar() {
   AYAR = await api("/api/ayar");
   for (const [a, v] of Object.entries(AYAR.genel)) { const el = $("#g-" + a); if (el) el.value = v ?? ""; }
+  $("#g-gunler").innerHTML = gunSecici("genel", AYAR.genel.calisma_gunleri);
   const kat = AYAR.kategoriler;
-  $("#k-tablo-kat").innerHTML = tablo(["Ad", "Giriş", "Çıkış", "Cts giriş", "Cts çıkış", "Kişi", ""],
+  $("#k-tablo-kat").innerHTML = tablo(["Ad", "Giriş", "Çıkış", "Cts giriş", "Cts çıkış", "Çalışma günleri", "Kişi", ""],
     kat.map(k => [`<input data-k="${k.id}" data-a="ad" value="${esc(k.ad)}" style="width:140px">`,
       ...["giris", "cikis", "cts_giris", "cts_cikis"].map(a => saatIn(k[a], `data-k="${k.id}" data-a="${a}"`)),
+      gunSecici("k:" + k.id, k.calisma_gunleri ? k.calisma_gunleri.split(",").map(Number) : AYAR.genel.calisma_gunleri, {acik: !k.calisma_gunleri, kaynak: "genel"}),
       k.kisi_sayisi, `<button class="d kucuk" data-kkaydet="${k.id}">Kaydet</button> <button class="d kucuk" data-ksil="${k.id}">Sil</button>`])
     .concat([[`<input data-k="yeni" data-a="ad" placeholder="Yeni kategori" style="width:140px">`,
-      ...["giris", "cikis", "cts_giris", "cts_cikis"].map(a => saatIn("", `data-k="yeni" data-a="${a}"`)), "",
+      ...["giris", "cikis", "cts_giris", "cts_cikis"].map(a => saatIn("", `data-k="yeni" data-a="${a}"`)),
+      gunSecici("k:yeni", AYAR.genel.calisma_gunleri, {acik: true, kaynak: "genel"}), "",
       `<button class="d ana kucuk" data-kkaydet="yeni">Ekle</button>`]]), "");
+  $$("#k-tablo-kat [data-gs-kaynak]").forEach(x => x.dataset.devral = "genel");
   $$("[data-kkaydet]").forEach(b => b.onclick = async () => {
     const id = b.dataset.kkaydet, v = {id: id === "yeni" ? null : +id};
     $$(`[data-k="${id}"]`).forEach(i => v[i.dataset.a] = i.value);
+    const g = gunOku("k:" + id);
+    if (g === undefined) return alert("En az bir çalışma günü seçin ya da \"devral\"ı işaretleyin.");
+    v.calisma_gunleri = g;
     try { await postJ("/api/ayar/kategori", v); yukleAyar(); } catch (e) { alert(e.message); }
   });
   $$("[data-ksil]").forEach(b => b.onclick = async () => {
@@ -932,20 +1183,25 @@ async function yukleAyar() {
   f.value = fv;
   AYAR.katSec = katSec;
   ayarPersonelCiz();
+  ozellikCiz();
 }
 function ayarPersonelCiz() {
   if (!AYAR) return;
-  const ara = $("#a-ara").value.toLocaleUpperCase("tr"), kf = $("#a-kat-filtre").value, akt = $("#a-aktif").checked;
-  const liste = AYAR.personel.filter(p => (!akt || p.aktif) &&
+  const ara = $("#a-ara").value.toLocaleUpperCase("tr"), kf = $("#a-kat-filtre").value, akt = $("#a-aktif").checked, ayr = $("#a-ayrilan").checked;
+  const liste = AYAR.personel.filter(p => (!akt || p.aktif) && (!ayr || !p.ayrildi) &&
     (!ara || (p.ad + " " + p.kisi_no + " " + p.sicil).toLocaleUpperCase("tr").includes(ara)) &&
     (!kf || (kf === "-" ? !p.kategori_id : p.kategori_id === +kf)));
-  $("#a-tablo").innerHTML = tablo(["<input type=checkbox id=a-hepsi>", "Ad Soyad", "Kategori", "Özel giriş", "Özel çıkış", "Cts giriş", "Cts çıkış", "Geçerli saat", ""],
+  const kaynakYazi = p => p.calisma_gunleri_kaynak === "Genel" ? "genel" : p.calisma_gunleri_kaynak === "Özel" ? "genel" : p.calisma_gunleri_kaynak;
+  $("#a-tablo").innerHTML = tablo(["<input type=checkbox id=a-hepsi>", "Ad Soyad", "Kategori", "Özel giriş", "Özel çıkış", "Cts giriş", "Cts çıkış", "Çalışma günleri", "Geçerli saat", ""],
     liste.map(p => [`<input type="checkbox" data-psec="${p.kisi_no}">`,
-      `${kisiLink(p.kisi_no, p.ad)} <span class="soluk">${p.kisi_no}</span>`,
+      `${kisiLink(p.kisi_no, p.ad)} <span class="soluk">${p.kisi_no}</span>${p.ayrildi ? ` <span class="e kirmizi" title="${tarihTR(p.isten_cikis)} tarihinde ayrıldı">ayrıldı</span>` : ""}`,
       AYAR.katSec(p.kategori_id, `data-p="${p.kisi_no}" data-a="kategori_id"`),
       ...["giris", "cikis", "cts_giris", "cts_cikis"].map(a => saatIn(p[a], `data-p="${p.kisi_no}" data-a="${a}"`)),
+      gunSecici("p:" + p.kisi_no, p.calisma_gunleri, {acik: !p.calisma_gunleri_ozel, kaynak: p.calisma_gunleri_ozel ? "" : kaynakYazi(p)}),
       `<span class="soluk">${esc(p.gecerli)}<br>Cts ${esc(p.gecerli_cts)}</span>`,
       `<button class="d kucuk" data-pkaydet="${p.kisi_no}">Kaydet</button>`]), "Personel yok");
+  // "devral" kutusu açılınca gösterilecek kaynak (kategori adı / genel)
+  liste.forEach(p => { const k = document.querySelector(`[data-gs="p:${p.kisi_no}"] [data-gs-kaynak]`); if (k) k.dataset.devral = p.calisma_gunleri_ozel ? (p.kategori_id ? "kategori/genel" : "genel") : kaynakYazi(p); });
   const secSay = () => $("#a-secili").textContent = $$("[data-psec]:checked").length + " seçili";
   $$("[data-psec]").forEach(c => c.onchange = secSay);
   const h = $("#a-hepsi"); if (h) h.onchange = () => { $$("[data-psec]").forEach(c => c.checked = h.checked); secSay(); };
@@ -954,10 +1210,13 @@ function ayarPersonelCiz() {
     const k = b.dataset.pkaydet, dg = {};
     $$(`[data-p="${k}"]`).forEach(i => dg[i.dataset.a] = i.value);
     if (["giris", "cikis"].filter(a => dg[a]).length === 1) return alert("Özel saat için giriş ve çıkışı birlikte girin (ya da ikisini de boş bırakın).");
+    const g = gunOku("p:" + k);
+    if (g === undefined) return alert("En az bir çalışma günü seçin ya da \"devral\"ı işaretleyin.");
+    dg.calisma_gunleri = g;
     try { await postJ("/api/ayar/personel", {kisi_nolar: [+k], degisiklik: dg}); yukleAyar(); } catch (e) { alert(e.message); }
   });
 }
-$("#a-ara").oninput = ayarPersonelCiz; $("#a-kat-filtre").onchange = ayarPersonelCiz; $("#a-aktif").onchange = ayarPersonelCiz;
+$("#a-ara").oninput = ayarPersonelCiz; $("#a-kat-filtre").onchange = ayarPersonelCiz; $("#a-aktif").onchange = ayarPersonelCiz; $("#a-ayrilan").onchange = ayarPersonelCiz;
 $("#a-toplu").onclick = async () => {
   const kisiler = $$("[data-psec]:checked").map(c => +c.dataset.psec);
   if (!kisiler.length) return alert("Önce personel seçin");
@@ -966,7 +1225,49 @@ $("#a-toplu").onclick = async () => {
 };
 $("#g-kaydet").onclick = async () => {
   const v = {}; ["giris", "cikis", "cts_giris", "cts_cikis", "gec_tolerans_dk", "erken_tolerans_dk"].forEach(a => v[a] = $("#g-" + a).value);
+  const g = gunOku("genel");
+  if (!g) return alert("En az bir çalışma günü seçin");
+  v.calisma_gunleri = g;
   try { await postJ("/api/ayar/genel", v); alert("Kaydedildi"); yukleAyar(); } catch (e) { alert(e.message); }
+};
+
+// ---- özellik anahtarları
+function ozellikCiz() {
+  if (!AYAR) return;
+  $("#oz-liste").innerHTML = AYAR.ozellikler.map(o => `<div class="ozellik"><div><b>${esc(o.baslik)}</b>${o.yakinda ? ` <span class="e sari">yakında</span>` : ""}
+    <div class="soluk">${esc(o.aciklama)}</div></div>
+    <label class="anahtar" title="${o.yakinda ? "Bu özellik sonraki sürümde gelecek" : o.acik ? "Açık" : "Kapalı"}"><input type="checkbox" data-oz-ad="${o.ad}"${o.acik ? " checked" : ""}${o.yakinda ? " disabled" : ""} aria-label="${esc(o.baslik)}"><span class="kaydirak"></span></label></div>`).join("");
+  $$("[data-oz-ad]").forEach(c => c.onchange = async () => {
+    try {
+      const r = await postJ("/api/ayar/ozellik", {ad: c.dataset.ozAd, acik: c.checked});
+      OZ[r.ad] = r.acik; ozellikUygula(); AYAR.ozellikler.find(o => o.ad === r.ad).acik = r.acik; c.parentElement.title = r.acik ? "Açık" : "Kapalı";
+    } catch (e) { c.checked = !c.checked; alert(e.message); }
+  });
+}
+
+// ---- resmi tatiller
+let T_YIL = new Date().getFullYear();
+async function yukleTatil() {
+  const yillar = []; for (let y = new Date().getFullYear() - 1; y <= new Date().getFullYear() + 2; y++) yillar.push(y);
+  $("#t-yil").innerHTML = yillar.map(y => `<option${y === T_YIL ? " selected" : ""}>${y}</option>`).join("");
+  const d = await api(`/api/tatil?yil=${T_YIL}`);
+  $("#t-uyari").classList.toggle("gizli", !d.uyari); $("#t-uyari").textContent = d.uyari;
+  $("#t-tablo").innerHTML = tablo(["Tarih", "Ad", "Tür", ""], d.tatiller.map(t => [tarihTR(t.tarih), esc(t.ad),
+    t.yarim ? `<span class="e pembe">Yarım gün (öğleden sonra)</span>` : `<span class="e pembe">Tam gün</span>`,
+    `<button class="d kucuk" data-tsil="${t.tarih}">Sil</button>`]), "Bu yıl için tatil tanımlı değil");
+  $$("[data-tsil]").forEach(b => b.onclick = async () => {
+    if (!confirm(`${tarihTR(b.dataset.tsil)} tatili silinsin mi?`)) return;
+    try { await postJ("/api/ayar/tatil_sil", {tarih: b.dataset.tsil}); yukleTatil(); } catch (e) { alert(e.message); }
+  });
+}
+$("#t-yil").onchange = () => { T_YIL = +$("#t-yil").value; yukleTatil(); };
+$("#t-ekle").onclick = async () => {
+  const tarih = $("#t-tarih").value, ad = $("#t-ad").value.trim();
+  if (!tarih || !ad) return alert("Tarih ve ad girin");
+  try {
+    await postJ("/api/ayar/tatil", {tarih, ad, yarim: $("#t-yarim").checked});
+    T_YIL = +tarih.slice(0, 4); $("#t-ad").value = ""; $("#t-yarim").checked = false; yukleTatil();
+  } catch (e) { alert(e.message); }
 };
 
 // ===================================================================== SİSTEM
@@ -1007,9 +1308,10 @@ async function ustDurum() {
     $("#durumcuk").textContent = metin;
     $("#surum").textContent = "v" + d.surum;
     $("#b-son").textContent = metin;
-    const uy = d.uyari ? "⚠ " + d.uyari + " Sistem sayfasına bakın." : "";
-    $("#uyari").classList.toggle("gizli", !uy);
-    $("#uyari").textContent = uy;
+    OZ = d.ozellikler || OZ; ozellikUygula();
+    const uy = $("#uyari");
+    uy.className = "uyari " + (d.uyari_seviye || "") + (d.uyari ? "" : " gizli");
+    uy.innerHTML = d.uyari ? `${ikon("uyari", 22)}<span><b>Cihazdan okuma yapılamıyor.</b> ${esc(d.uyari)} Yeni giriş-çıkışlar panelde görünmeyebilir.</span> <a href="#sistem">Sistem sayfasını aç →</a>` : "";
   } catch (e) { $("#durumcuk").textContent = "Sunucuya ulaşılamıyor"; }
 }
 async function personelDoldur() {
@@ -1020,8 +1322,7 @@ async function personelDoldur() {
 const g0 = bugun();
 $("#r-bas").value = g0.slice(0, 8) + "01"; $("#r-bit").value = g0; $("#n-ay").value = g0.slice(0, 7); $("#i-ay").value = g0.slice(0, 7);
 personelDoldur().catch(() => {});
-ustDurum();
-rota();
+ustDurum().then(rota);  // özellik anahtarları gelmeden menü/sayfa çizilmesin
 setInterval(() => { ustDurum(); if (!$('[data-sayfa="bugun"]').classList.contains("gizli")) yukleBugun(); }, 60000);
 </script>
 </body>
