@@ -107,6 +107,18 @@ button.ana{background:var(--ana);color:#fff;border-color:var(--ana)}
       <div class="filtre"><input type="file" id="n-dosya" accept=".xlsx,.csv"><button class="d ana" id="n-yukle">Önizle</button></div>
       <div id="n-onizle"></div>
     </div>
+    <div class="kart">
+      <h2>İsim eşleştirmeleri</h2>
+      <p class="soluk">Çizelgedeki isimlerin hangi personele ait olduğu. Yanlış olanı buradan düzeltin; o isimle kaydedilmiş
+        nöbetler de isteğe bağlı olarak düzeltilir. Çizelgeyi yüklemeden önce de eşleştirme ekleyebilirsiniz.</p>
+      <div class="filtre">
+        <label>Çizelgedeki yazı<input id="e-metin" placeholder="ör. NASTYA (DAL)"></label>
+        <label>Personel<select id="e-kisi"></select></label>
+        <button class="d ana" id="e-ekle">Ekle</button>
+        <label style="margin-left:auto">Ara<input type="search" id="e-ara" placeholder="İsim"></label>
+      </div>
+      <div class="tablo" id="e-tablo"></div>
+    </div>
   </section>
 
   <section id="s-ham" class="gizli">
@@ -208,10 +220,21 @@ function sekme(s) {
 }
 
 // ---- şimdi
-function nobetKarti(g, baslik) {
+// Personel <option> listesi: son 60 günde okutanlar önce. bos=null ise boş seçenek eklenmez.
+function kisiSecenek(liste, secili, bos = "— seçin —") {
+  return (bos === null ? "" : `<option value="">${bos}</option>`) +
+    [["Son 60 günde okutanlar", true], ["Diğer personel", false]].map(([lbl, akt]) => `<optgroup label="${lbl}">` +
+      liste.filter(p => p.aktif === akt).map(p => `<option value="${p.kisi_no}"${p.kisi_no === secili ? " selected" : ""}>${esc(p.ad)}</option>`).join("") +
+      `</optgroup>`).join("");
+}
+function nobetKarti(g, baslik, duzenle = false) {
+  const bas = ["Durum", "Ad Soyad", "Mesai", "Giriş", "Çıkış", "Geç"].concat(duzenle ? ["Çizelgede", ""] : []);
   return `<div class="kart"><h2>${baslik} – ${tarihTR(g.tarih)} <span class="soluk">(${g.geldi}/${g.planli} geldi)</span></h2>` +
-    tablo(["Durum", "Ad Soyad", "Mesai", "Giriş", "Çıkış", "Geç"], g.satirlar.map(s => [etiket(s.durum), esc(s.ad), `<span class="soluk">${esc(s.mesai)}</span>`, s.giris, s.cikis, gecHucre(s.gec_dk)])) +
-    (g.nobetsiz_gelen.length ? `<p class="soluk">Nöbet listesinde olmayıp gelen: ${g.nobetsiz_gelen.map(a => `<span class="cip">${esc(a)}</span>`).join("")}</p>` : "") + "</div>";
+    tablo(bas, g.satirlar.map(s => [etiket(s.durum), esc(s.ad), `<span class="soluk">${esc(s.mesai)}</span>`, s.giris, s.cikis, gecHucre(s.gec_dk)]
+      .concat(duzenle ? [`<span class="soluk">${esc(s.metin)}</span>`, `<button class="d" title="Bu kişiyi bu günün nöbetinden çıkar" data-nsil="${g.tarih}|${s.kisi_no}">×</button>`] : []))) +
+    (g.nobetsiz_gelen.length ? `<p class="soluk">Nöbet listesinde olmayıp gelen: ${g.nobetsiz_gelen.map(a => `<span class="cip">${esc(a)}</span>`).join("")}</p>` : "") +
+    (duzenle && ESL ? `<div class="filtre" style="margin:8px 0 0"><select data-nekle-sec="${g.tarih}">${kisiSecenek(ESL.personel, null, "Nöbete kişi ekle…")}</select>
+      <button class="d" data-nekle="${g.tarih}">Ekle</button><button class="d" data-ngunsil="${g.tarih}" style="margin-left:auto">Bu günün planını sil</button></div>` : "") + "</div>";
 }
 async function yukleSimdi() {
   const d = await api("/api/bugun");
@@ -263,10 +286,67 @@ function ayAraligi() {
 }
 async function yukleNobet() {
   const [b1, b2] = ayAraligi();
+  if (!ESL) await yukleEslesme().catch(() => {});
   const d = await api(`/api/nobet?bas=${b1}&bit=${b2}`);
-  $("#n-liste").innerHTML = d.length ? d.map(g => nobetKarti(g, g.cumartesi ? "Cumartesi nöbeti" : "Nöbet")).join("")
+  $("#n-liste").innerHTML = d.length ? d.map(g => nobetKarti(g, g.cumartesi ? "Cumartesi nöbeti" : "Nöbet", true)).join("")
     : `<p class="soluk">Bu ay için yüklenmiş nöbet çizelgesi yok.</p>`;
+  const yenile = () => { yukleNobet(); yukleEslesme(); };
+  document.querySelectorAll("[data-nsil]").forEach(b => b.onclick = async () => {
+    const [tarih, k] = b.dataset.nsil.split("|");
+    if (!confirm("Bu kişi o günün nöbetinden çıkarılsın mı?")) return;
+    try { await postJ("/api/nobet/satir", {tarih, kisi_no: +k, sil: true}); yenile(); } catch (e) { alert(e.message); }
+  });
+  document.querySelectorAll("[data-nekle]").forEach(b => b.onclick = async () => {
+    const k = document.querySelector(`[data-nekle-sec="${b.dataset.nekle}"]`).value;
+    if (!k) return alert("Önce kişi seçin");
+    try { await postJ("/api/nobet/satir", {tarih: b.dataset.nekle, kisi_no: +k}); yenile(); } catch (e) { alert(e.message); }
+  });
+  document.querySelectorAll("[data-ngunsil]").forEach(b => b.onclick = async () => {
+    if (!confirm(`${tarihTR(b.dataset.ngunsil)} günün tüm nöbet planı silinsin mi?`)) return;
+    try { await postJ("/api/nobet/sil", {tarihler: [b.dataset.ngunsil]}); yenile(); } catch (e) { alert(e.message); }
+  });
 }
+
+// ---- isim eşleştirmeleri
+let ESL = null;
+async function yukleEslesme() {
+  ESL = await api("/api/eslesme");
+  const v = $("#e-kisi").value;
+  $("#e-kisi").innerHTML = kisiSecenek(ESL.personel, null);
+  $("#e-kisi").value = v;
+  eslesmeCiz();
+}
+function eslesmeCiz() {
+  const ara = $("#e-ara").value.toLocaleUpperCase("tr");
+  const l = ESL.eslesmeler.filter(e => !ara || (e.metin + " " + e.ad).toLocaleUpperCase("tr").includes(ara));
+  $("#e-tablo").innerHTML = tablo(["Çizelgedeki yazı", "Personel", "Kayıtlı nöbet", ""], l.map((e, i) => [
+    esc(e.metin) + (e.kisi_no ? "" : ` <span class="e kirmizi" title="Bu isim farklı kişilere eşleştirilmiş, otomatik kullanılmıyor. Kişi seçip kaydedin.">çakışma</span>`),
+    `<select data-e="${i}">${kisiSecenek(ESL.personel, e.kisi_no)}</select>`, e.nobet_sayisi,
+    `<button class="d" data-ek="${i}">Kaydet</button> <button class="d" data-es="${i}">Sil</button>`]), "Henüz eşleştirme yok");
+  document.querySelectorAll("[data-ek]").forEach(b => b.onclick = async () => {
+    const e = l[+b.dataset.ek], k = document.querySelector(`[data-e="${b.dataset.ek}"]`).value;
+    if (!k) return alert("Personel seçin");
+    const ad = ESL.personel.find(p => p.kisi_no === +k)?.ad || "";
+    const uygula = e.nobet_sayisi > 0 && +k !== e.kisi_no &&
+      confirm(`"${e.metin}" ile kaydedilmiş ${e.nobet_sayisi} nöbet de ${ad} olarak düzeltilsin mi?\n(Hayır: sadece sonraki yüklemeler etkilenir)`);
+    try {
+      const r = await postJ("/api/nobet/eslesme", {anahtar: e.anahtar, kisi_no: +k, uygula});
+      if (uygula) alert(`${r.duzeltilen} nöbet kaydı düzeltildi.`);
+      yukleEslesme(); if (uygula) yukleNobet();
+    } catch (x) { alert(x.message); }
+  });
+  document.querySelectorAll("[data-es]").forEach(b => b.onclick = async () => {
+    const e = l[+b.dataset.es];
+    if (!confirm(`"${e.metin}" eşleştirmesi silinsin mi? (Kayıtlı nöbetler değişmez; sonraki yüklemede bu isim yeniden sorulur.)`)) return;
+    try { await postJ("/api/nobet/eslesme_sil", {anahtar: e.anahtar}); yukleEslesme(); } catch (x) { alert(x.message); }
+  });
+}
+$("#e-ara").oninput = () => ESL && eslesmeCiz();
+$("#e-ekle").onclick = async () => {
+  const metin = $("#e-metin").value.trim(), k = $("#e-kisi").value;
+  if (!metin || !k) return alert("Çizelgedeki yazıyı ve personeli girin");
+  try { await postJ("/api/nobet/eslesme", {metin, kisi_no: +k}); $("#e-metin").value = ""; yukleEslesme(); } catch (x) { alert(x.message); }
+};
 $("#n-getir").onclick = yukleNobet;
 
 let onizleme = null;
@@ -281,25 +361,35 @@ $("#n-yukle").onclick = async () => {
 };
 function onizlemeGoster() {
   const o = onizleme;
-  const sec = (g, i) => `<select data-i="${i}"><option value="">— yok say —</option>` +
+  const sec = (g, ek) => `<select ${ek}><option value="">— yok say —</option>` +
     (g.adaylar.length && g.durum === "belirsiz" ? `<optgroup label="Adaylar">${g.adaylar.map(a => `<option value="${a.kisi_no}">${esc(a.ad)}</option>`).join("")}</optgroup>` : "") +
-    [["Son 60 günde okutanlar", true], ["Diğer personel", false]].map(([lbl, akt]) => `<optgroup label="${lbl}">` +
-      o.personel.filter(p => p.aktif === akt).map(p => `<option value="${p.kisi_no}"${p.kisi_no === g.kisi_no ? " selected" : ""}>${esc(p.ad)}</option>`).join("") + `</optgroup>`).join("") + `</select>`;
-  const sorun = o.girdiler.filter(g => !g.kisi_no).length;
+    kisiSecenek(o.personel, g.kisi_no, null) + `</select>`;
+  // Ayni yazi (her hafta tekrar eden isim) tek satirda toplanir
+  const gruplar = [];
+  const gi = new Map();
+  o.girdiler.forEach((g, i) => {
+    const k = g.tam_anahtar || g.metin;
+    if (!gi.has(k)) { gi.set(k, gruplar.length); gruplar.push({g, idx: []}); }
+    gruplar[gi.get(k)].idx.push(i);
+  });
+  const kontrol = gruplar.map((x, n) => [x, n]).filter(([x]) => !["tam", "kayıtlı"].includes(x.g.durum));
+  const gunler = x => x.idx.map(i => o.girdiler[i].tarih.slice(8, 10) + "." + o.girdiler[i].tarih.slice(5, 7)).join(", ");
   $("#n-onizle").innerHTML =
     o.uyarilar.map(u => `<div class="uyari">${esc(u)}</div>`).join("") +
-    `<p><b>${o.tarihler.length}</b> tarih, <b>${o.girdiler.length}</b> isim bulundu. ` +
-    (sorun ? `<span class="kirmizi">${sorun} isim eşleşmedi</span> – listeden seçin ya da yok sayın (başlık/not satırları da burada görünebilir).` : `Hepsi eşleşti.`) +
-    ` <span class="soluk">Sarı = tahmini eşleşme, kontrol edin. Kaydettiğiniz eşleşmeler hatırlanır; sonraki aylarda aynı isim otomatik eşleşir.</span></p>` +
-    `<div class="tablo">` + tablo(["Tarih", "Dosyadaki yazı", "Eşleşme", "Personel", "Hücre"],
-      o.girdiler.map((g, i) => [tarihTR(g.tarih), esc(g.metin), etiket(g.durum), sec(g, i), `<span class="soluk">${esc(g.hucre)}</span>`])) + `</div>` +
+    `<p><b>${o.tarihler.length}</b> tarih, <b>${o.girdiler.length}</b> satır, <b>${gruplar.length}</b> farklı isim. ` +
+    (kontrol.length ? `<span class="kirmizi"><b>${kontrol.length}</b> isim kontrol bekliyor.</span>` : `<span class="yesil">Hepsi eşleşti.</span>`) + `</p>` +
+    (kontrol.length ? `<h2 style="font-size:14px">Bulunamayan / kontrol edilecek isimler</h2>
+      <p class="soluk">Her isim için personeli bir kez seçin; o ismin bütün haftalarına uygulanır ve sonraki yüklemeler için hatırlanır.
+      Personel olmayan yazıları (başlık, not) "yok say" bırakın.</p>` +
+      `<div class="tablo">` + tablo(["Çizelgedeki yazı", "Günler", "Durum", "Personel"],
+        kontrol.map(([x, n]) => [esc(x.g.metin), `<span class="soluk">${gunler(x)}</span>`, etiket(x.g.durum), sec(x.g, `data-grup="${n}"`)])) + `</div>` : "") +
+    `<details style="margin-top:12px"><summary>Tüm satırlar (${o.girdiler.length})</summary><div class="tablo">` +
+      tablo(["Tarih", "Dosyadaki yazı", "Eşleşme", "Personel", "Hücre"],
+        o.girdiler.map((g, i) => [tarihTR(g.tarih), esc(g.metin), etiket(g.durum), sec(g, `data-i="${i}"`), `<span class="soluk">${esc(g.hucre)}</span>`])) +
+    `</div></details>` +
     `<p><button class="d ana" id="n-kaydet">Kaydet</button> <button class="d" id="n-vazgec">Vazgeç</button></p>`;
-  // Ayni isim her hafta tekrarlanir: bir satirda secilen kisi, ayni yazili bos satirlara da uygulanir.
-  document.querySelectorAll("#n-onizle select[data-i]").forEach(sel => sel.onchange = () => {
-    const ta = o.girdiler[+sel.dataset.i].tam_anahtar;
-    document.querySelectorAll("#n-onizle select[data-i]").forEach(d => {
-      if (d !== sel && !d.value && o.girdiler[+d.dataset.i].tam_anahtar === ta) d.value = sel.value;
-    });
+  document.querySelectorAll("#n-onizle select[data-grup]").forEach(sel => sel.onchange = () => {
+    gruplar[+sel.dataset.grup].idx.forEach(i => { document.querySelector(`#n-onizle select[data-i="${i}"]`).value = sel.value; });
   });
   $("#n-vazgec").onclick = () => { onizleme = null; $("#n-onizle").innerHTML = ""; };
   $("#n-kaydet").onclick = async () => {
@@ -313,7 +403,7 @@ function onizlemeGoster() {
         body: JSON.stringify({dosya: o.dosya, tarihler: o.tarihler, kayitlar})});
       $("#n-onizle").innerHTML = `<p class="yesil">Kaydedildi: ${r.tarih_sayisi} tarih, ${r.kayit_sayisi} kayıt.</p>`;
       if (o.tarihler.length) $("#n-ay").value = o.tarihler[0].slice(0, 7);
-      yukleNobet();
+      yukleNobet(); yukleEslesme();
     } catch (e) { alert(e.message); }
   };
 }

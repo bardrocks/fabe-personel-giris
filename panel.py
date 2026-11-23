@@ -181,6 +181,10 @@ def db_hazirla():
     with db() as con:
         con.execute("PRAGMA journal_mode=WAL")
         con.executescript(SEMA)
+        for tablo, sutun in (("nobet", "tam_anahtar TEXT"), ("nobet_eslesme", "metin TEXT")):
+            mevcut = {r[1] for r in con.execute(f"PRAGMA table_info({tablo})")}
+            if sutun.split()[0] not in mevcut:
+                con.execute(f"ALTER TABLE {tablo} ADD COLUMN {sutun}")
 
 
 _ZAMAN_RE = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$")
@@ -856,13 +860,18 @@ def nobet_cozumle(dosya_adi, veri):
                                  "kisi_no": k, "ad": es.ad(k) if k else "",
                                  "durum": seviye, "adaylar": [{"kisi_no": a, "ad": es.ad(a)} for a in aday[:8]],
                                  "hucre": f"{sayfa}!{_sutun_adi(rc[1])}{rc[0]}", "_sira": (sayfa, rc[1], rc[0])})
-    # ayni tarih+kisi tekrarlarini birlestir
-    gor, tekil = set(), []
+    # ayni tarihte ayni yazi tekrarini birlestir (farkli yazilar ayni kisiye gidiyorsa uyar, gizleme)
+    gor, tekil, kisi_yazi = set(), [], {}
     for g in girdiler:
-        anahtar = (g["tarih"], g["kisi_no"] or g["metin"])
+        anahtar = (g["tarih"], g["tam_anahtar"] or g["metin"])
         if anahtar not in gor:
             gor.add(anahtar)
             tekil.append(g)
+            if g["kisi_no"]:
+                kisi_yazi.setdefault((g["tarih"], g["kisi_no"]), []).append(g["metin"])
+    for (t, k), yazilar in sorted(kisi_yazi.items()):
+        if len(yazilar) > 1:
+            uyarilar.append(f"{t}: {es.ad(k)} birden fazla isimle eşleşti ({', '.join(yazilar)}). Kontrol edin.")
     tekil.sort(key=lambda g: (g["tarih"], g["_sira"]))
     for g in tekil:
         del g["_sira"]
@@ -879,35 +888,117 @@ def nobet_cozumle(dosya_adi, veri):
 
 def nobet_kaydet(dosya, tarihler, kayitlar):
     tarihler = sorted({dt.date.fromisoformat(t).isoformat() for t in tarihler})
-    temiz, hafiza = set(), []
+    temiz, hafiza = {}, []
     for r in kayitlar:
         t = dt.date.fromisoformat(r["tarih"]).isoformat()
         k = int(r["kisi_no"])
-        temiz.add((t, k, str(r.get("metin", ""))[:100]))
-        hafiza.append((str(r.get("anahtar") or "")[:100], str(r.get("tam_anahtar") or "")[:100], k))
+        metin = str(r.get("metin", ""))[:100]
+        tam = str(r.get("tam_anahtar") or "")[:100]
+        temiz[(t, k)] = (metin, tam or None)
+        hafiza.append((str(r.get("anahtar") or "")[:100], tam, k, metin))
         if t not in tarihler:
             tarihler.append(t)
     with db() as con:
         # Onaylanan eslesmeleri hatirla: tam anahtar her zaman; sadece ilk ad, farkli kisilere
         # gidiyorsa NULL (cakisma) yapilir ve artik kullanilmaz.
-        for ad, tam, k in hafiza:
+        for ad, tam, k, metin in hafiza:
             if tam and not tam.isdigit():
-                con.execute("INSERT INTO nobet_eslesme(anahtar,kisi_no) VALUES(?,?) "
-                            "ON CONFLICT(anahtar) DO UPDATE SET kisi_no=excluded.kisi_no", (tam, k))
+                con.execute("INSERT INTO nobet_eslesme(anahtar,kisi_no,metin) VALUES(?,?,?) "
+                            "ON CONFLICT(anahtar) DO UPDATE SET kisi_no=excluded.kisi_no, metin=excluded.metin",
+                            (tam, k, metin))
             if ad and ad != tam and not ad.isdigit():
                 eski = con.execute("SELECT kisi_no FROM nobet_eslesme WHERE anahtar=?", (ad,)).fetchone()
                 if eski is None:
-                    con.execute("INSERT INTO nobet_eslesme(anahtar,kisi_no) VALUES(?,?)", (ad, k))
+                    goster = _KAT_EKI.sub("", re.sub(r"\([^)]*\)", " ", tr_upper(metin)).strip()).strip() or ad
+                    con.execute("INSERT INTO nobet_eslesme(anahtar,kisi_no,metin) VALUES(?,?,?)", (ad, k, goster))
                 elif eski[0] is not None and eski[0] != k:
                     con.execute("UPDATE nobet_eslesme SET kisi_no=NULL WHERE anahtar=?", (ad,))
         cur = con.execute("INSERT INTO nobet_yukleme(zaman,dosya,tarih_sayisi,kayit_sayisi) VALUES(?,?,?,?)",
                           (zstr(simdi()), str(dosya)[:200], len(tarihler), len(temiz)))
         yid = cur.lastrowid
         con.executemany("DELETE FROM nobet WHERE tarih = ?", [(t,) for t in tarihler])
-        con.executemany("INSERT OR IGNORE INTO nobet(tarih,kisi_no,metin,yukleme_id) VALUES(?,?,?,?)",
-                        [(t, k, m, yid) for t, k, m in temiz])
+        con.executemany("INSERT OR IGNORE INTO nobet(tarih,kisi_no,metin,tam_anahtar,yukleme_id) VALUES(?,?,?,?,?)",
+                        [(t, k, m, ta, yid) for (t, k), (m, ta) in temiz.items()])
     log.info("Nobet kaydedildi: %s, %d tarih, %d kayit", dosya, len(tarihler), len(temiz))
     return {"tarih_sayisi": len(tarihler), "kayit_sayisi": len(temiz)}
+
+
+def personel_secenekleri(con):
+    son = (simdi() - dt.timedelta(days=60)).strftime("%Y-%m-%d")
+    aktif = {r[0] for r in con.execute("SELECT DISTINCT kisi_no FROM okutma WHERE zaman >= ?", (son,))}
+    liste = [{"kisi_no": k, "ad": ad_soyad(p, k), "aktif": k in aktif} for k, p in personel_sozluk(con).items()]
+    return sorted(liste, key=lambda x: x["ad"])
+
+
+def _ad_kismi(anahtar_veya_metin):
+    p = _isim_parcalari(anahtar_veya_metin)
+    return p[0][1] if p else ""
+
+
+def eslesme_listesi():
+    with db() as con:
+        per = personel_sozluk(con)
+        say = {r[0]: r[1] for r in con.execute(
+            "SELECT tam_anahtar, COUNT(*) FROM nobet WHERE tam_anahtar IS NOT NULL GROUP BY tam_anahtar")}
+        hepsi = [dict(r) for r in con.execute("SELECT * FROM nobet_eslesme")]
+        # "SEHRIZADE" gibi sadece-ilk-ad yedegi, ayni kisiye giden tam kayit ("ŞEHRİZADE (LP)") varsa gizlenir
+        tam_kayit = {(_ad_kismi(e["metin"] or ""), e["kisi_no"]) for e in hepsi
+                     if _ad_kismi(e["metin"] or "") not in ("", e["anahtar"])}
+        rows = [{"anahtar": e["anahtar"], "metin": e["metin"] or e["anahtar"], "kisi_no": e["kisi_no"],
+                 "ad": ad_soyad(per.get(e["kisi_no"]), e["kisi_no"]) if e["kisi_no"] else "",
+                 "nobet_sayisi": say.get(e["anahtar"], 0)}
+                for e in hepsi if not (e["kisi_no"] and (e["anahtar"], e["kisi_no"]) in tam_kayit)]
+        rows.sort(key=lambda x: katla(x["metin"]))
+        return {"eslesmeler": rows, "personel": personel_secenekleri(con)}
+
+
+def eslesme_kaydet(js):
+    """{anahtar?: mevcut kayit, metin?: yeni (cizelgedeki yazi), kisi_no, uygula: kayitli nobetleri de duzelt}"""
+    k = int(js["kisi_no"])
+    anahtar, metin = js.get("anahtar"), tr_upper(str(js.get("metin") or "").strip())[:100]
+    if not anahtar:
+        parca = _isim_parcalari(metin)
+        if not parca:
+            raise ValueError("Geçerli bir isim yazın")
+        anahtar = parca[0][2]
+    with db() as con:
+        if not con.execute("SELECT 1 FROM personel WHERE kisi_no=?", (k,)).fetchone():
+            raise ValueError("Personel bulunamadı")
+        eski = con.execute("SELECT kisi_no, metin FROM nobet_eslesme WHERE anahtar=?", (anahtar,)).fetchone()
+        ad = _ad_kismi((eski[1] if eski else None) or metin)
+        if eski and ad and ad != anahtar:  # gizli ilk-ad yedegini de ayni kisiye tasi
+            con.execute("UPDATE nobet_eslesme SET kisi_no=? WHERE anahtar=? AND kisi_no IS ?", (k, ad, eski[0]))
+        con.execute("INSERT INTO nobet_eslesme(anahtar,kisi_no,metin) VALUES(?,?,?) ON CONFLICT(anahtar) DO UPDATE "
+                    "SET kisi_no=excluded.kisi_no, metin=COALESCE(NULLIF(excluded.metin,''), nobet_eslesme.metin)",
+                    (anahtar, k, metin or None))
+        duzeltilen = 0
+        if js.get("uygula"):
+            # Bu yaziyla kaydedilmis nobetleri yeni kisiye tasi (o gun zaten varsa eski satir silinir)
+            once = con.total_changes
+            con.execute("UPDATE OR IGNORE nobet SET kisi_no=? WHERE tam_anahtar=? AND kisi_no<>?", (k, anahtar, k))
+            duzeltilen = con.total_changes - once
+            con.execute("DELETE FROM nobet WHERE tam_anahtar=? AND kisi_no<>?", (anahtar, k))
+    return {"anahtar": anahtar, "duzeltilen": duzeltilen}
+
+
+def eslesme_sil(js):
+    with db() as con:
+        con.execute("DELETE FROM nobet_eslesme WHERE anahtar=?", (str(js["anahtar"]),))
+    return {"ok": True}
+
+
+def nobet_satir(js):
+    """Tek nobet kaydi ekle/sil: {tarih, kisi_no, sil?}"""
+    t = dt.date.fromisoformat(js["tarih"]).isoformat()
+    k = int(js["kisi_no"])
+    with db() as con:
+        if js.get("sil"):
+            con.execute("DELETE FROM nobet WHERE tarih=? AND kisi_no=?", (t, k))
+        else:
+            if not con.execute("SELECT 1 FROM personel WHERE kisi_no=?", (k,)).fetchone():
+                raise ValueError("Personel bulunamadı")
+            con.execute("INSERT OR IGNORE INTO nobet(tarih,kisi_no,metin) VALUES(?,?,'elle')", (t, k))
+    return {"ok": True}
 
 
 def nobet_sil(tarihler):
@@ -922,7 +1013,7 @@ def nobet_durumu(bas, bit):
     with db() as con:
         per = personel_sozluk(con)
         mc = MesaiCozucu(con)
-        plan = con.execute("SELECT tarih, kisi_no FROM nobet WHERE tarih >= ? AND tarih <= ? ORDER BY tarih",
+        plan = con.execute("SELECT tarih, kisi_no, metin FROM nobet WHERE tarih >= ? AND tarih <= ? ORDER BY tarih",
                            (bas, bit)).fetchall()
         if not plan:
             return []
@@ -931,9 +1022,10 @@ def nobet_durumu(bas, bit):
         for r in con.execute("SELECT kisi_no, zaman FROM okutma WHERE zaman >= ? AND zaman <= ? ORDER BY zaman",
                              (gunler[0] + " 00:00", gunler[-1] + " 23:59")):
             okut.setdefault(r["zaman"][:10], {}).setdefault(r["kisi_no"], []).append(r["zaman"])
-    planli = {}
+    planli, yazi = {}, {}
     for r in plan:
         planli.setdefault(r["tarih"], []).append(r["kisi_no"])
+        yazi[(r["tarih"], r["kisi_no"])] = r["metin"] if r["metin"] not in (None, "demo", "elle") else ""
     sonuc = []
     for g in gunler:
         gun = dt.date.fromisoformat(g)
@@ -943,7 +1035,7 @@ def nobet_durumu(bas, bit):
             mesai = mc.al(k, gun)
             bas_dk = dk(mesai[0]) + mc.genel["gec_tolerans_dk"]
             s = {"kisi_no": k, "ad": ad_soyad(per.get(k), k), "giris": "", "cikis": "", "gec_dk": 0,
-                 "mesai": f"{mesai[0]}-{mesai[1]}" if mesai[1] else mesai[0]}
+                 "mesai": f"{mesai[0]}-{mesai[1]}" if mesai[1] else mesai[0], "metin": yazi.get((g, k), "")}
             if k in gun_okut:
                 s.update({x: y for x, y in gun_ozeti(gun, ayikla(gun_okut[k]), bugun, mesai, mc.genel).items()
                           if x in ("giris", "cikis", "gec_dk")})
@@ -1184,6 +1276,8 @@ class Istek(BaseHTTPRequestHandler):
                 return self.gonder(200, nobet_durumu(q["bas"], q["bit"]))
             if yol == "/api/ayar":
                 return self.gonder(200, ayar_getir())
+            if yol == "/api/eslesme":
+                return self.gonder(200, eslesme_listesi())
             if yol == "/disa":
                 tur = q.get("tur") if q.get("tur") in ("rapor", "ham", "nobet") else "rapor"
                 b, s = disa_tablo(tur, q)
@@ -1227,7 +1321,9 @@ class Istek(BaseHTTPRequestHandler):
             if yol == "/api/nobet/kaydet":
                 js = json.loads(govde)
                 return self.gonder(200, nobet_kaydet(js.get("dosya", ""), js.get("tarihler", []), js.get("kayitlar", [])))
-            ayar_islem = {"/api/ayar/genel": ayar_genel_kaydet, "/api/ayar/kategori": ayar_kategori_kaydet,
+            ayar_islem = {"/api/nobet/eslesme": eslesme_kaydet, "/api/nobet/eslesme_sil": eslesme_sil,
+                          "/api/nobet/satir": nobet_satir,
+                          "/api/ayar/genel": ayar_genel_kaydet, "/api/ayar/kategori": ayar_kategori_kaydet,
                           "/api/ayar/kategori_sil": ayar_kategori_sil, "/api/ayar/personel": ayar_personel_kaydet}
             if yol in ayar_islem:
                 try:
