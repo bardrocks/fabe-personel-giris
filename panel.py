@@ -61,6 +61,7 @@ VARSAYILAN = {
     # Test/gelistirme icin: toplayici yerine calisacak komut ("{cikti}" yer tutucusu).
     "toplayici_komut": None,
     "demo": False,
+    "tarayici_ac": True,  # panel baslayinca varsayilan tarayicida ac (servis/SYSTEM modunda acilmaz)
 }
 
 log = logging.getLogger("panel")
@@ -1371,12 +1372,28 @@ def log_hazirla(konsol):
         log.addHandler(k)
 
 
+def servis_hesabi():
+    """SYSTEM (oturumsuz) calisiyorsa tarayici acilacak bir masaustu yoktur."""
+    if not WIN:
+        return not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    return os.environ.get("USERNAME", "").upper() in ("SYSTEM", "") or os.environ.get("USERNAME", "").endswith("$")
+
+
+def tarayici_ac(url):
+    try:
+        import webbrowser
+        webbrowser.open(url)
+    except Exception as e:
+        log.warning("Tarayici acilamadi: %s", e)
+
+
 def main():
     global CFG
     ap = argparse.ArgumentParser(description="EnGoPer Panel")
     ap.add_argument("--ayar", default=os.path.join(KOK, "config.json"))
     ap.add_argument("--bir-kez", action="store_true", help="tek okuma turu yap ve cik")
     ap.add_argument("--port", type=int, help="web panel portu (varsayilan config/8080)")
+    ap.add_argument("--tarayici-yok", action="store_true", help="baslarken tarayiciyi acma (servis modu)")
     ap.add_argument("--demo", action="store_true", help="sahte veriyle dene (cihaz/EnGoPer gerekmez)")
     ap.add_argument("--ice-aktar-backup", nargs="?", const="", metavar="YOL", help="backup.txt ice aktar")
     a = ap.parse_args()
@@ -1422,6 +1439,8 @@ def main():
         log.warning("DEMO MODU: veriler sahte, cihaza baglanilmiyor. Veri: %s", CFG["veri_klasoru"])
     threading.Thread(target=TOPLAYICI.dongu, daemon=True, name="toplayici").start()
     log.info("Panel acildi: http://localhost:%s  (LAN: http://<bu-pc-ip>:%s)", CFG["http_port"], CFG["http_port"])
+    if CFG["tarayici_ac"] and not a.tarayici_yok and not servis_hesabi():
+        threading.Timer(1.0, tarayici_ac, args=(f'http://localhost:{CFG["http_port"]}/',)).start()
     srv.serve_forever()
 
 

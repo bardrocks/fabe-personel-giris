@@ -19,7 +19,7 @@ Hiçbir şey kurulmaz, veriler sadece `demo_data\` klasörüne yazılır. Python
 py panel.py --demo
 ```
 
-Tarayıcıda `http://localhost:8080` açın. Durdurmak için konsolda `Ctrl+C`. Sıfırlamak için `demo_data`
+Panel tarayıcıda kendiliğinden açılır (açılmazsa konsolda yazan `http://localhost:...` adresini açın). Durdurmak için konsolda `Ctrl+C`. Sıfırlamak için `demo_data`
 klasörünü silin. (Demo personeli sahte olduğu için gerçek nöbet çizelgesindeki isimler önizlemede
 "eşleşmedi" görünür; listeden demo personel seçerek kaydetmeyi deneyebilirsiniz.)
 
@@ -36,7 +36,8 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 Kurulum bir kez cihazdan test okuması yapar, ardından panel `http://192.168.1.140:8080` adresinde açılır.
-Açılışta SYSTEM olarak başlar. Log'da cihaz hatası (OCX/E_UNEXPECTED) görülürse oturum moduna geçin:
+Açılışta SYSTEM olarak başlar. Masaüstüne **Personel Paneli** kısayolu eklenir ve oturum açılınca panel
+tarayıcıda kendiliğinden açılır (istemiyorsanız `-OturumdaAcma`). Log'da cihaz hatası (OCX/E_UNEXPECTED) görülürse oturum moduna geçin:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install.ps1 -Tetik Oturum

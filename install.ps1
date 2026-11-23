@@ -4,6 +4,7 @@
 #   -Tetik Baslangic   (varsayilan) Windows acilisinda SYSTEM olarak, oturum gerekmez
 #   -Tetik Oturum      Kullanici oturum acinca (Baslangic modunda cihaz okunamazsa bunu kullanin)
 #   -TestAtla          Kurulumdaki tek seferlik cihaz okuma testini atla
+#   -OturumdaAcma      Oturum acilinca paneli tarayicida otomatik acma (masaustu kisayolu yine eklenir)
 #   -Kaldir            Gorevi ve guvenlik duvari kuralini kaldir (veriler kalir)
 # EnGoPer klasorune (C:\EnGoPer) hicbir sey yazilmaz.
 param(
@@ -11,6 +12,7 @@ param(
     [string]$Hedef = 'C:\EnGoPerPanel',
     [int]$Port = 8080,
     [switch]$TestAtla,
+    [switch]$OturumdaAcma,
     [switch]$Kaldir
 )
 $ErrorActionPreference = 'Stop'
@@ -26,6 +28,9 @@ if ($Kaldir) {
     Stop-ScheduledTask -TaskName $GorevAdi -ErrorAction SilentlyContinue
     Unregister-ScheduledTask -TaskName $GorevAdi -Confirm:$false -ErrorAction SilentlyContinue
     Get-NetFirewallRule -DisplayName $KuralAdi -ErrorAction SilentlyContinue | Remove-NetFirewallRule
+    foreach ($klasor in [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Startup')) {
+        Remove-Item -LiteralPath (Join-Path $klasor 'Personel Paneli.url') -ErrorAction SilentlyContinue
+    }
     Write-Host "Kaldirildi. Veriler duruyor: $Hedef\data" -ForegroundColor Green
     return
 }
@@ -83,7 +88,7 @@ if ($profiller -contains 'Public') {
 }
 
 # --- zamanlanmis gorev
-$eylem = New-ScheduledTaskAction -Execute $pyw -Argument ('"' + (Join-Path $Hedef 'panel.py') + '" --ayar "' + $ayar + '" --port ' + $Port) -WorkingDirectory $Hedef
+$eylem = New-ScheduledTaskAction -Execute $pyw -Argument ('"' + (Join-Path $Hedef 'panel.py') + '" --ayar "' + $ayar + '" --port ' + $Port + ' --tarayici-yok') -WorkingDirectory $Hedef
 if ($Tetik -eq 'Baslangic') {
     $tetikleyici = New-ScheduledTaskTrigger -AtStartup
     $sorumlu = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
@@ -100,6 +105,20 @@ $ayarlar = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) -
 Register-ScheduledTask -TaskName $GorevAdi -Action $eylem -Trigger $tetikleyici -Principal $sorumlu `
     -Settings $ayarlar -Force | Out-Null
 Start-ScheduledTask -TaskName $GorevAdi
+
+# --- kisayollar: masaustu + (istege bagli) oturum acilinca tarayicida ac
+$kisayol = "[InternetShortcut]`r`nURL=http://localhost:$Port/`r`n"
+$masaustu = [Environment]::GetFolderPath('Desktop')   # OneDrive'a yonlendirilmis olabilir
+[IO.File]::WriteAllText((Join-Path $masaustu 'Personel Paneli.url'), $kisayol)
+$baslangic = Join-Path ([Environment]::GetFolderPath('Startup')) 'Personel Paneli.url'
+if ($OturumdaAcma) {
+    Remove-Item -LiteralPath $baslangic -ErrorAction SilentlyContinue
+}
+else {
+    [IO.File]::WriteAllText($baslangic, $kisayol)
+    Write-Host 'Oturum acilinca panel tarayicida acilacak.'
+}
+Write-Host "Masaustu kisayolu: $masaustu\Personel Paneli.url"
 
 # --- kontrol
 Start-Sleep -Seconds 5
