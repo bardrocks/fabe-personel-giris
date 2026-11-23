@@ -97,12 +97,73 @@ mesai çıkışı 13:00 kabul edilir. Tatilde çalışan kişi o günü normal �
 
 **Ayarlar > Özellikler**: nöbet takibi, izin takibi, okutma düzeltme ve resmi tatiller tek tek kapatılabilir (`ayar` tablosunda `ozellik_<ad>` = 1/0).
 Kapalı özellik menü, kart ve düğmelerden kalkar **ve hesaplara katılmaz** (izin kapalıysa izinler mesai/gelmedi hesabını etkilemez, tatil kapalıysa tatiller yok sayılır,
-nöbet kapalıysa cumartesi beklentisi nöbetten gelmez). Veri silinmez, tekrar açınca geri gelir. Puantaj, izin bakiyesi, panel şifresi ve Telegram bildirimi "yakında" olarak görünür, henüz açılamaz.
+nöbet kapalıysa cumartesi beklentisi nöbetten gelmez). Veri silinmez, tekrar açınca geri gelir. Puantaj, izin bakiyesi, panel şifresi (giriş) ve Telegram bildirimi de bu sekmeden açılıp kapatılır (giriş ve bildirim varsayılan olarak kapalıdır).
 
 ## İşe giriş / işten çıkış
 
 Personel sayfasında **Düzenle** ile girilir. İşten çıkış tarihinden sonraki günlerde kişi beklenmez, Gelmeyenler listesine ve (çıkış tarihi dönem başından önceyse) Personel sayfasına girmez.
 Ayarlar > Personel saatleri'nde ayrılanlar varsayılan olarak gizlenir.
+
+## Puantaj ve fazla mesai
+
+**Puantaj** menüsü (ay seçimi): satırlar personel, sütunlar ayın günleri, en solda (sabit) ad. Hücre kodları:
+**X** geldi · **İ** izinli (tam gün; Raporlu ve Ücretsiz hariç türler) · **R** raporlu · **Ü** ücretsiz izin · **HT** hafta tatili (kişinin beklenmediği gün: Pazar, çalışmadığı gün, nöbetsiz cumartesi) ·
+**RT** resmi tatil · **TÇ** tatilde çalıştı (tam gün resmi tatilde okutma var) · **G** gelmedi (beklenen gün, okutma yok) · boş: gelecek gün, sistemde veri yok ya da kişi o gün işte değil.
+Saatlik izinli gelinen gün X'tir, küçük nokta ile işaretlenir; okutması düzeltilmiş günde ✎ görünür. Hücre üzerine gelince giriş-çıkış saatleri, izin ve tatil adı çıkar.
+Satır sonunda: çalışılan gün, toplam çalışma, **fazla mesai**, **eksik süre** (geç + erken çıkış), geç (adet), izin / rapor / ücretsiz / gelmedi gün ve tatil çalışması gün.
+Listelenenler: o ay okutması olan ya da son 60 günde okutmuş kişiler (ay başından önce işten ayrılanlar hariç). **Excel** düğmesi aynı ızgarayı toplamlar ve kod açıklamalarıyla indirir
+(`/disa?tur=puantaj&ay=2026-11&bicim=xlsx`). Kişi sayfasında da dönem için fazla mesai ve eksik süre kartları vardır.
+
+**Ayarlar > Genel mesai > Fazla mesai ve mola** (`ayar` tablosunda `fm_yontem`, `fm_haftalik_esik`, `mola_dk`):
+
+- **Haftalık** (varsayılan, İş Kanunu): haftalar Pazartesi başlar; haftalık toplam çalışma eşiği (`fm_haftalik_esik`, varsayılan 45 saat) aşarsa aşan kısım fazla mesaidir.
+  **Ay sınırındaki haftalar haftanın tamamı üzerinden hesaplanır ve fazla mesai haftanın son gününün (Pazar) ayına yazılır.**
+- **Günlük**: her gün kişinin mesai bitişinden sonra çalıştığı süre fazla mesaidir (erken gelme sayılmaz).
+- **Mola** (`mola_dk`, varsayılan 0): çıkışı olan günlerin çalışma süresinden düşülür (negatif olmaz); haftalık yöntemde fazla mesaiyi azaltır, günlük yöntemde fazla mesaiyi etkilemez.
+- Çıkış okutulmamış gün çalışma süresine 0 dakika katılır (önce Düzelt ile çıkış ekleyin). Tatilde çalışılan saatler de toplam çalışmaya ve haftalık toplama dahildir.
+
+## Yıllık izin bakiyesi
+
+**İzinler > Bakiye** (kişi sayfasında "Yıllık izin" kartı): işe giriş tarihinden itibaren her **tamamlanan** hizmet yılı için hak eklenir: kıdem 1-4. yıl **14** gün, 5-14. yıl **20** gün, 15+ yıl **26** gün.
+Kullanılan: türü "Yıllık izin" olan, tarihi geçmiş tam gün izinler; saatlik yıllık izin, o günkü mesai süresine oranla kesir (1 ondalık). **Kalan = devir + hak − kullanılan.**
+Sonraki hak tarihi ve miktarı gösterilir; işe giriş tarihi yoksa "işe giriş tarihi girin" uyarısı çıkar (kişi sayfası > Düzenle).
+**Devir** sisteme geçmeden önceki kalan günlerdir; tabloda hücreden elle girilir, negatif olabilir. Yaş kuralı (18 yaş altı / 50 yaş üstü için en az 20 gün) bilinmediği için uygulanmaz; gerekirse devir alanından düzeltin.
+
+## Panel şifresi (giriş)
+
+**Ayarlar > Özellikler > Panel şifresi**. Açmadan önce en az bir **yönetici** oluşturulur (ekranda "ilk yönetici" formu çıkar; şifre en az 6 karakter). Giriş açıkken:
+
+- `/` dahil her şey oturum ister; oturum yoksa giriş sayfası gelir, `/api/*`, `/yedek/` ve `/disa` oturumsuz 401 döner. Oturum çerezi HttpOnly + SameSite=Lax, 12 saat sürer; yanlış girişte 1 sn beklenir.
+- **Yönetici** her şeyi yapar. **İzleyici** sadece görüntüler: bütün POST istekleri (okutma düzeltme, ayar, izin, nöbet yükleme, "Şimdi oku") 403 döner.
+- Eski `yonetim_sifresi` / X-Sifre mekanizması giriş açıkken devre dışıdır (yönetici oturumu yeterli); giriş kapalıyken eskisi gibi çalışır.
+- Ayarlar > **Kullanıcılar** (sadece yönetici): ekle, sil, şifre değiştir, rol değiştir. Son yönetici silinemez ya da izleyici yapılamaz. Şifreler PBKDF2-SHA256 (200000 tur, kullanıcıya özel tuz) ile saklanır.
+- Cihaz toplayıcı ve zamanlayıcı giriş açıkken de aynen çalışır.
+- **Kilitlenirseniz** (şifreyi unuttuysanız) KASA 1'de:
+
+```powershell
+py C:\EnGoPerPanel\panel.py --ayar C:\EnGoPerPanel\config.json --giris-kapat
+```
+
+Bu komut girişi kapatır ve açık oturumları siler (servisi yeniden başlatmak gerekmez); sonra Özellikler'den yeniden açabilirsiniz.
+
+## Telegram bildirimleri
+
+**Ayarlar > Bildirimler** (özellik: *Telegram bildirimi*, Özellikler'den açılır):
+
+1. Telegram'da **@BotFather**'a `/newbot` yazıp botu oluşturun; verdiği **token**'ı panele yapıştırın.
+2. Bildirim alacak kişi (ya da grup) bota bir mesaj yazsın (grupsa botu gruba ekleyip bir mesaj yazın). Tarayıcıda `https://api.telegram.org/bot<TOKEN>/getUpdates` adresini açın;
+   çıkan `"chat":{"id":...}` değeri **chat id**'dir (gruplarda eksi ile başlar). Birden çok chat id virgülle ayrılır.
+3. **Test mesajı gönder** ile deneyin. Seçenekler: **sabah özeti** (varsayılan 09:45: geç kalanlar, gelmeyenler, bugün izinliler), **akşam özeti** (20:30: günün özeti, çıkış okutmayanlar, nöbet durumu),
+   **cihaz uyarısı** (son başarılı okuma 60 dakikadan eskiyse; en fazla 3 saatte bir tekrarlanır, düzelince "cihaz tekrar okunuyor" gelir).
+
+Özetler aynı gün bir kez, planlı saatten en geç 3 saat sonrasına kadar gönderilir; Pazar ve tam gün resmi tatilde gönderilmez. Kontrol her toplama turunda (5 dk) yapılır.
+**Mesajlarda personel isimleri Telegram'a gönderilir.** Token panelde ve API'de yalnızca son 4 hanesiyle görünür, log'a yazılmaz (ama `panel.db` ve yedeklerinde durur; yedekleri paylaşmayın).
+Gönderim hataları log'a ve Sistem sayfasındaki "Telegram bildirimi" satırına yazılır; servis hatadan etkilenmez. (Test için gizli `telegram_api` ayarı `config.json`'dan başka bir adrese yönlendirilebilir.)
+
+## Önceki dönemle karşılaştırma
+
+Personel sayfasındaki özet kartlarında önceki eşdeğer döneme göre değişim görünür (artış kötüyse kırmızı, azalış yeşil): *Bu hafta* → geçen hafta (aynı gün sayısı), *Bu ay* → geçen ayın aynı gün aralığı,
+*Geçen ay* → ondan önceki ay, *Özel* → aynı uzunlukta önceki aralık.
 
 ## Nöbet çizelgesi
 

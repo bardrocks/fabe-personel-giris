@@ -140,12 +140,49 @@ button.kucuk{padding:4px 9px;font-size:12.5px}
 .gun-sec small{color:var(--soluk);font-size:11px;margin-left:4px}
 .modal.genis .kart{width:min(720px,100%)}
 s.iptal{color:var(--soluk)}
+.pz-t{border-collapse:separate;border-spacing:0;font-size:12px}
+.pz-t th,.pz-t td{padding:3px 4px;text-align:center;border-bottom:1px solid var(--cizgi);position:static}
+.pz-t th{position:sticky;top:0;z-index:3}
+.pz-t .ad{position:sticky;left:0;z-index:2;background:var(--kart);text-align:left;white-space:nowrap;min-width:160px;max-width:200px;overflow:hidden;text-overflow:ellipsis;border-right:1px solid var(--cizgi)}
+.pz-t th.ad{z-index:4;background:var(--kart2)}
+.pz-t tr:hover td.ad{background:var(--kart2)}
+.pz-t th.hs{background:var(--kart2);font-weight:500;min-width:28px}
+.pz-t th.hs.hsonu{color:var(--mor)}
+.pz-t th.hs.rt{background:var(--pembe-z);color:var(--pembe)}
+.pz-t td.h{min-width:28px;height:28px;font-weight:700;position:relative}
+.pz-t td.h small{position:absolute;right:1px;top:0;font-size:9px;line-height:1;color:var(--soluk)}
+.pz-t td.h sub{position:absolute;left:2px;bottom:1px;font-size:8px;line-height:1;color:var(--turkuaz)}
+.pz-t td.X{background:var(--yesil-z);color:var(--yesil)}
+.pz-t td.I{background:var(--turkuaz-z);color:var(--turkuaz)}
+.pz-t td.R{background:var(--ana-z);color:var(--ana)}
+.pz-t td.U{background:var(--gri-z);color:var(--yazi)}
+.pz-t td.HT{background:var(--kart2);color:var(--soluk);font-weight:500}
+.pz-t td.RT{background:var(--pembe-z);color:var(--pembe)}
+.pz-t td.TC{background:var(--pembe);color:#fff}
+.pz-t td.G{background:var(--kirmizi-z);color:var(--kirmizi)}
+.pz-t td.t{white-space:nowrap;padding:3px 8px;font-variant-numeric:tabular-nums}
+.pz-kod{display:inline-flex;gap:6px;align-items:center;margin:2px 12px 2px 0;font-size:12px;color:var(--soluk)}
+.lg-X{background:var(--yesil-z);color:var(--yesil)}.lg-I{background:var(--turkuaz-z);color:var(--turkuaz)}.lg-R{background:var(--ana-z);color:var(--ana)}.lg-U{background:var(--gri-z);color:var(--yazi)}.lg-HT{background:var(--kart2);color:var(--soluk)}.lg-RT{background:var(--pembe-z);color:var(--pembe)}.lg-TC{background:var(--pembe);color:#fff}.lg-G{background:var(--kirmizi-z);color:var(--kirmizi)}
+.pz-kod b{display:inline-grid;place-items:center;min-width:26px;height:22px;border-radius:5px;padding:0 4px}
+.k-fark{font-size:11.5px!important;font-weight:600}
+.k-fark.kotu{color:var(--kirmizi)}.k-fark.iyi{color:var(--yesil)}
+.bak-neg{color:var(--kirmizi);font-weight:700}
+#bak-tablo input[type=number]{width:84px}
+.durum-satir{padding:8px 12px;border-radius:8px;background:var(--kart2);border:1px solid var(--cizgi);margin:8px 0;font-size:13px}
+.durum-satir.hata{border-color:var(--kirmizi);color:var(--kirmizi)}
+.kul-kutu{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.kul-kutu button{background:rgba(255,255,255,.08);border:0;color:#cfd5e3;border-radius:6px;padding:4px 9px;cursor:pointer;font:inherit;font-size:12px}
+#a-tablo input[type=time]{width:92px;padding:6px 4px}
+#a-tablo select{max-width:118px;padding:6px}
+#a-tablo th,#a-tablo td{padding:8px 6px}
+#a-tablo td.ad{min-width:250px}
+#a-tablo td:nth-last-child(2){white-space:normal;max-width:128px;font-size:12px}
 .takvim .g.tik{cursor:pointer}
 .takvim .g.tik:hover{outline:2px solid var(--ana)}
 .modal{position:fixed;inset:0;background:rgba(5,8,15,.6);display:grid;place-items:center;z-index:50;padding:16px}
 .modal .kart{width:min(520px,100%);max-height:92vh;overflow:auto}
 .form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
-.form input,.form select{width:100%;min-width:0}
+.form input:not([type=checkbox]):not([type=radio]),.form select{width:100%;min-width:0}
 .form label{display:flex;flex-direction:column;font-size:12px;color:var(--soluk);gap:4px}
 .form .tam{grid-column:1/-1}
 .radyo{display:flex;gap:16px;color:var(--yazi);font-size:13.5px}
@@ -180,6 +217,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   aside nav a{padding:7px 10px;white-space:nowrap;font-size:13px}
   aside nav a i{display:none}
   .yan-alt{margin:0;padding:0}.yan-alt .bilgi{display:none}
+  .yan-alt .bilgi.kul-kutu{display:flex}#kul-ad{display:none}
   .tema-dugme{padding:6px 8px}
   main{padding:14px 12px 30px}
   .takvim{grid-template-columns:repeat(7,minmax(0,1fr))}
@@ -195,11 +233,13 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
     <a href="#personel" data-r="personel"><i data-ik="personel"></i>Personel</a>
     <a href="#nobet" data-r="nobet" data-oz="nobet"><i data-ik="nobet"></i>Nöbet</a>
     <a href="#izin" data-r="izin" data-oz="izin"><i data-ik="izin"></i>İzinler</a>
+    <a href="#puantaj" data-r="puantaj" data-oz="puantaj"><i data-ik="puantaj"></i>Puantaj</a>
     <a href="#rapor" data-r="rapor"><i data-ik="rapor"></i>Raporlar</a>
     <a href="#ayarlar" data-r="ayarlar"><i data-ik="ayarlar"></i>Ayarlar</a>
     <a href="#sistem" data-r="sistem"><i data-ik="sistem"></i>Sistem</a>
   </nav>
   <div class="yan-alt">
+    <div class="bilgi gizli kul-kutu" id="kul-kutu"><span id="kul-ad"></span><button id="kul-cikis" title="Oturumu kapat">Çıkış</button></div>
     <div class="bilgi" id="durumcuk">—</div>
     <div class="bilgi" id="surum" style="opacity:.6;font-size:11.5px"></div>
     <button class="tema-dugme" id="tema" title="Tema değiştir"><i data-ik="tema"></i><span class="tema-yazi"> Tema</span></button>
@@ -274,6 +314,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
             İşe giriş tarihinden önceki günler de gelmedi sayılmaz. Boş bırakılırsa ilk okutma tarihi esas alınır.</p></div>
           <p style="margin:12px 0 0;display:flex;gap:8px;justify-content:flex-end"><button class="d" id="kd-vazgec">Vazgeç</button><button class="d ana" id="kd-kaydet">Kaydet</button></p></div></div>
     </div>
+    <div class="kart gizli" id="k-izin-kart" style="margin-top:14px"><h2><i data-ik="izin"></i>Yıllık izin</h2><div id="k-izin-icerik"></div></div>
     <div class="kart" style="margin-top:14px"><h2>Günlük kayıtlar <span class="sag"><button class="d kucuk" id="k-excel">Excel</button></span></h2>
       <div class="tablo" id="k-tablo"></div></div>
   </section>
@@ -321,11 +362,33 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   <!-- ================= İZİNLER ================= -->
   <section data-sayfa="izin" class="gizli">
     <div class="ust"><h1>İzinler</h1>
-      <div class="sag"><label class="soluk" style="display:flex;gap:6px;align-items:center">Ay <input type="month" id="i-ay"></label>
-        <button class="d ana" id="i-ekle">+ İzin ekle</button></div></div>
-    <div class="kart">
+      <div class="sag"><div class="cipler" data-altgrup="izin"><button data-alt="kayit" class="aktif">İzin kayıtları</button><button data-alt="bakiye" data-oz="izin_bakiye">Bakiye</button></div>
+        <label class="soluk" style="display:flex;gap:6px;align-items:center" data-altgrup-icerik="izin" data-alt="kayit">Ay <input type="month" id="i-ay"></label>
+        <button class="d ana" id="i-ekle" data-altgrup-icerik="izin" data-alt="kayit">+ İzin ekle</button></div></div>
+    <div class="kart" data-altgrup-icerik="izin" data-alt="kayit">
       <div class="filtre"><label>Ara<input type="search" id="i-ara" placeholder="İsim"></label></div>
       <div class="tablo" id="i-tablo"></div>
+    </div>
+    <div class="kart gizli" data-altgrup-icerik="izin" data-alt="bakiye">
+      <h2>Yıllık izin bakiyesi</h2>
+      <p class="soluk">Hak: işe giriş tarihinden itibaren tamamlanan her hizmet yılı için, kıdem 1-4. yıl <b>14</b>, 5-14. yıl <b>20</b>, 15+ yıl <b>26</b> gün.
+        Kullanılan: türü "Yıllık izin" olan, tarihi geçmiş izinler (saatlik izin, o günkü mesai süresine oranla kesir olarak). Kalan = devir + hak − kullanılan.
+        <b>18 yaş altı / 50 yaş üstü</b> için en az 20 gün hak vardır; yaş bilinmediği için gerekirse <b>Devir</b> alanından düzeltin. Devir sisteme geçmeden önceki kalan gündür (negatif olabilir).</p>
+      <div class="filtre"><label>Ara<input type="search" id="bak-ara" placeholder="İsim"></label>
+        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="bak-ayrilan" checked> Ayrılanları gizle</label></div>
+      <div class="tablo" id="bak-tablo"></div>
+    </div>
+  </section>
+
+  <!-- ================= PUANTAJ ================= -->
+  <section data-sayfa="puantaj" class="gizli">
+    <div class="ust"><h1>Puantaj</h1>
+      <div class="sag"><label class="soluk" style="display:flex;gap:6px;align-items:center">Ay <input type="month" id="pz-ay"></label>
+        <input type="search" id="pz-ara" placeholder="İsim ara" style="width:150px"><button class="d" id="pz-excel">Excel</button></div></div>
+    <div class="kart">
+      <div id="pz-kodlar" class="lejant" style="margin:0 0 8px"></div>
+      <p class="soluk" id="pz-fm" style="margin:0 0 10px"></p>
+      <div class="tablo" id="pz-tablo" style="max-height:72vh;overflow:auto"></div>
     </div>
   </section>
 
@@ -354,7 +417,8 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
     <div class="ust"><h1>Ayarlar</h1>
       <div class="sag"><div class="cipler" data-altgrup="ayar">
         <button data-alt="mesai" class="aktif">Genel mesai</button><button data-alt="kategori">Kategoriler</button><button data-alt="kisiler">Personel saatleri</button>
-        <button data-alt="ozellik">Özellikler</button><button data-alt="tatil" data-oz="resmi_tatil">Resmi tatiller</button></div></div></div>
+        <button data-alt="ozellik">Özellikler</button><button data-alt="tatil" data-oz="resmi_tatil">Resmi tatiller</button>
+        <button data-alt="bildirim">Bildirimler</button><button data-alt="kullanici" data-oz="giris" data-yonetici>Kullanıcılar</button></div></div></div>
     <div data-altgrup-icerik="ayar" data-alt="mesai" class="kart">
       <h2>Genel mesai</h2>
       <p class="soluk">Kategorisi ve özel saati olmayan herkese uygulanır. Cumartesi boş bırakılırsa hafta içi saatleri geçerli olur.</p>
@@ -367,6 +431,15 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <label>Erken çıkış tol. (dk)<input type="number" min="0" max="240" id="g-erken_tolerans_dk" style="width:100px"></label>
         <button class="d ana" id="g-kaydet">Kaydet</button>
       </div>
+      <h2 style="margin-top:18px">Fazla mesai ve mola</h2>
+      <div class="filtre" data-oz="puantaj">
+        <label>Fazla mesai yöntemi<select id="g-fm_yontem"><option value="haftalik">Haftalık (İş Kanunu)</option><option value="gunluk">Günlük (mesai bitişinden sonra)</option></select></label>
+        <label>Haftalık eşik (saat)<input type="number" min="1" max="168" step="0.5" id="g-fm_haftalik_esik" style="width:100px"></label>
+        <label>Günlük mola (dk)<input type="number" min="0" max="240" id="g-mola_dk" style="width:100px"></label>
+      </div>
+      <p class="soluk" data-oz="puantaj"><b>Haftalık:</b> haftalar Pazartesi başlar; haftalık toplam çalışma eşiği (varsayılan 45 saat) aşarsa aşan kısım fazla mesaidir. Ay sınırındaki haftalar
+        haftanın tamamı üzerinden hesaplanır ve fazla mesai haftanın son gününün (Pazar) ayına yazılır. <b>Günlük:</b> her gün mesai bitişinden sonra çalışılan süre (erken gelme sayılmaz).
+        <b>Mola:</b> çıkışı olan günlerin çalışma süresinden düşülür (sadece haftalık yöntemde fazla mesaiyi etkiler). Değişiklik için yukarıdaki Kaydet'i kullanın.</p>
       <h2 style="margin-top:18px">Çalışma günleri</h2>
       <p class="soluk">Bu günler herkes için "beklenen gün"dür (gelmezse <i>gelmedi</i> sayılır); kategori ve personel bazında değiştirilebilir. Pazar her zaman kapalıdır.
         Cumartesi işaretli değilse kişi sadece nöbet listesindeki cumartesilerde beklenir.</p>
@@ -398,6 +471,46 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
       <p class="soluk">Kullanmadığınız özellikleri kapatın: menü, kart ve düğmeler gizlenir, hesaplara da katılmaz (örn. izin kapalıysa izinler mesai/gelmedi hesabını etkilemez).
         Kapatmak veri silmez; tekrar açınca her şey geri gelir.</p>
       <div id="oz-liste"></div>
+      <div id="oz-giris-form" class="gizli" style="margin-top:14px;padding:14px;border:1px solid var(--cizgi);border-radius:10px;background:var(--kart2)">
+        <b>Panel şifresini açmak için önce bir yönetici oluşturun</b>
+        <p class="soluk" style="margin:6px 0 10px">Giriş açılınca panele (ve yedek indirmeye) kullanıcı adı ve şifre olmadan erişilemez. Yönetici her şeyi yapar, izleyici sadece görüntüler.
+          Unutursanız KASA 1'de <code>py panel.py --giris-kapat</code> komutu girişi kapatır.</p>
+        <div class="form">
+          <label>Kullanıcı adı<input id="og-ad" autocomplete="off"></label><label>Şifre (en az 6 karakter)<input id="og-sifre" type="password" autocomplete="new-password"></label>
+          <label>Şifre (tekrar)<input id="og-sifre2" type="password" autocomplete="new-password"></label>
+        </div>
+        <p style="margin:12px 0 0;display:flex;gap:8px;justify-content:flex-end"><button class="d" id="og-vazgec">Vazgeç</button><button class="d ana" id="og-kaydet">Yönetici oluştur ve girişi aç</button></p>
+      </div>
+    </div>
+    <div data-altgrup-icerik="ayar" data-alt="bildirim" class="kart gizli">
+      <h2>Telegram bildirimleri</h2>
+      <div class="durum-satir gizli" id="bd-kapali">Bildirim özelliği şu an <b>kapalı</b>. Ayarları kaydedebilirsiniz; mesajlar için Özellikler sekmesinden "Telegram bildirimi"ni açın.</div>
+      <p class="soluk"><b>Kurulum:</b> Telegram'da <b>@BotFather</b>'a <code>/newbot</code> yazıp botu oluşturun, verdiği token'ı aşağıya yapıştırın. Bildirim alacak kişi/grup botla bir mesajlaşma başlatsın
+        (gruba botu ekleyin, bir mesaj yazın), sonra tarayıcıda <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> adresini açıp <code>"chat":{"id":...}</code> değerini chat id olarak girin
+        (gruplarda eksi ile başlar). Birden çok chat id virgülle ayrılır. <b>Mesajlarda personel isimleri Telegram'a gönderilir.</b></p>
+      <div class="form">
+        <label>Bot token<input id="bd-token" type="text" autocomplete="off" placeholder="123456789:ABC..."></label>
+        <label>Chat id (virgülle birden çok)<input id="bd-chat" placeholder="123456789, -100123456789"></label>
+        <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="bd-sabah"> Sabah özeti (geç kalanlar, gelmeyenler, izinliler)</label>
+        <label>Sabah özeti saati<input type="time" id="bd-sabah-saat"></label>
+        <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="bd-aksam"> Akşam özeti (günün özeti, çıkış okutmayanlar, nöbet)</label>
+        <label>Akşam özeti saati<input type="time" id="bd-aksam-saat"></label>
+        <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="bd-cihaz"> Cihaz uyarısı (okuma yapılamazsa)</label>
+        <label>Uyarı eşiği (dakika)<input type="number" min="5" max="1440" id="bd-cihaz-dk"></label>
+        <p class="tam soluk" style="margin:0">Özetler Pazar ve tam gün resmi tatilde gönderilmez, aynı gün bir kez gönderilir. Cihaz uyarısı en fazla 3 saatte bir tekrarlanır; cihaz düzelince "tekrar okunuyor" mesajı gelir.
+          Token kaydedildikten sonra yalnızca son 4 hanesi görünür; değiştirmek için yenisini yapıştırın.</p>
+      </div>
+      <p style="margin:12px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="d ana" id="bd-kaydet">Kaydet</button><button class="d" id="bd-test">Test mesajı gönder</button>
+        <button class="d" id="bd-token-sil">Token'ı sil</button><span class="soluk" id="bd-sonuc" style="align-self:center"></span></p>
+      <div class="durum-satir" id="bd-son"></div>
+    </div>
+    <div data-altgrup-icerik="ayar" data-alt="kullanici" class="kart gizli">
+      <h2>Kullanıcılar</h2>
+      <p class="soluk"><b>Yönetici</b> her şeyi yapar; <b>izleyici</b> sadece görüntüler (kayıt, düzeltme, ayar yapamaz). Son yönetici silinemez. Şifre değişince o kullanıcının açık oturumları kapanır.</p>
+      <div class="tablo" id="kul-tablo"></div>
+      <h2 style="margin-top:16px">Kullanıcı ekle</h2>
+      <div class="filtre"><label>Kullanıcı adı<input id="ku-ad" autocomplete="off"></label><label>Şifre (en az 6)<input id="ku-sifre" type="password" autocomplete="new-password"></label>
+        <label>Rol<select id="ku-rol"><option value="izleyici">İzleyici</option><option value="yonetici">Yönetici</option></select></label><button class="d ana" id="ku-ekle">Ekle</button></div>
     </div>
     <div data-altgrup-icerik="ayar" data-alt="tatil" class="kart gizli">
       <h2>Resmi tatiller</h2>
@@ -497,6 +610,7 @@ const IKON = {
   yedek: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
   izin: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
   duzelt: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/><path d="m15 5 4 4"/>',
+  puantaj: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
   tatil: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
 };
 const ikon = (ad, boy = 18) => `<svg class="ik" width="${boy}" height="${boy}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IKON[ad] || ""}</svg>`;
@@ -526,8 +640,10 @@ const izinRozet = s => s && s.izin ? ` <span class="e turkuaz" title="${esc(s.iz
 // özellik anahtarları (sunucudan /api/durum ile gelir; yüklenene kadar ilk dört açık varsayılır)
 let OZ = {nobet: true, izin: true, duzeltme: true, resmi_tatil: true};
 const oz = a => OZ[a] === true;
+let KUL = null;  // giriş açıksa {ad, rol}
 function ozellikUygula() {
   $$("[data-oz]").forEach(e => e.classList.toggle("gizli", !oz(e.dataset.oz)));
+  $$("[data-yonetici]").forEach(e => { if (KUL && KUL.rol !== "yonetici") e.classList.add("gizli"); });
 }
 const duzRozet = s => s && s.duzeltildi ? ` <span class="duz-r" title="Bu günün okutmaları elle düzeltilmiş (eklenen ya da gizlenen kayıt var)">✎</span>` : "";
 const tatilRozet = s => s && s.tatil ? ` <span class="e pembe" title="${esc(s.tatil)}${s.tatil_yarim ? " (yarım gün)" : ""} – tatilde çalıştı">Tatil</span>` : "";
@@ -540,7 +656,8 @@ async function api(yol, secenek = {}) {
   secenek.headers = Object.assign({}, secenek.headers, sifre ? {"X-Sifre": encodeURIComponent(sifre)} : {});
   const r = await fetch(yol, secenek);
   const j = await r.json().catch(() => ({hata: "Geçersiz yanıt"}));
-  if (r.status === 403) {
+  if (r.status === 401 && j.giris_gerekli) { location.reload(); throw new Error("Giriş gerekli"); }
+  if (r.status === 403 && !j.salt_okunur) {
     const s = prompt("Yönetim şifresi:"); if (s !== null) { sifre = s; return api(yol, secenek); }
   }
   if (!r.ok) throw new Error(j.hata || r.status);
@@ -572,7 +689,7 @@ function kisiSecenek(liste, secili, bos = "— seçin —") {
 function kpiKart(o) {
   const t = o.tikla ? "button" : "div";
   return `<${t} class="k${o.secili ? " secili" : ""}" style="--renk:var(--${o.renk})"${o.tikla ? ` data-kpi="${o.tikla}"` : ""}>
-    ${o.ikon ? `<span class="kik">${ikon(o.ikon)}</span>` : ""}<b${String(o.deger).length > 6 ? ' class="uzun"' : ""}>${o.deger}</b><span>${o.ad}</span>${o.alt ? `<small>${o.alt}</small>` : ""}</${t}>`;
+    ${o.ikon ? `<span class="kik">${ikon(o.ikon)}</span>` : ""}<b${String(o.deger).length > 6 ? ' class="uzun"' : ""}>${o.deger}</b><span>${o.ad}</span>${o.alt ? `<small>${o.alt}</small>` : ""}${o.fark || ""}</${t}>`;
 }
 
 // ===================================================================== tema
@@ -586,7 +703,7 @@ function altSec(grup, alt) {
   $$(`[data-altgrup="${grup}"] button`).forEach(b => b.classList.toggle("aktif", b.dataset.alt === alt));
   $$(`[data-altgrup-icerik="${grup}"]`).forEach(x => x.classList.toggle("gizli", x.dataset.alt !== alt));
   const yukle = {nobet: {takip: yukleNobet, eslesme: yukleEslesme}, rapor: {gunluk: yukleRapor, ham: yukleRapor},
-    ayar: {tatil: yukleTatil}}[grup]?.[alt];
+    ayar: {tatil: yukleTatil, bildirim: yukleBildirim, kullanici: yukleKullanici}, izin: {kayit: yukleIzin, bakiye: yukleBakiye}}[grup]?.[alt];
   if (yukle) yukle();
 }
 const altAktif = g => $(`[data-altgrup="${g}"] button.aktif`).dataset.alt;
@@ -614,13 +731,13 @@ function donemCiz() {
 donemHesapla();
 
 // ===================================================================== yönlendirme
-const SAYFA = {bugun: yukleBugun, personel: yuklePersonel, kisi: yukleKisi, nobet: () => altSec("nobet", altAktif("nobet")),
-  rapor: () => altSec("rapor", altAktif("rapor")), ayarlar: yukleAyar, sistem: yukleSistem, izin: yukleIzin};
+const SAYFA = {puantaj: yuklePuantaj, bugun: yukleBugun, personel: yuklePersonel, kisi: yukleKisi, nobet: () => altSec("nobet", altAktif("nobet")),
+  rapor: () => altSec("rapor", altAktif("rapor")), ayarlar: yukleAyar, sistem: yukleSistem, izin: () => altSec("izin", altAktif("izin") === "bakiye" && !oz("izin_bakiye") ? "kayit" : altAktif("izin"))};
 function rota() {
   const h = (location.hash || "#bugun").slice(1).split("/");
   let s = h[0] in SAYFA ? h[0] : "bugun";
   if (s === "personel" && h[1]) s = "kisi";
-  if ((s === "nobet" && !oz("nobet")) || (s === "izin" && !oz("izin"))) { location.hash = "#bugun"; return; }  // kapalı özellik
+  if ((s === "nobet" && !oz("nobet")) || (s === "izin" && !oz("izin")) || (s === "puantaj" && !oz("puantaj"))) { location.hash = "#bugun"; return; }  // kapalı özellik
   $$("main section").forEach(x => x.classList.toggle("gizli", x.dataset.sayfa !== s));
   $$("aside nav a").forEach(a => a.classList.toggle("aktif", a.dataset.r === (s === "kisi" ? "personel" : s)));
   donemCiz();
@@ -715,8 +832,18 @@ function cikisEkleDugme(s, tarih) {
 
 // ===================================================================== PERSONEL
 let PER = null, pSira = {a: "ad", yon: 1};
+function farkYazi(simdi, onceki, etiket) {
+  if (!onceki && !simdi) return "";
+  if (!onceki) return `<small class="k-fark kotu">▲ yeni (önceki dönemde 0) · ${etiket}</small>`;
+  const yuzde = Math.round((simdi - onceki) / onceki * 100);
+  if (!yuzde) return `<small class="k-fark soluk">= aynı · ${etiket}</small>`;
+  return `<small class="k-fark ${yuzde > 0 ? "kotu" : "iyi"}">${yuzde > 0 ? "▲" : "▼"} %${Math.abs(yuzde)} · ${etiket}</small>`;
+}
 async function yuklePersonel() {
-  PER = await api(`/api/personel_ozet?bas=${DONEM.bas}&bit=${DONEM.bit}`);
+  let KARS = null;
+  [PER, KARS] = await Promise.all([api(`/api/personel_ozet?bas=${DONEM.bas}&bit=${DONEM.bit}`),
+    api(`/api/donem_karsilastir?tur=${DONEM.tur}&bas=${DONEM.bas}&bit=${DONEM.bit}`).catch(() => null)]);
+  const fk = a => KARS ? farkYazi(KARS.simdi[a], KARS.onceki_toplam[a], KARS.etiket) : "";
   const kat = [...new Set(PER.map(p => p.kategori).filter(Boolean))].sort();
   const ks = $("#p-kat"), v = ks.value;
   ks.innerHTML = `<option value="">Tümü</option><option value="-">Kategorisiz</option>` + kat.map(k => `<option>${esc(k)}</option>`).join("");
@@ -725,11 +852,11 @@ async function yuklePersonel() {
   const t = a => PER.reduce((s, p) => s + p[a], 0);
   $("#p-kpi").innerHTML = [
     {deger: PER.length, ad: "Çalışan personel", renk: "ana", ikon: "personel"},
-    {deger: t("gec"), ad: "Geç kalma", renk: "sari", ikon: "gec", alt: t("gec_dk") ? `toplam ${sureYaz(t("gec_dk"))}` : ""},
-    {deger: t("erken"), ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: t("erken_dk") ? `toplam ${sureYaz(t("erken_dk"))}` : ""},
-    {deger: t("cikis_yok"), ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
-    {deger: t("gelmedi"), ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: "beklenen günlerde kayıt olmayan"}]
-    .concat(oz("nobet") ? [{deger: t("nobet_gelmedi"), ad: "Nöbete gelmedi", renk: "kirmizi", ikon: "nobet", alt: `${t("nobet")} planlı nöbet`}] : []).map(kpiKart).join("");
+    {deger: t("gec"), ad: "Geç kalma", renk: "sari", ikon: "gec", alt: t("gec_dk") ? `toplam ${sureYaz(t("gec_dk"))}` : "", fark: fk("gec")},
+    {deger: t("erken"), ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: t("erken_dk") ? `toplam ${sureYaz(t("erken_dk"))}` : "", fark: fk("erken")},
+    {deger: t("cikis_yok"), ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari", fark: fk("cikis_yok")},
+    {deger: t("gelmedi"), ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: "beklenen günlerde kayıt olmayan", fark: fk("gelmedi")}]
+    .concat(oz("nobet") ? [{deger: t("nobet_gelmedi"), ad: "Nöbete gelmedi", renk: "kirmizi", ikon: "nobet", alt: `${t("nobet")} planlı nöbet`, fark: fk("nobet_gelmedi")}] : []).map(kpiKart).join("");
   const liste = (a, birim) => top(a).map(p => `<a href="#personel/${p.kisi_no}"><span>${esc(p.ad)}</span><b class="${a === "gec" ? "sari-y" : "kirmizi-y"}">${p[a]} ${birim}${a === "gec" ? ` · ${sureYaz(p.gec_dk)}` : ""}</b></a>`).join("") || `<p class="soluk">Yok</p>`;
   $("#p-top-gec").innerHTML = liste("gec", "kez");
   $("#p-top-gelmedi").innerHTML = liste("gelmedi", "gün");
@@ -779,8 +906,20 @@ async function yukleKisi(k) {
     {deger: o.erken, ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: o.erken ? `toplam ${sureYaz(o.erken_dk)}` : ""},
     {deger: o.cikis_yok, ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
     {deger: o.gelmedi, ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: o.izinli_gun || o.saatlik_izin ? `${o.izinli_gun} gün izinli${o.saatlik_izin ? `, ${o.saatlik_izin} saatlik` : ""}` : ""},
-    {deger: o.calisma, ad: "Toplam çalışma", renk: "ana", ikon: "saat"}].map(kpiKart).join("");
+    {deger: o.calisma, ad: "Toplam çalışma", renk: "ana", ikon: "saat"}]
+    .concat(oz("puantaj") ? [{deger: o.fazla_mesai, ad: "Fazla mesai", renk: "mor", ikon: "saat", alt: o.fm_yontem === "haftalik" ? "haftalık eşik üstü (dönemle kesişen haftalar)" : "mesai bitişinden sonra"},
+      {deger: o.eksik, ad: "Eksik süre", renk: "sari", ikon: "gec", alt: "geç + erken çıkış toplamı"}] : []).map(kpiKart).join("");
   const izinli = oz("izin"), duzeltme = oz("duzeltme");
+  const ib = d.izin_bakiye, kart = $("#k-izin-kart");
+  kart.classList.toggle("gizli", !(ib && izinli));
+  if (ib && izinli) {
+    $("#k-izin-icerik").innerHTML = ib.uyari ? `<p class="soluk"><span class="e sari">${esc(ib.uyari)}</span> Yıllık izin hakkı işe giriş tarihine göre hesaplanır; yukarıdaki Bilgi kartından "Düzenle" ile girin.</p>` : "";
+    $("#k-izin-icerik").innerHTML += `<div class="kpi" style="margin:0">` + [
+      {deger: ib.kalan, ad: "Kalan gün", renk: ib.kalan < 0 ? "kirmizi" : "yesil", alt: ib.sonraki_tarih ? `sonraki hak ${tarihTR(ib.sonraki_tarih)} · +${ib.sonraki_miktar} gün` : ""},
+      {deger: ib.hak, ad: "Hak edilen", renk: "ana", alt: ib.kidem ? `kıdem ${ib.kidem}` : ""},
+      {deger: ib.kullanilan, ad: "Kullanılan", renk: "turkuaz", alt: ib.planli ? `${ib.planli} gün planlı` : ""},
+      {deger: ib.devir, ad: "Devir", renk: "gri", alt: "sisteme geçmeden önceki"}].map(kpiKart).join("") + `</div>`;
+  }
   $("#k-takvim-not").textContent = izinli && duzeltme ? "Güne tıklayarak izin ekleyebilir ya da o günün okutmalarını düzeltebilirsiniz." :
     izinli ? "İzin girmek için takvimde güne tıklayın." : duzeltme ? "Okutmaları düzeltmek için takvimde güne tıklayın." : "";
   // takvim: aylara böl
@@ -1192,12 +1331,12 @@ function ayarPersonelCiz() {
     (!ara || (p.ad + " " + p.kisi_no + " " + p.sicil).toLocaleUpperCase("tr").includes(ara)) &&
     (!kf || (kf === "-" ? !p.kategori_id : p.kategori_id === +kf)));
   const kaynakYazi = p => p.calisma_gunleri_kaynak === "Genel" ? "genel" : p.calisma_gunleri_kaynak === "Özel" ? "genel" : p.calisma_gunleri_kaynak;
-  $("#a-tablo").innerHTML = tablo(["<input type=checkbox id=a-hepsi>", "Ad Soyad", "Kategori", "Özel giriş", "Özel çıkış", "Cts giriş", "Cts çıkış", "Çalışma günleri", "Geçerli saat", ""],
+  $("#a-tablo").innerHTML = tablo(["<input type=checkbox id=a-hepsi>", "Ad Soyad", "Kategori", "Özel giriş", "Özel çıkış", "Cts giriş", "Cts çıkış", "Geçerli saat", ""],
     liste.map(p => [`<input type="checkbox" data-psec="${p.kisi_no}">`,
-      `${kisiLink(p.kisi_no, p.ad)} <span class="soluk">${p.kisi_no}</span>${p.ayrildi ? ` <span class="e kirmizi" title="${tarihTR(p.isten_cikis)} tarihinde ayrıldı">ayrıldı</span>` : ""}`,
+      `<div>${kisiLink(p.kisi_no, p.ad)} <span class="soluk">${p.kisi_no}</span>${p.ayrildi ? ` <span class="e kirmizi" title="${tarihTR(p.isten_cikis)} tarihinde ayrıldı">ayrıldı</span>` : ""}</div>` +
+        `<div style="margin-top:5px">${gunSecici("p:" + p.kisi_no, p.calisma_gunleri, {acik: !p.calisma_gunleri_ozel, kaynak: p.calisma_gunleri_ozel ? "" : kaynakYazi(p)})}</div>`,
       AYAR.katSec(p.kategori_id, `data-p="${p.kisi_no}" data-a="kategori_id"`),
       ...["giris", "cikis", "cts_giris", "cts_cikis"].map(a => saatIn(p[a], `data-p="${p.kisi_no}" data-a="${a}"`)),
-      gunSecici("p:" + p.kisi_no, p.calisma_gunleri, {acik: !p.calisma_gunleri_ozel, kaynak: p.calisma_gunleri_ozel ? "" : kaynakYazi(p)}),
       `<span class="soluk">${esc(p.gecerli)}<br>Cts ${esc(p.gecerli_cts)}</span>`,
       `<button class="d kucuk" data-pkaydet="${p.kisi_no}">Kaydet</button>`]), "Personel yok");
   // "devral" kutusu açılınca gösterilecek kaynak (kategori adı / genel)
@@ -1224,7 +1363,7 @@ $("#a-toplu").onclick = async () => {
   try { await postJ("/api/ayar/personel", {kisi_nolar: kisiler, degisiklik: {kategori_id: kid ? +kid : null}}); yukleAyar(); } catch (e) { alert(e.message); }
 };
 $("#g-kaydet").onclick = async () => {
-  const v = {}; ["giris", "cikis", "cts_giris", "cts_cikis", "gec_tolerans_dk", "erken_tolerans_dk"].forEach(a => v[a] = $("#g-" + a).value);
+  const v = {}; ["giris", "cikis", "cts_giris", "cts_cikis", "gec_tolerans_dk", "erken_tolerans_dk", "fm_yontem", "fm_haftalik_esik", "mola_dk"].forEach(a => v[a] = $("#g-" + a).value);
   const g = gunOku("genel");
   if (!g) return alert("En az bir çalışma günü seçin");
   v.calisma_gunleri = g;
@@ -1238,12 +1377,132 @@ function ozellikCiz() {
     <div class="soluk">${esc(o.aciklama)}</div></div>
     <label class="anahtar" title="${o.yakinda ? "Bu özellik sonraki sürümde gelecek" : o.acik ? "Açık" : "Kapalı"}"><input type="checkbox" data-oz-ad="${o.ad}"${o.acik ? " checked" : ""}${o.yakinda ? " disabled" : ""} aria-label="${esc(o.baslik)}"><span class="kaydirak"></span></label></div>`).join("");
   $$("[data-oz-ad]").forEach(c => c.onchange = async () => {
+    if (c.dataset.ozAd === "giris" && c.checked) {  // giriş: önce yönetici olmalı
+      if (!AYAR.yonetici_var) { c.checked = false; $("#oz-giris-form").classList.remove("gizli"); $("#og-ad").focus(); return; }
+      if (!confirm("Giriş açılınca panele herkes kullanıcı adı ve şifreyle girer. Devam edilsin mi?")) { c.checked = false; return; }
+    }
     try {
       const r = await postJ("/api/ayar/ozellik", {ad: c.dataset.ozAd, acik: c.checked});
+      if (r.ad === "giris") { location.reload(); return; }
       OZ[r.ad] = r.acik; ozellikUygula(); AYAR.ozellikler.find(o => o.ad === r.ad).acik = r.acik; c.parentElement.title = r.acik ? "Açık" : "Kapalı";
     } catch (e) { c.checked = !c.checked; alert(e.message); }
   });
 }
+
+$("#og-vazgec").onclick = () => $("#oz-giris-form").classList.add("gizli");
+$("#og-kaydet").onclick = async () => {
+  const ad = $("#og-ad").value.trim(), s1 = $("#og-sifre").value;
+  if (!ad) return alert("Kullanıcı adı girin");
+  if (s1.length < 6) return alert("Şifre en az 6 karakter olmalı");
+  if (s1 !== $("#og-sifre2").value) return alert("Şifreler aynı değil");
+  try {
+    await postJ("/api/kullanici/ekle", {ad, sifre: s1, rol: "yonetici"});
+    await postJ("/api/ayar/ozellik", {ad: "giris", acik: true});
+    alert("Giriş açıldı. Şimdi bu kullanıcıyla giriş yapmanız istenecek."); location.reload();
+  } catch (e) { alert(e.message); }
+};
+
+// ---- kullanıcılar
+async function yukleKullanici() {
+  const l = await api("/api/kullanici");
+  $("#kul-tablo").innerHTML = tablo(["Kullanıcı", "Rol", "Oluşturma", ""], l.map(k => [esc(k.ad) + (KUL && KUL.ad === k.ad ? ` <span class="e mavi">siz</span>` : ""),
+    `<select data-ku-rol="${k.id}"><option value="yonetici"${k.rol === "yonetici" ? " selected" : ""}>Yönetici</option><option value="izleyici"${k.rol === "izleyici" ? " selected" : ""}>İzleyici</option></select>`,
+    `<span class="soluk">${esc(k.olusturma || "")}</span>`,
+    `<button class="d kucuk" data-ku-sifre="${k.id}">Şifre değiştir</button> <button class="d kucuk" data-ku-sil="${k.id}" data-ad="${esc(k.ad)}">Sil</button>`]), "Kullanıcı yok");
+  $$("[data-ku-rol]").forEach(x => x.onchange = async () => { try { await postJ("/api/kullanici/rol", {id: +x.dataset.kuRol, rol: x.value}); } catch (e) { alert(e.message); } yukleKullanici(); });
+  $$("[data-ku-sifre]").forEach(b => b.onclick = async () => {
+    const sf = prompt("Yeni şifre (en az 6 karakter):"); if (sf === null) return;
+    try { await postJ("/api/kullanici/sifre", {id: +b.dataset.kuSifre, sifre: sf}); alert("Şifre değişti"); } catch (e) { alert(e.message); }
+  });
+  $$("[data-ku-sil]").forEach(b => b.onclick = async () => {
+    if (!confirm(`${b.dataset.ad} silinsin mi?`)) return;
+    try { await postJ("/api/kullanici/sil", {id: +b.dataset.kuSil}); } catch (e) { alert(e.message); } yukleKullanici();
+  });
+}
+$("#ku-ekle").onclick = async () => {
+  try { await postJ("/api/kullanici/ekle", {ad: $("#ku-ad").value, sifre: $("#ku-sifre").value, rol: $("#ku-rol").value}); $("#ku-ad").value = ""; $("#ku-sifre").value = ""; yukleKullanici(); }
+  catch (e) { alert(e.message); }
+};
+$("#kul-cikis").onclick = async () => { try { await postJ("/api/cikis", {}); } catch (e) {} location.reload(); };
+
+// ---- telegram bildirimleri
+async function yukleBildirim() {
+  const d = await api("/api/bildirim");
+  $("#bd-kapali").classList.toggle("gizli", oz("bildirim"));
+  $("#bd-token").value = d.token || ""; $("#bd-chat").value = d.chat;
+  $("#bd-sabah").checked = d.sabah_ac; $("#bd-sabah-saat").value = d.sabah_saat;
+  $("#bd-aksam").checked = d.aksam_ac; $("#bd-aksam-saat").value = d.aksam_saat;
+  $("#bd-cihaz").checked = d.cihaz_ac; $("#bd-cihaz-dk").value = d.cihaz_dk;
+  const s = d.son_durum;
+  $("#bd-son").className = "durum-satir" + (s && !s.ok ? " hata" : "");
+  $("#bd-son").textContent = s ? `Son bildirim (${s.tur}) ${s.zaman}: ${s.ok ? "gönderildi" : "HATA"} · ${s.mesaj}` : "Henüz bildirim gönderilmedi.";
+}
+function bildirimVeri() {
+  return {token: $("#bd-token").value, chat: $("#bd-chat").value, sabah_ac: $("#bd-sabah").checked, sabah_saat: $("#bd-sabah-saat").value,
+    aksam_ac: $("#bd-aksam").checked, aksam_saat: $("#bd-aksam-saat").value, cihaz_ac: $("#bd-cihaz").checked, cihaz_dk: +$("#bd-cihaz-dk").value};
+}
+$("#bd-kaydet").onclick = async () => {
+  try { await postJ("/api/ayar/bildirim", bildirimVeri()); $("#bd-sonuc").textContent = "Kaydedildi"; yukleBildirim(); } catch (e) { alert(e.message); }
+};
+$("#bd-token-sil").onclick = async () => {
+  if (!confirm("Kayıtlı bot token silinsin mi?")) return;
+  try { await postJ("/api/ayar/bildirim", {token_sil: true}); yukleBildirim(); } catch (e) { alert(e.message); }
+};
+$("#bd-test").onclick = async () => {
+  $("#bd-sonuc").textContent = "Gönderiliyor…";
+  try { await postJ("/api/ayar/bildirim", bildirimVeri()); const r = await postJ("/api/ayar/bildirim_test", {}); $("#bd-sonuc").textContent = `Test mesajı ${r.gonderilen} alıcıya gönderildi`; }
+  catch (e) { $("#bd-sonuc").textContent = "Hata: " + e.message; }
+  yukleBildirim();
+};
+
+// ---- puantaj
+const PZ_SINIF = {"X": "X", "İ": "I", "R": "R", "Ü": "U", "HT": "HT", "RT": "RT", "TÇ": "TC", "G": "G"};
+let PZ = null;
+async function yuklePuantaj() {
+  if (!$("#pz-ay").value) $("#pz-ay").value = bugun().slice(0, 7);
+  PZ = await api(`/api/puantaj?ay=${$("#pz-ay").value}`);
+  $("#pz-kodlar").innerHTML = PZ.kodlar.filter(k => k[0]).map(k => `<span class="pz-kod"><b class="lg-${PZ_SINIF[k[0]]}">${esc(k[0])}</b>${esc(k[1].split(" (")[0])}</span>`).join("") +
+    `<span class="pz-kod"><b style="background:var(--kart2)">•</b>saatlik izinli gelinen gün</span><span class="pz-kod"><b class="duz-r">✎</b>okutması düzeltilmiş</span>`;
+  $("#pz-fm").textContent = `Fazla mesai: ${PZ.fm.aciklama}${PZ.fm.yontem === "haftalik" ? ` Eşik ${PZ.fm.esik} saat.` : ""}${PZ.fm.mola_dk ? ` Günlük mola ${PZ.fm.mola_dk} dk çalışma süresinden düşülür.` : ""} (Değiştirmek için Ayarlar > Genel mesai.)`;
+  puantajCiz();
+}
+function puantajCiz() {
+  if (!PZ) return;
+  const ara = $("#pz-ara").value.toLocaleUpperCase("tr");
+  const l = PZ.satirlar.filter(r => !ara || r.ad.toLocaleUpperCase("tr").includes(ara));
+  const HG = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
+  const KA = Object.fromEntries(PZ.kodlar.map(k => [k[0], k[1]]));
+  const TOP = [["calisilan", "Çalışılan gün"], ["calisma_dk", "Toplam çalışma"], ["fazla_mesai_dk", "Fazla mesai"], ["eksik_dk", "Eksik süre"], ["gec", "Geç (adet)"],
+    ["izin", "İzin gün"], ["rapor", "Rapor gün"], ["ucretsiz", "Ücretsiz gün"], ["gelmedi", "Gelmedi gün"], ["tatil_calismasi", "Tatil çalışması gün"]];
+  const sureH = (a, v) => /_dk$/.test(a) ? (v ? sureYaz(v) : "–") : (v || "–");
+  $("#pz-tablo").innerHTML = l.length ? `<table class="pz-t"><thead><tr><th class="ad">Ad Soyad</th>` +
+    PZ.gunler.map(g => `<th class="hs${g.hafta_gunu >= 5 ? " hsonu" : ""}${g.tatil ? " rt" : ""}" title="${tarihTR(g.tarih)}${g.tatil ? " · " + esc(g.tatil) : ""}">${g.gun}<br><span style="font-size:9px">${HG[g.hafta_gunu]}</span></th>`).join("") +
+    TOP.map(t => `<th>${t[1]}</th>`).join("") + `</tr></thead><tbody>` +
+    l.map(r => `<tr><td class="ad">${kisiLink(r.kisi_no, r.ad)}</td>` + r.hucreler.map((h, i) => {
+      const g = PZ.gunler[i], ip = [tarihTR(g.tarih), KA[h.k] ? KA[h.k].split(" (")[0] : "", h.t && `Tatil: ${h.t}`, h.i, h.g && `Giriş ${h.g}`, h.c && `Çıkış ${h.c}`, h.d && "okutması düzeltilmiş"].filter(Boolean).join(" · ");
+      return `<td class="h ${PZ_SINIF[h.k] || ""}" title="${esc(ip)}">${esc(h.k)}${h.s ? "<sub>•</sub>" : ""}${h.d ? "<small>✎</small>" : ""}</td>`; }).join("") +
+      TOP.map(([a]) => `<td class="t">${sureH(a, r.toplam[a])}</td>`).join("") + `</tr>`).join("") + `</tbody></table>` : `<p class="soluk">Bu ay için kayıt yok</p>`;
+}
+$("#pz-ay").onchange = yuklePuantaj; $("#pz-ara").oninput = puantajCiz;
+$("#pz-excel").onclick = () => location.href = `/disa?${new URLSearchParams({tur: "puantaj", bicim: "xlsx", ay: $("#pz-ay").value || bugun().slice(0, 7)})}`;
+
+// ---- yıllık izin bakiyesi
+let BAK = null;
+async function yukleBakiye() { BAK = await api("/api/izin_bakiye"); bakiyeCiz(); }
+function bakiyeCiz() {
+  if (!BAK) return;
+  const ara = $("#bak-ara").value.toLocaleUpperCase("tr"), ayr = $("#bak-ayrilan").checked;
+  const l = BAK.filter(b => (!ayr || !b.ayrildi) && (!ara || b.ad.toLocaleUpperCase("tr").includes(ara)));
+  $("#bak-tablo").innerHTML = tablo(["Ad Soyad", "İşe giriş", "Kıdem", "Hak edilen", "Kullanılan", "Devir", "Kalan", "Sonraki hak"], l.map(b => [kisiLink(b.kisi_no, b.ad) + (b.ayrildi ? ` <span class="e kirmizi">ayrıldı</span>` : ""),
+    b.ise_giris ? tarihTR(b.ise_giris) : `<a href="#personel/${b.kisi_no}"><span class="e sari">İşe giriş tarihi girin</span></a>`, b.kidem || "–", b.hak,
+    b.kullanilan + (b.planli ? ` <span class="soluk">(+${b.planli} planlı)</span>` : ""),
+    `<input type="number" step="0.5" value="${b.devir}" data-devir="${b.kisi_no}" title="Sisteme geçmeden önceki kalan gün (negatif olabilir); değiştirince kaydedilir">`,
+    `<b class="${b.kalan < 0 ? "bak-neg" : ""}">${b.kalan}</b>`, b.sonraki_tarih ? `${tarihTR(b.sonraki_tarih)} <span class="soluk">+${b.sonraki_miktar} gün</span>` : "–"]), "Kayıt yok");
+  $$("[data-devir]").forEach(i => i.onchange = async () => {
+    try { await postJ("/api/ayar/izin_devir", {kisi_no: +i.dataset.devir, devir: i.value}); await yukleBakiye(); } catch (e) { alert(e.message); yukleBakiye(); }
+  });
+}
+$("#bak-ara").oninput = bakiyeCiz; $("#bak-ayrilan").onchange = bakiyeCiz;
 
 // ---- resmi tatiller
 let T_YIL = new Date().getFullYear();
@@ -1280,6 +1539,7 @@ async function yukleSistem() {
     ["Toplam okutma", d.toplam_okutma],
     ["Kayıt aralığı", `${d.ilk_kayit || "–"}<br>${d.son_kayit || "–"}`],
     ["Personel (Personel.DBF)", d.personel],
+    ["Telegram bildirimi", !d.bildirim.acik ? `<span class="soluk">kapalı</span>` : d.bildirim.son ? `${d.bildirim.son.ok ? `<span class="yesil-y">gönderildi</span>` : `<span class="kirmizi-y">HATA</span>`} · ${esc(d.bildirim.son.tur)}<br><span class="soluk">${esc(d.bildirim.son.zaman)} · ${esc(d.bildirim.son.mesaj)}</span>` : "henüz gönderilmedi"],
     ["Uygulama sürümü", "v" + d.surum]]);
   const y = await api("/api/yedekler");
   const TUR = t => t === "gunluk" ? "Günlük" : t === "elle" ? "Elle" : t.startsWith("surum") ? `Sürüm (${t.split("-").slice(1).join(" → ")})` : t === "kurulum" ? "Kurulum" : t;
@@ -1308,7 +1568,9 @@ async function ustDurum() {
     $("#durumcuk").textContent = metin;
     $("#surum").textContent = "v" + d.surum;
     $("#b-son").textContent = metin;
-    OZ = d.ozellikler || OZ; ozellikUygula();
+    OZ = d.ozellikler || OZ; KUL = d.kullanici || null; ozellikUygula();
+    $("#kul-kutu").classList.toggle("gizli", !KUL);
+    if (KUL) $("#kul-ad").textContent = `${KUL.ad} · ${KUL.rol === "yonetici" ? "yönetici" : "izleyici"}`;
     const uy = $("#uyari");
     uy.className = "uyari " + (d.uyari_seviye || "") + (d.uyari ? "" : " gizli");
     uy.innerHTML = d.uyari ? `${ikon("uyari", 22)}<span><b>Cihazdan okuma yapılamıyor.</b> ${esc(d.uyari)} Yeni giriş-çıkışlar panelde görünmeyebilir.</span> <a href="#sistem">Sistem sayfasını aç →</a>` : "";
