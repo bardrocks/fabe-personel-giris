@@ -98,6 +98,15 @@ def dk(saat):  # "09:15" -> 555
     return int(h) * 60 + int(m)
 
 
+def sure_yaz(dakika):
+    """70 -> '1 saat 10 dakika', 45 -> '45 dakika', 120 -> '2 saat', 0 -> ''"""
+    dakika = int(dakika or 0)
+    if dakika <= 0:
+        return ""
+    h, m = divmod(dakika, 60)
+    return " ".join(p for p in (f"{h} saat" if h else "", f"{m} dakika" if m else "") if p)
+
+
 def tr_upper(s):
     return s.replace("i", "İ").replace("ı", "I").upper()
 
@@ -445,7 +454,7 @@ def gun_ozeti(gun, ts, bugun, mesai, genel):
     sure, sure_dk = "", 0
     if cikis:
         sure_dk = int((cikis - giris).total_seconds() // 60)
-        sure = f"{sure_dk // 60}:{sure_dk % 60:02d}"
+        sure = sure_yaz(sure_dk)
     return {"giris": giris.strftime("%H:%M"), "cikis": cikis.strftime("%H:%M") if cikis else "",
             "sure": sure, "sure_dk": sure_dk, "okutma": len(ts), "gec_dk": gec_dk, "erken_dk": erken_dk, "durum": durum,
             "mesai": f"{m_giris}-{m_cikis}" if m_cikis else m_giris, "mesai_kaynak": m_kaynak}
@@ -572,7 +581,7 @@ def _istatistik(satirlar, beklenen, ilk_gun, nobet_gunleri, veri_gunleri):
             "gelmedi": len(gelmedi), "gelmedi_gunler": gelmedi,
             "nobet": len(nobet_gunleri), "nobet_gelmedi": len(nobet_gelmedi), "nobet_gelmedi_gunler": nobet_gelmedi,
             "ort_giris": f"{ort // 60:02d}:{ort % 60:02d}" if ort is not None else "",
-            "calisma_dk": calisma, "calisma": f"{calisma // 60}:{calisma % 60:02d}",
+            "calisma_dk": calisma, "calisma": sure_yaz(calisma) or "0 dakika",
             "hatali": sum(1 for s in satirlar if s["gec_dk"] or s["erken_dk"] or s["durum"] == "ÇIKIŞ YOK")}
 
 
@@ -1333,16 +1342,16 @@ def disa_tablo(tur, q):
         b = ["Zaman", "Kişi No", "Ad Soyad"]
         return b, [[r["zaman"], r["kisi_no"], r["ad"]] for r in ham_kayitlar(bas, bit, kisi)]
     if tur == "nobet":
-        b = ["Tarih", "Kişi No", "Ad Soyad", "Mesai", "Durum", "Giriş", "Çıkış", "Geç (dk)"]
+        b = ["Tarih", "Kişi No", "Ad Soyad", "Mesai", "Durum", "Giriş", "Çıkış", "Geç"]
         out = []
         for g in nobet_durumu(bas, bit):
             for s in g["satirlar"]:
-                out.append([g["tarih"], s["kisi_no"], s["ad"], s["mesai"], s["durum"], s["giris"], s["cikis"], s["gec_dk"]])
+                out.append([g["tarih"], s["kisi_no"], s["ad"], s["mesai"], s["durum"], s["giris"], s["cikis"], sure_yaz(s["gec_dk"])])
         return b, out
     b = ["Tarih", "Kişi No", "Sicil", "Ad Soyad", "Kategori", "Mesai", "Giriş", "Çıkış", "Süre", "Okutma",
-         "Geç (dk)", "Erken çıkış (dk)", "Durum"]
+         "Geç", "Erken çıkış", "Durum"]
     return b, [[r["tarih"], r["kisi_no"], r["sicil"], r["ad"], r["kategori"], r["mesai"], r["giris"], r["cikis"],
-                r["sure"], r["okutma"], r["gec_dk"], r["erken_dk"], r["durum"]] for r in gunluk_rapor(bas, bit, kisi, q.get("durum") or None)]
+                r["sure"], r["okutma"], sure_yaz(r["gec_dk"]), sure_yaz(r["erken_dk"]), r["durum"]] for r in gunluk_rapor(bas, bit, kisi, q.get("durum") or None)]
 
 
 def nobet_sablon():

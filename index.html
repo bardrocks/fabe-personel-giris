@@ -53,6 +53,7 @@ main{padding:22px 26px 40px;min-width:0}
 aside nav a i,.tema-dugme i{display:inline-grid;place-items:center}
 .kart h2 .ik{color:var(--soluk)}
 .kpi .k b{display:block;font-size:26px;font-weight:700;letter-spacing:-.5px}
+.kpi .k b.uzun{font-size:19px;letter-spacing:-.2px;padding-right:40px;line-height:1.3}
 .kpi .k span{color:var(--soluk);font-size:12.5px}
 .kpi .k small{display:block;color:var(--soluk);font-size:12px;margin-top:2px}
 .kpi .k.secili{outline:2px solid var(--renk,var(--ana));outline-offset:-2px;background:var(--kart2)}
@@ -365,7 +366,10 @@ const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GE
 const IPUCU = {"VERİ YOK": "O gün cihazdan hiç kayıt alınamamış; gelip gelmediği bilinemiyor",
   "tahmini": "Kısmi isimle eşleşti, kontrol edin", "kayıtlı": "Daha önce onayladığınız eşleşme", "belirsiz": "Birden fazla personel uyuyor, listeden seçin"};
 const etiket = d => `<span class="e ${RENK[d] ?? ""}"${IPUCU[d] ? ` title="${IPUCU[d]}"` : ""}>${esc(d)}</span>`;
-const dkYaz = (d, renk = "kirmizi-y") => d ? `<span class="${renk}">${d} dk</span>` : "";
+// 70 -> "1 saat 10 dakika"
+const sureYaz = d => { d = Math.round(d || 0); if (d <= 0) return ""; const h = Math.floor(d / 60), m = d % 60;
+  return [h ? `${h} saat` : "", m ? `${m} dakika` : ""].filter(Boolean).join(" "); };
+const dkYaz = (d, renk = "kirmizi-y") => d ? `<span class="${renk}">${sureYaz(d)}</span>` : "";
 const kisiLink = (k, ad) => `<a href="#personel/${k}">${esc(ad)}</a>`;
 const mesaiHucre = s => `<span class="soluk" title="${esc(s.mesai_kaynak || "")}">${esc(s.mesai || "")}</span>`;
 let sifre = "";
@@ -406,7 +410,7 @@ function kisiSecenek(liste, secili, bos = "— seçin —") {
 function kpiKart(o) {
   const t = o.tikla ? "button" : "div";
   return `<${t} class="k${o.secili ? " secili" : ""}" style="--renk:var(--${o.renk})"${o.tikla ? ` data-kpi="${o.tikla}"` : ""}>
-    ${o.ikon ? `<span class="kik">${ikon(o.ikon)}</span>` : ""}<b>${o.deger}</b><span>${o.ad}</span>${o.alt ? `<small>${o.alt}</small>` : ""}</${t}>`;
+    ${o.ikon ? `<span class="kik">${ikon(o.ikon)}</span>` : ""}<b${String(o.deger).length > 6 ? ' class="uzun"' : ""}>${o.deger}</b><span>${o.ad}</span>${o.alt ? `<small>${o.alt}</small>` : ""}</${t}>`;
 }
 
 // ===================================================================== tema
@@ -502,7 +506,7 @@ function bugunCiz() {
   const kartlar = [
     {tikla: "icerde", deger: d.icerde.length, ad: "Şu an içeride", renk: "ana", ikon: "icerde"},
     {tikla: "gelen", deger: d.satirlar.length, ad: "Bugün gelen", renk: "yesil", ikon: "gelen"},
-    {tikla: "gec", deger: d.gec.length, ad: "Geç kalan", renk: "sari", ikon: "gec", alt: d.gec.length ? `toplam ${d.gec.reduce((a, s) => a + s.gec_dk, 0)} dk` : ""},
+    {tikla: "gec", deger: d.gec.length, ad: "Geç kalan", renk: "sari", ikon: "gec", alt: d.gec.length ? `toplam ${sureYaz(d.gec.reduce((a, s) => a + s.gec_dk, 0))}` : ""},
     {tikla: "erken", deger: d.erken.length, ad: "Erken çıkan", renk: "mor", ikon: "erken"},
     {tikla: "gelmeyen", deger: d.gelmeyen.length, ad: "Gelmeyen", renk: "kirmizi", ikon: "gelmeyen", alt: "son 2 haftada çalışan"}];
   $("#b-kpi").innerHTML = kartlar.map(k => kpiKart(Object.assign(k, {secili: k.tikla === bFiltre}))).join("");
@@ -536,17 +540,17 @@ async function yuklePersonel() {
   const t = a => PER.reduce((s, p) => s + p[a], 0);
   $("#p-kpi").innerHTML = [
     {deger: PER.length, ad: "Çalışan personel", renk: "ana", ikon: "personel"},
-    {deger: t("gec"), ad: "Geç kalma", renk: "sari", ikon: "gec", alt: `toplam ${t("gec_dk")} dk`},
-    {deger: t("erken"), ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: `toplam ${t("erken_dk")} dk`},
+    {deger: t("gec"), ad: "Geç kalma", renk: "sari", ikon: "gec", alt: t("gec_dk") ? `toplam ${sureYaz(t("gec_dk"))}` : ""},
+    {deger: t("erken"), ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: t("erken_dk") ? `toplam ${sureYaz(t("erken_dk"))}` : ""},
     {deger: t("cikis_yok"), ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
     {deger: t("gelmedi"), ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: "hafta içi, kayıt olmayan"},
     {deger: t("nobet_gelmedi"), ad: "Nöbete gelmedi", renk: "kirmizi", ikon: "nobet", alt: `${t("nobet")} planlı nöbet`}].map(kpiKart).join("");
-  const liste = (a, birim) => top(a).map(p => `<a href="#personel/${p.kisi_no}"><span>${esc(p.ad)}</span><b class="${a === "gec" ? "sari-y" : "kirmizi-y"}">${p[a]} ${birim}${a === "gec" ? ` · ${p.gec_dk} dk` : ""}</b></a>`).join("") || `<p class="soluk">Yok</p>`;
+  const liste = (a, birim) => top(a).map(p => `<a href="#personel/${p.kisi_no}"><span>${esc(p.ad)}</span><b class="${a === "gec" ? "sari-y" : "kirmizi-y"}">${p[a]} ${birim}${a === "gec" ? ` · ${sureYaz(p.gec_dk)}` : ""}</b></a>`).join("") || `<p class="soluk">Yok</p>`;
   $("#p-top-gec").innerHTML = liste("gec", "kez");
   $("#p-top-gelmedi").innerHTML = liste("gelmedi", "gün");
   personelCiz();
 }
-const P_SUTUN = [["ad", "Ad Soyad"], ["kategori", "Kategori"], ["gun", "Gün"], ["gec", "Geç"], ["gec_dk", "Geç dk"], ["erken", "Erken"],
+const P_SUTUN = [["ad", "Ad Soyad"], ["kategori", "Kategori"], ["gun", "Gün"], ["gec", "Geç"], ["gec_dk", "Geç süre"], ["erken", "Erken"],
   ["cikis_yok", "Çıkış yok"], ["gelmedi", "Gelmedi"], ["nobet_gelmedi", "Nöbet"], ["ort_giris", "Ort. giriş"], ["calisma_dk", "Çalışma"]];
 function personelCiz() {
   const ara = $("#p-ara").value.toLocaleUpperCase("tr"), kf = $("#p-kat").value, hat = $("#p-goster").value;
@@ -556,7 +560,7 @@ function personelCiz() {
   const say = (v, r) => v ? `<span class="${r}">${v}</span>` : `<span class="soluk">0</span>`;
   const bas = P_SUTUN.map(([a, ad]) => `<span data-sira="${a}">${ad}${pSira.a === a ? (pSira.yon > 0 ? " ▲" : " ▼") : ""}</span>`);
   $("#p-tablo").innerHTML = tablo(bas, l.map(p => [kisiLink(p.kisi_no, p.ad), `<span class="soluk">${esc(p.kategori)}</span>`, p.gun,
-    say(p.gec, "sari-y"), say(p.gec_dk, "sari-y"), say(p.erken, "mor-y"), say(p.cikis_yok, "kirmizi-y"), say(p.gelmedi, "kirmizi-y"),
+    say(p.gec, "sari-y"), p.gec_dk ? `<span class="sari-y">${sureYaz(p.gec_dk)}</span>` : `<span class="soluk">–</span>`, say(p.erken, "mor-y"), say(p.cikis_yok, "kirmizi-y"), say(p.gelmedi, "kirmizi-y"),
     p.nobet ? `${say(p.nobet_gelmedi, "kirmizi-y")}<span class="soluk">/${p.nobet}</span>` : `<span class="soluk">–</span>`, p.ort_giris, p.calisma]),
     "Bu dönemde kayıt yok", {tikla: i => "#personel/" + l[i].kisi_no});
   $$("#p-tablo th").forEach(th => th.classList.add("sirala"));
@@ -578,11 +582,11 @@ async function yukleKisi(k) {
     <div class="soluk">${p.kategori ? `<span class="e mavi">${esc(p.kategori)}</span> ` : ""}No ${p.kisi_no}${p.sicil ? " · Sicil " + esc(p.sicil) : ""}</div></div>`;
   $("#k-kpi").innerHTML = [
     {deger: o.gun, ad: "Geldiği gün", renk: "yesil", ikon: "gelen", alt: `ort. giriş ${o.ort_giris || "–"}`},
-    {deger: o.gec, ad: "Geç kalma", renk: "sari", ikon: "gec", alt: o.gec ? `toplam ${o.gec_dk} dk` : ""},
-    {deger: o.erken, ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: o.erken ? `toplam ${o.erken_dk} dk` : ""},
+    {deger: o.gec, ad: "Geç kalma", renk: "sari", ikon: "gec", alt: o.gec ? `toplam ${sureYaz(o.gec_dk)}` : ""},
+    {deger: o.erken, ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: o.erken ? `toplam ${sureYaz(o.erken_dk)}` : ""},
     {deger: o.cikis_yok, ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
     {deger: o.gelmedi, ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen"},
-    {deger: o.calisma, ad: "Toplam çalışma", renk: "ana", ikon: "saat", alt: "saat:dakika"}].map(kpiKart).join("");
+    {deger: o.calisma, ad: "Toplam çalışma", renk: "ana", ikon: "saat"}].map(kpiKart).join("");
   // takvim: aylara böl
   const aylar = {};
   d.takvim.forEach(t => (aylar[t.tarih.slice(0, 7)] ||= []).push(t));
@@ -592,7 +596,7 @@ async function yukleKisi(k) {
     const ilk = (new Date(gunler[0].tarih + "T12:00").getDay() + 6) % 7;
     return `<div class="takvim"><div class="ay">${AYLAR[m - 1]} ${y}</div>` + ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"].map(g => `<div class="gb">${g}</div>`).join("") +
       "<div></div>".repeat(ilk) + gunler.map(t => {
-        const ip = [tarihTR(t.tarih), IP[t.durum], t.giris && `Giriş ${t.giris}`, t.cikis && `Çıkış ${t.cikis}`, t.gec_dk && `${t.gec_dk} dk geç`, t.erken_dk && `${t.erken_dk} dk erken`].filter(Boolean).join(" · ");
+        const ip = [tarihTR(t.tarih), IP[t.durum], t.giris && `Giriş ${t.giris}`, t.cikis && `Çıkış ${t.cikis}`, t.gec_dk && `${sureYaz(t.gec_dk)} geç`, t.erken_dk && `${sureYaz(t.erken_dk)} erken`].filter(Boolean).join(" · ");
         return `<div class="g ${t.durum}" title="${esc(ip)}">${Number(t.tarih.slice(8))}</div>`; }).join("") + "</div>";
   }).join("");
   $("#k-bilgi").innerHTML = tablo(["", ""], [
@@ -842,7 +846,7 @@ async function yukleSistem() {
   const t = d.son_basarili_tur;
   $("#sis-bilgi").innerHTML = tablo(["Bilgi", "Değer"], [
     ["Son başarılı okuma", t ? `${t.zaman}<br><span class="soluk">${t.okunan} okundu, ${t.yeni} yeni</span>` : "–"],
-    ["Okuma aralığı", `${d.aralik_sn / 60} dk`],
+    ["Okuma aralığı", sureYaz(d.aralik_sn / 60)],
     ["Toplam okutma", d.toplam_okutma],
     ["Kayıt aralığı", `${d.ilk_kayit || "–"}<br>${d.son_kayit || "–"}`],
     ["Personel (Personel.DBF)", d.personel]]);
