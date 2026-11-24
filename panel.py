@@ -36,7 +36,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, quote, unquote, urlparse
 from xml.sax.saxutils import escape
 
-SURUM = "1.8.0"  # her yeni ozellikte artirilir; degisiklikler DEGISIKLIKLER.md'de
+SURUM = "1.9.0"  # her yeni ozellikte artirilir; degisiklikler DEGISIKLIKLER.md'de
 KOK = os.path.dirname(os.path.abspath(__file__))
 WIN = os.name == "nt"
 ENGOPER_KLASOR = r"C:\EnGoPer"
@@ -190,6 +190,8 @@ CREATE TABLE IF NOT EXISTS duzeltme_log(
 CREATE INDEX IF NOT EXISTS ix_duzeltme_log_kisi ON duzeltme_log(kisi_no, okutma_zaman);
 CREATE TABLE IF NOT EXISTS kullanici(
   id INTEGER PRIMARY KEY, ad TEXT NOT NULL UNIQUE, sifre_hash TEXT NOT NULL, tuz TEXT NOT NULL, rol TEXT NOT NULL, olusturma TEXT);
+CREATE TABLE IF NOT EXISTS personel_log(
+  id INTEGER PRIMARY KEY, zaman TEXT, islem TEXT, kisi_no INTEGER, eski TEXT, yeni TEXT, istemci TEXT);
 CREATE TABLE IF NOT EXISTS oturum(token TEXT PRIMARY KEY, kullanici_id INTEGER NOT NULL, bitis INTEGER NOT NULL);
 """
 
@@ -200,6 +202,7 @@ YENI_SUTUNLAR = (
     ("kategori", "calisma_gunleri TEXT"),
     ("personel_ayar", "calisma_gunleri TEXT"), ("personel_ayar", "ise_giris TEXT"), ("personel_ayar", "isten_cikis TEXT"),
     ("personel_ayar", "izin_devir REAL"),
+    ("personel_ayar", "gorunen_ad TEXT"), ("personel_ayar", "silindi INTEGER DEFAULT 0"), ("personel", "kaynak TEXT"),
 )
 
 
@@ -243,6 +246,7 @@ def db_hazirla():
             mevcut = {r[1] for r in con.execute(f"PRAGMA table_info({tablo})")}
             if sutun.split()[0] not in mevcut:
                 con.execute(f"ALTER TABLE {tablo} ADD COLUMN {sutun}")
+        con.execute("UPDATE personel SET kaynak='dbf' WHERE kaynak IS NULL")  # simdiye kadarki personel EnGoPer'den gelir
         # Resmi tatiller: tablo ilk kez bos bulunursa bir kez yuklenir (kullanici silerse tekrar yuklenmez)
         if not con.execute("SELECT 1 FROM ayar WHERE anahtar='tatil_tohum'").fetchone():
             if not con.execute("SELECT 1 FROM tatil LIMIT 1").fetchone():
@@ -397,9 +401,11 @@ def personel_yenile(zorla=False):
         for s in satirlar:
             if not s["KARTNO"].isdigit():
                 continue
-            con.execute("INSERT INTO personel(kisi_no,kartno,adi,soyadi,sicilno,guncelleme) VALUES(?,?,?,?,?,?) "
+            # personel_ayar'daki gorunen_ad / silindi bu tabloda degil: DBF yenilemesi onlari ezmez.
+            # DBF'de olmayan (elle eklenen) kisiler silinmez: sadece DBF'dekiler upsert edilir.
+            con.execute("INSERT INTO personel(kisi_no,kartno,adi,soyadi,sicilno,guncelleme,kaynak) VALUES(?,?,?,?,?,?,'dbf') "
                         "ON CONFLICT(kisi_no) DO UPDATE SET kartno=excluded.kartno, adi=excluded.adi, "
-                        "soyadi=excluded.soyadi, sicilno=excluded.sicilno, guncelleme=excluded.guncelleme",
+                        "soyadi=excluded.soyadi, sicilno=excluded.sicilno, guncelleme=excluded.guncelleme, kaynak='dbf'",
                         (int(s["KARTNO"]), s["KARTNO"], s["ADI"], s["SOYADI"], s["SICILNO"], ek))
             n += 1
     _personel_mtime = mt
@@ -407,13 +413,22 @@ def personel_yenile(zorla=False):
 
 
 def personel_sozluk(con):
-    return {r["kisi_no"]: r for r in con.execute("SELECT * FROM personel")}
+    """kisi_no -> satir (personel + personel_ayar.gorunen_ad / silindi). Isimler HER YERDE ad_soyad() ile gosterilir."""
+    return {r["kisi_no"]: r for r in con.execute(
+        "SELECT p.*, a.gorunen_ad AS gorunen_ad, a.silindi AS silindi FROM personel p LEFT JOIN personel_ayar a ON a.kisi_no = p.kisi_no")}
+
+
+def ad_ham(p, k):
+    """Gorunen ad (varsa) yoksa EnGoPer adi; '(silindi)' eki olmadan."""
+    if p is None:
+        return f"#{k} (tanımsız)"
+    return (p["gorunen_ad"] or "").strip() or f'{p["adi"]} {p["soyadi"]}'.strip() or f"#{k}"
 
 
 def ad_soyad(p, k):
     if p is None:
         return f"#{k} (tanımsız)"
-    return f'{p["adi"]} {p["soyadi"]}'.strip() or f"#{k}"
+    return ad_ham(p, k) + (" (silindi)" if p["silindi"] else "")
 
 
 # ----------------------------------------------------------------- toplayici
@@ -730,6 +745,8 @@ class MesaiCozucu:
     def istihdamda(self, k, gun):
         """Kisi o gun isyerinde calisan mi (ise giris - isten cikis araliginda)?"""
         pa = self.per.get(k) or {}
+        if pa.get("silindi"):
+            return False  # silinmis personel hicbir yerde "beklenen" sayilmaz
         iso = _tarih(gun).isoformat()
         return not ((pa.get("ise_giris") and iso < pa["ise_giris"]) or (pa.get("isten_cikis") and iso > pa["isten_cikis"]))
 
@@ -822,7 +839,7 @@ def gunluk_rapor(bas, bit, kisi=None, durum_filtre=None):
         tatil = mc.tatil(gun)
         o.update({"tarih": g, "kisi_no": k, "ad": ad_soyad(p, k), "sicil": p["sicilno"] if p else "",
                   "kategori": mc.kategori_adi(k), "izin": izin_yazi(mc.izin(k, gun)),
-                  "duzeltildi": (k, g) in duzeltilen, "tatil": tatil[0] if tatil else "",
+                  "duzeltildi": (k, g) in duzeltilen, "silindi": bool(p and p["silindi"]), "tatil": tatil[0] if tatil else "",
                   "tatil_yarim": bool(tatil and tatil[1])})
         # tam gun izinli ya da tam gun resmi tatil: okutsa da geç/erken/çıkış yok sayilmaz
         # (tatilde calisan satirda `tatil` alani kalir; puantajda "tatil calismasi" olur)
@@ -989,8 +1006,8 @@ def personel_ozeti(bas, bit, kisi=None):
     out = []
     for k, rows in kisiye.items():
         pa = mc.per.get(k) or {}
-        if not kisi and pa.get("isten_cikis") and pa["isten_cikis"] < bas:
-            continue  # donem basindan once ayrilmis
+        if not kisi and ((pa.get("isten_cikis") and pa["isten_cikis"] < bas) or pa.get("silindi")):
+            continue  # donem basindan once ayrilmis ya da silinmis
         ilk_gun = pa.get("ise_giris") or ilk.get(k, "9999")
         st = _istatistik(rows, _beklenen_gunler(mc, k, veri_gunleri), ilk_gun, nobet.get(k, []), veri_gunleri,
                          izinler.get(k, []), mc, k)
@@ -1082,7 +1099,7 @@ def personel_detay(kisi, bas, bit):
     cg, cg_kaynak = mc.calisma_gunleri(k)
     pa = mc.per.get(k) or {}
     return {"kisi": {"kisi_no": k, "ad": ad_soyad(p, k), "sicil": p["sicilno"] if p else "",
-                     "kategori": mc.kategori_adi(k), "son_okutma": son or "",
+                     "kategori": mc.kategori_adi(k), "kategori_id": (mc.per.get(k) or {}).get("kategori_id"), "son_okutma": son or "",
                      "mesai": f"{hi[0]}-{hi[1]} ({hi[2]})", "mesai_cts": f"{cts[0]}-{cts[1]} ({cts[2]})",
                      "calisma_gunleri": cg, "calisma_gunleri_kaynak": cg_kaynak,
                      "ise_giris": pa.get("ise_giris") or "", "isten_cikis": pa.get("isten_cikis") or ""},
@@ -1534,23 +1551,27 @@ def _isim_parcalari(metin):
 class Eslestirici:
     def __init__(self):
         with db() as con:
-            per = list(con.execute("SELECT * FROM personel"))
+            per = [r for r in personel_sozluk(con).values() if not r["silindi"]]
             son = (simdi() - dt.timedelta(days=60)).strftime("%Y-%m-%d")
             self.aktif = {r[0] for r in con.execute("SELECT DISTINCT kisi_no FROM okutma WHERE gizli=0 AND zaman >= ?", (son,))}
             self.hafiza = {a: k for a, k in con.execute("SELECT anahtar, kisi_no FROM nobet_eslesme")}
         self.per = {r["kisi_no"]: r for r in per}
         self.tam, self.bas_harf, self.ilk = {}, {}, {}
         for r in per:
-            a, s = katla(r["adi"]), katla(r["soyadi"])
-            if not a:
-                continue
-            for anahtar in {f"{a} {s}".strip(), f"{s} {a}".strip()}:
-                self.tam.setdefault(anahtar, set()).add(r["kisi_no"])
-            if s:
-                self.bas_harf.setdefault(f"{a} {s[0]}", set()).add(r["kisi_no"])
-                self.bas_harf.setdefault(f"{a.split()[0]} {s}", set()).add(r["kisi_no"])
-            self.ilk.setdefault(a.split()[0], set()).add(r["kisi_no"])
-            self.ilk.setdefault(a, set()).add(r["kisi_no"])
+            adaylar = [(katla(r["adi"]), katla(r["soyadi"]))]
+            gor = katla(r["gorunen_ad"] or "").split()
+            if gor:  # gorunen ad: son kelime soyad, oncesi ad
+                adaylar.append((" ".join(gor[:-1]) or gor[0], gor[-1] if len(gor) > 1 else ""))
+            for a, s in adaylar:
+                if not a:
+                    continue
+                for anahtar in {f"{a} {s}".strip(), f"{s} {a}".strip()}:
+                    self.tam.setdefault(anahtar, set()).add(r["kisi_no"])
+                if s:
+                    self.bas_harf.setdefault(f"{a} {s[0]}", set()).add(r["kisi_no"])
+                    self.bas_harf.setdefault(f"{a.split()[0]} {s}", set()).add(r["kisi_no"])
+                self.ilk.setdefault(a.split()[0], set()).add(r["kisi_no"])
+                self.ilk.setdefault(a, set()).add(r["kisi_no"])
 
     def _sec(self, aday):
         aday = set(aday)
@@ -1582,7 +1603,7 @@ class Eslestirici:
         kel = anahtar.split()
         if len(kel) >= 2:
             aday = [k for k, r in self.per.items()
-                    if all(w in katla(f'{r["adi"]} {r["soyadi"]}').split() for w in kel)]
+                    if all(w in katla(f'{r["adi"]} {r["soyadi"]} {r["gorunen_ad"] or ""}').split() for w in kel)]
             if aday:
                 aday, tek = self._sec(aday)
                 if tek:
@@ -1716,7 +1737,7 @@ def nobet_kaydet(dosya, tarihler, kayitlar):
 def personel_secenekleri(con):
     son = (simdi() - dt.timedelta(days=60)).strftime("%Y-%m-%d")
     aktif = {r[0] for r in con.execute("SELECT DISTINCT kisi_no FROM okutma WHERE gizli=0 AND zaman >= ?", (son,))}
-    liste = [{"kisi_no": k, "ad": ad_soyad(p, k), "aktif": k in aktif} for k, p in personel_sozluk(con).items()]
+    liste = [{"kisi_no": k, "ad": ad_soyad(p, k), "aktif": k in aktif} for k, p in personel_sozluk(con).items() if not p["silindi"]]
     return sorted(liste, key=lambda x: x["ad"])
 
 
@@ -1865,6 +1886,8 @@ def ayar_getir():
     bugun_iso = simdi().date().isoformat()
     liste = []
     for k in sorted(set(per) | set(son)):
+        if k in per and per[k]["silindi"]:
+            continue
         pa = mc.per.get(k) or {}
         h, c = mc.al(k, hi), mc.al(k, cts)
         cg, cg_kaynak = mc.calisma_gunleri(k)
@@ -2047,7 +2070,7 @@ def puantaj(ay):
     out = []
     for k in kisiler:
         pa = mc.per.get(k) or {}
-        if (pa.get("isten_cikis") and pa["isten_cikis"] < bas.isoformat()) or (pa.get("ise_giris") and pa["ise_giris"] > bit.isoformat()):
+        if pa.get("silindi") or (pa.get("isten_cikis") and pa["isten_cikis"] < bas.isoformat()) or (pa.get("ise_giris") and pa["ise_giris"] > bit.isoformat()):
             continue  # ay basindan once ayrilmis / ay sonundan sonra ise girecek
         rows = gunluk.get(k, {})
         hucre, tp = [], dict(calisilan=0, izin=0, rapor=0, ucretsiz=0, gelmedi=0, tatil_calismasi=0, gec=0, calisma_dk=0, eksik_dk=0)
@@ -2163,6 +2186,8 @@ def izin_bakiye(kisi=None):
         if kisi and k != int(kisi):
             continue
         pa = mc.per.get(k) or {}
+        if pa.get("silindi") and not kisi:
+            continue
         if not kisi and not (k in son or pa.get("ise_giris") or pa.get("izin_devir") is not None or k in kul):
             continue
         ise = pa.get("ise_giris")
@@ -2577,6 +2602,121 @@ def bildirim_kontrol():
         log.exception("Bildirim kontrolu hatasi (devam ediliyor)")
 
 
+# ----------------------------------------------------------------- personel yonetimi (isim, ekle, sil)
+def _pers_log(con, islem, kisi_no, eski, yeni, istemci):
+    con.execute("INSERT INTO personel_log(zaman,islem,kisi_no,eski,yeni,istemci) VALUES(?,?,?,?,?,?)",
+                (zstr(simdi()), islem, kisi_no, str(eski or "")[:200], str(yeni or "")[:200], str(istemci or "")[:60]))
+
+
+def _personel_getir(con, k):
+    r = con.execute("SELECT p.*, a.gorunen_ad AS gorunen_ad, a.silindi AS silindi FROM personel p "
+                    "LEFT JOIN personel_ayar a ON a.kisi_no = p.kisi_no WHERE p.kisi_no=?", (k,)).fetchone()
+    if not r:
+        raise ValueError("Personel bulunamadı")
+    return r
+
+
+def _kisi_no(js):
+    try:
+        k = int(str(js["kisi_no"]).strip())
+    except (KeyError, TypeError, ValueError):
+        raise ValueError("Cihaz no pozitif bir tam sayı olmalı")
+    if k <= 0:
+        raise ValueError("Cihaz no pozitif bir tam sayı olmalı")
+    return k
+
+
+def personel_liste(silinenler=False):
+    bugun = simdi().date().isoformat()
+    sinir = (simdi() - dt.timedelta(days=60)).strftime("%Y-%m-%d")
+    with db() as con:
+        per = personel_sozluk(con)
+        mc = MesaiCozucu(con)
+        son = {r[0]: r[1] for r in con.execute("SELECT kisi_no, MAX(zaman) FROM okutma WHERE gizli=0 GROUP BY kisi_no")}
+    out = []
+    for k, p in per.items():
+        if p["silindi"] and not silinenler:
+            continue
+        pa = mc.per.get(k) or {}
+        dbf = f'{p["adi"]} {p["soyadi"]}'.strip()
+        gor = (p["gorunen_ad"] or "").strip()
+        kat = mc.kat.get(pa.get("kategori_id")) or {}
+        out.append({"kisi_no": k, "kartno": p["kartno"], "ad": ad_ham(p, k), "dbf_ad": dbf, "gorunen_ad": gor,
+                    "farkli": bool(gor and p["kaynak"] != "elle" and gor != dbf), "kaynak": "elle" if p["kaynak"] == "elle" else "dbf",
+                    "kategori_id": pa.get("kategori_id"), "kategori": kat.get("ad", ""), "son_okutma": son.get(k) or "",
+                    "aktif": (son.get(k) or "") >= sinir, "silindi": bool(p["silindi"]),
+                    "ayrildi": bool(pa.get("isten_cikis") and pa["isten_cikis"] < bugun)})
+    out.sort(key=lambda x: x["ad"])
+    return out
+
+
+def tanimsiz_numaralar():
+    """Okutmasi olan ama personel tablosunda olmayan cihaz numaralari."""
+    with db() as con:
+        return [{"kisi_no": r[0], "sayi": r[1], "ilk": r[2], "son": r[3]} for r in con.execute(
+            "SELECT kisi_no, COUNT(*), MIN(zaman), MAX(zaman) FROM okutma WHERE gizli=0 AND kisi_no NOT IN (SELECT kisi_no FROM personel) "
+            "GROUP BY kisi_no ORDER BY MAX(zaman) DESC")]
+
+
+def personel_ekle(js, istemci=""):
+    k = _kisi_no(js)
+    ad = " ".join(str(js.get("ad") or "").split())[:80]
+    if not ad:
+        raise ValueError("Ad soyad zorunlu")
+    with db() as con:
+        var = con.execute("SELECT p.*, a.gorunen_ad AS gorunen_ad, a.silindi AS silindi FROM personel p "
+                          "LEFT JOIN personel_ayar a ON a.kisi_no = p.kisi_no WHERE p.kisi_no=?", (k,)).fetchone()
+        if var:
+            if var["silindi"]:
+                raise ValueError(f"Bu numara silinmiş bir kişiye ait ({ad_ham(var, k)}). Listede \"Silinenleri göster\" ile bulup \"Geri al\" yapabilirsiniz.")
+            raise ValueError(f"Bu numara {ad_ham(var, k)} kişisine ait")
+        con.execute("INSERT INTO personel(kisi_no,kartno,adi,soyadi,sicilno,guncelleme,kaynak) VALUES(?,?,?,?,?,?,'elle')",
+                    (k, f"{k:04d}", ad, "", "", zstr(simdi())))
+        con.execute("INSERT OR IGNORE INTO personel_ayar(kisi_no) VALUES(?)", (k,))
+        con.execute("UPDATE personel_ayar SET gorunen_ad=? WHERE kisi_no=?", (ad, k))  # DBF'ye sonradan eklense de bu ad gorunur
+        _pers_log(con, "ekle", k, "", ad, istemci)
+    log.info("Personel eklendi: %s %s istemci=%s", k, ad, istemci)
+    return {"kisi_no": k}
+
+
+def personel_duzenle(js, istemci=""):
+    k = _kisi_no(js)
+    with db() as con:
+        p = _personel_getir(con, k)
+        eski = ad_ham(p, k)
+        con.execute("INSERT OR IGNORE INTO personel_ayar(kisi_no) VALUES(?)", (k,))
+        if "gorunen_ad" in js:
+            ad = " ".join(str(js.get("gorunen_ad") or "").split())[:80]
+            con.execute("UPDATE personel_ayar SET gorunen_ad=? WHERE kisi_no=?", (ad or None, k))
+        if "kategori_id" in js:
+            kid = js["kategori_id"]
+            kid = int(kid) if kid not in (None, "", 0) else None
+            if kid and not con.execute("SELECT 1 FROM kategori WHERE id=?", (kid,)).fetchone():
+                raise ValueError("Kategori bulunamadı")
+            con.execute("UPDATE personel_ayar SET kategori_id=? WHERE kisi_no=?", (kid, k))
+        yeni = ad_ham(_personel_getir(con, k), k)
+        _pers_log(con, "duzenle", k, eski, yeni, istemci)
+    return {"kisi_no": k}
+
+
+def _personel_bayrak(js, istemci, silindi):
+    k = _kisi_no(js)
+    with db() as con:
+        p = _personel_getir(con, k)
+        con.execute("INSERT OR IGNORE INTO personel_ayar(kisi_no) VALUES(?)", (k,))
+        con.execute("UPDATE personel_ayar SET silindi=? WHERE kisi_no=?", (1 if silindi else 0, k))
+        _pers_log(con, "sil" if silindi else "geri_al", k, ad_ham(p, k), ad_ham(p, k), istemci)
+    return {"kisi_no": k, "silindi": silindi}
+
+
+def personel_sil(js, istemci=""):
+    return _personel_bayrak(js, istemci, True)
+
+
+def personel_geri_al(js, istemci=""):
+    return _personel_bayrak(js, istemci, False)
+
+
 # ----------------------------------------------------------------- disa aktarma
 def xlsx_yaz(baslik, satirlar, sayfa="Rapor"):
     def hucre(r, c, v):
@@ -2752,15 +2892,20 @@ class Istek(BaseHTTPRequestHandler):
             if yol == "/api/ham":
                 return self.gonder(200, ham_kayitlar(q["bas"], q["bit"], q.get("kisi")))
             if yol == "/api/personel":
-                with db() as con:
-                    rows = con.execute("SELECT kisi_no, adi, soyadi, sicilno FROM personel ORDER BY adi, soyadi")
-                    return self.gonder(200, [dict(r) for r in rows])
+                with db() as con:  # rapor filtresi: silinenler de (gecmis kayitlar icin), "(silindi)" ekiyle
+                    liste = [{"kisi_no": k, "adi": p["adi"], "soyadi": p["soyadi"], "sicilno": p["sicilno"], "ad": ad_soyad(p, k)}
+                             for k, p in personel_sozluk(con).items()]
+                    return self.gonder(200, sorted(liste, key=lambda x: x["ad"]))
             if yol == "/api/nobet":
                 return self.gonder(200, nobet_durumu(q["bas"], q["bit"]))
             if yol == "/api/ayar":
                 return self.gonder(200, ayar_getir())
             if yol == "/api/izin":
                 return self.gonder(200, {"izinler": izin_listesi(q["bas"], q["bit"], q.get("kisi")), "turler": IZIN_TURLERI})
+            if yol == "/api/personel_liste":
+                return self.gonder(200, personel_liste(q.get("silinenler") in ("1", "true")))
+            if yol == "/api/tanimsiz_numaralar":
+                return self.gonder(200, tanimsiz_numaralar())
             if yol == "/api/puantaj":
                 return self.gonder(200, puantaj(q.get("ay") or simdi().strftime("%Y-%m")))
             if yol == "/api/izin_bakiye":
@@ -2858,6 +3003,13 @@ class Istek(BaseHTTPRequestHandler):
             if yol in duzeltme_islem:
                 try:
                     return self.gonder(200, duzeltme_islem[yol](json.loads(govde), self.client_address[0]))
+                except (ValueError, KeyError, TypeError) as e:
+                    return self.gonder(400, {"hata": str(e)})
+            personel_islem = {"/api/ayar/personel_ekle": personel_ekle, "/api/ayar/personel_duzenle": personel_duzenle,
+                              "/api/ayar/personel_sil": personel_sil, "/api/ayar/personel_geri_al": personel_geri_al}
+            if yol in personel_islem:
+                try:
+                    return self.gonder(200, personel_islem[yol](json.loads(govde), self.client_address[0]))
                 except (ValueError, KeyError, TypeError) as e:
                     return self.gonder(400, {"hata": str(e)})
             ayar_islem = {"/api/yedek/al": lambda js: {"ad": yedek_al("elle")},

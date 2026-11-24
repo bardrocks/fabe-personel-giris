@@ -3,6 +3,24 @@
 Sürüm numarası `panel.py` içindeki `SURUM` değeridir; panelde sol menünün altında ve Sistem sayfasında görünür.
 Yeni sürüm ilk açıldığında veritabanı, güncellenmeden önce `data\yedekler` klasörüne otomatik yedeklenir.
 
+## 1.9.0
+- **Toplu kategori atama**: Personel sayfasındaki tabloda (ve Ayarlar > Personel listesi'nde) onay kutuları ve "tümünü seç"; seçince yapışkan çubuk çıkar:
+  "N kişi seçildi · Kategoriye ata: [liste / Kategorisiz yap] [Uygula] [Seçimi temizle]". Satıra tıklayınca kişi sayfası açılmaya devam eder, onay kutusu gezinmeyi tetiklemez.
+- **Personel yönetimi** (Ayarlar > Personel listesi): görünen adı değiştir (EnGoPer adı korunur, altında "EnGoPer'de: …" yazar), kişiyi **sil / geri al**, EnGoPer'de olmayan kişiyi **ekle**,
+  cihazda okutması olup adı bilinmeyen numaraları **tanımla**. Hiçbir şey Personel.DBF'e, EnGoPer'e ya da cihaza yazılmaz; okutmalar cihaz numarasıyla eşleşmeye devam eder.
+  Görünen ad her yerde (rapor, puantaj, bugün, nöbet, izin, Excel, Telegram…) tek noktadan çözülür. Silinen kişi Personel/Puantaj/Gelmeyen/izin bakiyesi/seçim listelerinden çıkar,
+  geçmiş raporlarda "(silindi)" ile görünür; cihazdan yeni okutması gelirse Bugün'de "silinmiş personel" uyarısı çıkar. DBF yenilemesi görünen adı ve silindi bayrağını ezmez, elle eklenen kişiyi silmez.
+  Nöbet isim eşleştirmesi görünen adla da eşleşir. Değişiklikler `personel_log` tablosuna yazılır.
+- Yeni API: `GET /api/personel_liste`, `GET /api/tanimsiz_numaralar`, `POST /api/ayar/personel_ekle|personel_duzenle|personel_sil|personel_geri_al`.
+- 1.8.0'dan geçişte `personel_ayar.gorunen_ad`, `personel_ayar.silindi`, `personel.kaynak` sütunları ve `personel_log` tablosu otomatik eklenir (otomatik yedek alınır).
+
+## 1.8.1
+- **Tablolar pencereye sığar**: Personel sayfasında "En çok geç kalanlar / gelmeyenler" kartları tablonun üstüne (yan yana) alındı, tablo tam genişlik kullanır. Bugün tablosu da tam genişlik,
+  grafikler altında. Tablolar sıkılaştırıldı (küçük dolgu, süreler gerekirse iki satıra sarılır). Ayarlar > Kategoriler ve Personel saatleri tabloları saat çiftleri ve çalışma günleri alt satırda olacak şekilde
+  yeniden düzenlendi. Puantaj'da aylık toplamlar ızgaranın altında ayrı, kaydırmasız tabloda; ızgarada ad sütunu sabit. 1024 / 1280 / 1366 px'te tablo içi yatay kaydırma yoktur.
+- **Kategoriye personel ekleme**: Ayarlar > Kategoriler'de her satırda "Personel (N)" düğmesi (arama, son 60 gün filtresi, onay kutulu liste, taşınacak kişi uyarısı); kişi sayfası > Düzenle'de Kategori seçimi;
+  Personel saatleri'ndeki toplu atama çubuğu "Seçili kişileri kategoriye ata: [liste] [Uygula]" olarak belirginleştirildi.
+
 ## 1.8.0
 - **Puantaj ve fazla mesai**: aylık ızgara (X, İ, R, Ü, HT, RT, TÇ, G), satır toplamları (çalışılan gün, çalışma süresi, fazla mesai, eksik süre, geç, izin/rapor/ücretsiz/gelmedi/tatil çalışması), Excel çıktısı.
   Fazla mesai yöntemi (haftalık eşik ya da günlük) ve günlük mola Genel mesai'den ayarlanır; ay sınırındaki haftalar haftanın tamamı üzerinden hesaplanır ve haftanın son gününün (Pazar) ayına yazılır.

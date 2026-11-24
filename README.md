@@ -67,6 +67,18 @@ Log: `C:\EnGoPerPanel\data\panel.log` · Veritabanı: `C:\EnGoPerPanel\data\pane
 Cihaz giriş/çıkış ayırmadığı için günün ilk okutması giriş, son okutması çıkış sayılır;
 3 dk içindeki tekrar okutmalar tek sayılır.
 
+## Personel listesi, kategoriler ve toplu atama
+
+- **Kategoriye atama (3 yol):** (1) Personel sayfasında kişileri onay kutusuyla seçin, çıkan çubuktan kategoriyi seçip **Uygula**'ya basın (Kategorisiz yap da var). (2) Ayarlar > Kategoriler'de kategori satırındaki
+  **Personel (N)** düğmesiyle kişi ekleyip çıkarın. (3) Kişi sayfası > **Düzenle**'de Kategori seçin.
+- **Ayarlar > Personel listesi:** tüm personel (EnGoPer'den gelen ve elle eklenen), arama, "Silinenleri göster", "Son 60 günde okutanlar". Satır işlemleri: **Düzenle** (görünen ad, kategori; cihaz no salt okunur),
+  **Sil / Geri al**. **+ Personel ekle**: cihaz no ve ad soyad zorunlu; numara başka kişide ya da silinmiş birindeyse hata verir. **Cihazda olup adı bilinmeyen numaralar** kartında **Tanımla** ile ad verilir;
+  numaranın geçmiş okutmaları o isimle görünür (okutmalar zaten cihaz numarasıyla bağlıdır).
+- Adlar EnGoPer'in Personel.DBF'inden **salt okunur** alınır; görünen ad, silme ve elle ekleme panelin kendi veritabanında tutulur (DBF'e, EnGoPer'e ya da cihaza yazılmaz). DBF yenilemesi bunları ezmez;
+  elle eklenen kişi DBF'ye sonradan eklenirse DBF adı kaydedilir ama görünen ad geçerli kalır. Her değişiklik `personel_log` tablosuna (zaman, işlem, kişi, eski/yeni ad, istemci IP) yazılır.
+- **Silinen kişi**: Personel sayfası, Puantaj, Gelmeyenler, izin bakiyesi ve kişi seçim listelerinden çıkar; geçmiş raporlar, ham kayıtlar ve kişi sayfası çalışır, ad "(silindi)" ekiyle görünür.
+  Cihazdan yeni okutması gelirse kayıt alınır ve Bugün listesinde "silinmiş personel" uyarısıyla görünür. Geri alınabilir.
+
 ## Çalışma günleri
 
 Mağaza Pazar kapalıdır; diğer günler kişiden kişiye değişebilir (kimi Cumartesi hiç çalışmaz, kimi ayda bir nöbetle, kimi her Cumartesi çalışır;
