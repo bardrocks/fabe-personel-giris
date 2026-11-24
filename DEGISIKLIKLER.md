@@ -3,6 +3,9 @@
 Sürüm numarası `panel.py` içindeki `SURUM` değeridir; panelde sol menünün altında ve Sistem sayfasında görünür.
 Yeni sürüm ilk açıldığında veritabanı, güncellenmeden önce `data\yedekler` klasörüne otomatik yedeklenir.
 
+## 1.9.1
+- Personeli bulması kolaylaşsın diye: kişi sayfası başlığında "✎ Adı düzenle" ve "Personeli sil / Geri al" düğmeleri (silinmişse kırmızı "silinmiş" rozeti), Personel sayfasında Ayarlar > Personel listesi'ne giden ipucu satırı (`#ayarlar/personelliste` bağlantısı).
+
 ## 1.9.0
 - **Toplu kategori atama**: Personel sayfasındaki tabloda (ve Ayarlar > Personel listesi'nde) onay kutuları ve "tümünü seç"; seçince yapışkan çubuk çıkar:
   "N kişi seçildi · Kategoriye ata: [liste / Kategorisiz yap] [Uygula] [Seçimi temizle]". Satıra tıklayınca kişi sayfası açılmaya devam eder, onay kutusu gezinmeyi tetiklemez.

@@ -307,6 +307,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
           <label>Göster<select id="p-goster"><option value="">Herkes</option><option value="hatali">Sadece hatası olanlar</option></select></label>
           <button class="d" id="p-excel" style="margin-left:auto">Excel</button>
         </div>
+        <p class="soluk" id="p-ipucu" style="margin:0 0 10px">İsim değiştirmek veya silmek için kişinin adına tıklayın ya da <a href="#ayarlar/personelliste">Ayarlar &gt; Personel listesi</a>'ni kullanın.</p>
         <div id="p-secim"></div>
         <div class="tablo" id="p-tablo"></div>
       </div>
@@ -815,6 +816,7 @@ function rota() {
   $$("aside nav a").forEach(a => a.classList.toggle("aktif", a.dataset.r === (s === "kisi" ? "personel" : s)));
   donemCiz();
   Promise.resolve(SAYFA[s](h[1])).catch(e => console.error(e));
+  if (s === "ayarlar" && h[1] && document.querySelector(`[data-altgrup=ayar] [data-alt="${h[1]}"]`)) altSec("ayar", h[1]);
 }
 window.addEventListener("hashchange", () => { rota(); window.scrollTo(0, 0); });
 
@@ -1002,17 +1004,32 @@ $("#p-excel").onclick = () => location.href = `/disa?${new URLSearchParams({tur:
 
 // ===================================================================== PERSONEL DETAY
 let KISI_NO = null;
-let KISI_DETAY = null;
+let KISI_DETAY = null, KISI_PL = null;
+document.addEventListener("click", async e => {
+  if (!KISI_PL) return;
+  if (e.target.closest("#k-ad-duzenle")) pdAc({mod: "duzenle", p: KISI_PL, sonra: () => rota()});
+  if (e.target.closest("#k-sil")) {
+    if (!confirm(`${KISI_PL.ad} listelerden kaldırılacak. Geçmiş kayıtları silinmez, Ayarlar > Personel listesi > Silinenleri göster'den geri alabilirsiniz.`)) return;
+    try { await postJ("/api/ayar/personel_sil", {kisi_no: KISI_PL.kisi_no}); await rota(); toast(`${KISI_PL.ad} silindi`); } catch (x) { alert(x.message); }
+  }
+  if (e.target.closest("#k-geri-al")) {
+    try { await postJ("/api/ayar/personel_geri_al", {kisi_no: KISI_PL.kisi_no}); await rota(); toast(`${KISI_PL.ad} geri alındı`); } catch (x) { alert(x.message); }
+  }
+});
 async function yukleKisi(k) {
   KISI_NO = k;
   // takvim için ay başı/sonu tamamlanmış aralık
   const d = await api(`/api/personel_detay?kisi=${k}&bas=${DONEM.bas}&bit=${DONEM.bit}`);
   KISI_DETAY = d;
   const p = d.kisi, o = d.ozet;
+  KISI_PL = (await api("/api/personel_liste?silinenler=1").catch(() => [])).find(x => x.kisi_no === +k) || null;
   const bas = (p.ad.split(" ").map(x => x[0]).slice(0, 2).join("")) || "?";
   $("#k-bas").innerHTML = `<div class="avatar">${esc(bas)}</div><div><h1 style="font-size:19px;margin:0">${esc(p.ad)}</h1>
     <div class="soluk">${p.kategori ? `<span class="e mavi">${esc(p.kategori)}</span> ` : ""}No ${p.kisi_no}${p.sicil ? " · Sicil " + esc(p.sicil) : ""}
-    ${p.isten_cikis && p.isten_cikis < bugun() ? ` · <span class="e kirmizi">${tarihTR(p.isten_cikis)} tarihinde ayrıldı</span>` : ""}</div></div>`;
+    ${p.isten_cikis && p.isten_cikis < bugun() ? ` · <span class="e kirmizi">${tarihTR(p.isten_cikis)} tarihinde ayrıldı</span>` : ""}
+    ${KISI_PL && KISI_PL.silindi ? ` <span class="e kirmizi" title="Personel listesinden silinmiş; geçmiş kayıtlar durur">silinmiş</span>` : ""}</div>
+    ${KISI_PL ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><button class="d kucuk" id="k-ad-duzenle">✎ Adı düzenle</button>` +
+      (KISI_PL.silindi ? `<button class="d kucuk" id="k-geri-al">Geri al</button>` : `<button class="d kucuk" id="k-sil">Personeli sil</button>`) + `</div>` : ""}</div>`;
   $("#k-kpi").innerHTML = [
     {deger: o.gun, ad: "Geldiği gün", renk: "yesil", ikon: "gelen", alt: `ort. giriş ${o.ort_giris || "–"}`},
     {deger: o.gec, ad: "Geç kalma", renk: "sari", ikon: "gec", alt: o.gec ? `toplam ${sureYaz(o.gec_dk)}` : ""},
@@ -1533,9 +1550,9 @@ function tnCiz() {
 $("#pl-ara").oninput = plCiz; $("#pl-silinen").onchange = plCiz; $("#pl-aktif").onchange = plCiz;
 $("#pl-ekle").onclick = () => pdAc({mod: "ekle"});
 let PD = null;
-async function pdAc({mod, p, kisi_no}) {
+async function pdAc({mod, p, kisi_no, sonra}) {
   await katlarYukle(true);
-  PD = {mod};
+  PD = {mod, sonra};
   $("#pd-baslik").textContent = mod === "ekle" ? "Personel ekle" : `${p.ad} · düzenle`;
   $("#pd-no").value = p ? p.kisi_no : (kisi_no || ""); $("#pd-no").readOnly = mod === "duzenle";
   $("#pd-ad").value = mod === "duzenle" ? p.gorunen_ad : "";
@@ -1559,7 +1576,7 @@ $("#pd-kaydet").onclick = async () => {
       await postJ("/api/ayar/personel_duzenle", {kisi_no: +no, gorunen_ad: ad, kategori_id: kat ? +kat : null});
       toast("Kaydedildi");
     }
-    $("#pd-modal").classList.add("gizli"); await yukleKisiListe();
+    $("#pd-modal").classList.add("gizli"); await (PD.sonra ? PD.sonra() : yukleKisiListe());
   } catch (e) { alert(e.message); }
 };
 
