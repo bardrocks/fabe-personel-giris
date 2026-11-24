@@ -61,7 +61,11 @@ if (Test-Path $db) {
 # --- dosyalari kopyala (data klasoru ve config.json korunur)
 $kaynak = $PSScriptRoot
 New-Item -ItemType Directory -Force -Path $Hedef, (Join-Path $Hedef 'data') | Out-Null
-foreach ($dosya in 'panel.py', 'index.html', 'collector.ps1', 'baslat.vbs', 'panel.ico') {
+# eski VBS baslatici (Defender engelliyor) ve artik gerekmeyen python_yolu.txt
+foreach ($eski in 'baslat.vbs', 'python_yolu.txt') {
+    Remove-Item -LiteralPath (Join-Path $Hedef $eski) -ErrorAction SilentlyContinue
+}
+foreach ($dosya in 'panel.py', 'index.html', 'collector.ps1', 'baslat.pyw', 'panel.ico') {
     Copy-Item -LiteralPath (Join-Path $kaynak $dosya) -Destination $Hedef -Force
 }
 $ayar = Join-Path $Hedef 'config.json'
@@ -81,10 +85,12 @@ if (-not $py -or -not (Test-Path $py)) { throw 'Python bulunamadi (py / python.e
 $ver = & $py -c "import sys; print('%d.%d' % sys.version_info[:2])"
 if ([version]$ver -lt [version]'3.8') { throw "Python 3.8+ gerekli, bulunan: $ver" }
 $pyw = Join-Path (Split-Path $py) 'pythonw.exe'
-if (-not (Test-Path $pyw)) { $pyw = $py }
+if (-not (Test-Path $pyw)) {
+    $pyw = $py
+    Write-Warning 'pythonw.exe bulunamadi, python.exe kullaniliyor: kisayola tiklayinca kisa sure konsol penceresi acilabilir.'
+}
 Write-Host "Python: $py ($ver)"
-# baslat.vbs pythonw yolunu ve portu buradan okur
-[IO.File]::WriteAllText((Join-Path $Hedef 'python_yolu.txt'), $pyw + "`r`n")
+# baslat.pyw portu buradan okur
 [IO.File]::WriteAllText((Join-Path $Hedef 'port.txt'), [string]$Port + "`r`n")
 
 
@@ -128,8 +134,8 @@ $kisayolAdi = 'Personel Paneli.lnk'
 $wsh = New-Object -ComObject WScript.Shell
 function Yeni-Kisayol($yol) {
     $k = $wsh.CreateShortcut($yol)
-    $k.TargetPath = Join-Path $env:WINDIR 'System32\wscript.exe'
-    $k.Arguments = '"' + (Join-Path $Hedef 'baslat.vbs') + '"'
+    $k.TargetPath = $pyw
+    $k.Arguments = '"' + (Join-Path $Hedef 'baslat.pyw') + '"'
     $k.WorkingDirectory = $Hedef
     $k.IconLocation = (Join-Path $Hedef 'panel.ico') + ',0'
     $k.Description = 'Personel giri' + [char]0x15F + '-' + [char]0x00E7 + [char]0x0131 + 'k' + [char]0x0131 + [char]0x015F + ' paneli'   # script ASCII kalsin
