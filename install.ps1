@@ -28,8 +28,10 @@ if ($Kaldir) {
     Stop-ScheduledTask -TaskName $GorevAdi -ErrorAction SilentlyContinue
     Unregister-ScheduledTask -TaskName $GorevAdi -Confirm:$false -ErrorAction SilentlyContinue
     Get-NetFirewallRule -DisplayName $KuralAdi -ErrorAction SilentlyContinue | Remove-NetFirewallRule
-    foreach ($klasor in [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Startup')) {
-        Remove-Item -LiteralPath (Join-Path $klasor 'Personel Paneli.url') -ErrorAction SilentlyContinue
+    foreach ($klasor in [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'), [Environment]::GetFolderPath('Startup')) {
+        foreach ($ad in 'Personel Paneli.lnk', 'Personel Paneli.url') {
+            Remove-Item -LiteralPath (Join-Path $klasor $ad) -ErrorAction SilentlyContinue
+        }
     }
     Write-Host "Kaldirildi. Veriler duruyor: $Hedef\data" -ForegroundColor Green
     return
@@ -59,7 +61,7 @@ if (Test-Path $db) {
 # --- dosyalari kopyala (data klasoru ve config.json korunur)
 $kaynak = $PSScriptRoot
 New-Item -ItemType Directory -Force -Path $Hedef, (Join-Path $Hedef 'data') | Out-Null
-foreach ($dosya in 'panel.py', 'index.html', 'collector.ps1') {
+foreach ($dosya in 'panel.py', 'index.html', 'collector.ps1', 'baslat.vbs', 'panel.ico') {
     Copy-Item -LiteralPath (Join-Path $kaynak $dosya) -Destination $Hedef -Force
 }
 $ayar = Join-Path $Hedef 'config.json'
@@ -81,6 +83,9 @@ if ([version]$ver -lt [version]'3.8') { throw "Python 3.8+ gerekli, bulunan: $ve
 $pyw = Join-Path (Split-Path $py) 'pythonw.exe'
 if (-not (Test-Path $pyw)) { $pyw = $py }
 Write-Host "Python: $py ($ver)"
+# baslat.vbs pythonw yolunu ve portu buradan okur
+[IO.File]::WriteAllText((Join-Path $Hedef 'python_yolu.txt'), $pyw + "`r`n")
+[IO.File]::WriteAllText((Join-Path $Hedef 'port.txt'), [string]$Port + "`r`n")
 
 
 # --- tek seferlik test okumasi
@@ -118,19 +123,36 @@ Register-ScheduledTask -TaskName $GorevAdi -Action $eylem -Trigger $tetikleyici 
     -Settings $ayarlar -Force | Out-Null
 Start-ScheduledTask -TaskName $GorevAdi
 
-# --- kisayollar: masaustu + (istege bagli) oturum acilinca tarayicida ac
-$kisayol = "[InternetShortcut]`r`nURL=http://localhost:$Port/`r`n"
+# --- kisayollar: masaustu + Baslat menusu + (istege bagli) oturum acilinca baslatici
+$kisayolAdi = 'Personel Paneli.lnk'
+$wsh = New-Object -ComObject WScript.Shell
+function Yeni-Kisayol($yol) {
+    $k = $wsh.CreateShortcut($yol)
+    $k.TargetPath = Join-Path $env:WINDIR 'System32\wscript.exe'
+    $k.Arguments = '"' + (Join-Path $Hedef 'baslat.vbs') + '"'
+    $k.WorkingDirectory = $Hedef
+    $k.IconLocation = (Join-Path $Hedef 'panel.ico') + ',0'
+    $k.Description = 'Personel giri' + [char]0x15F + '-' + [char]0x00E7 + [char]0x0131 + 'k' + [char]0x0131 + [char]0x015F + ' paneli'   # script ASCII kalsin
+    $k.Save()
+}
 $masaustu = [Environment]::GetFolderPath('Desktop')   # OneDrive'a yonlendirilmis olabilir
-[IO.File]::WriteAllText((Join-Path $masaustu 'Personel Paneli.url'), $kisayol)
-$baslangic = Join-Path ([Environment]::GetFolderPath('Startup')) 'Personel Paneli.url'
+$programlar = [Environment]::GetFolderPath('Programs')
+$baslangicKlasor = [Environment]::GetFolderPath('Startup')
+# eski internet kisayollarini sil
+foreach ($klasor in $masaustu, $programlar, $baslangicKlasor) {
+    Remove-Item -LiteralPath (Join-Path $klasor 'Personel Paneli.url') -ErrorAction SilentlyContinue
+}
+Yeni-Kisayol (Join-Path $masaustu $kisayolAdi)
+Yeni-Kisayol (Join-Path $programlar $kisayolAdi)
+$baslangic = Join-Path $baslangicKlasor $kisayolAdi
 if ($OturumdaAcma) {
     Remove-Item -LiteralPath $baslangic -ErrorAction SilentlyContinue
 }
 else {
-    [IO.File]::WriteAllText($baslangic, $kisayol)
+    Yeni-Kisayol $baslangic
     Write-Host 'Oturum acilinca panel tarayicida acilacak.'
 }
-Write-Host "Masaustu kisayolu: $masaustu\Personel Paneli.url"
+Write-Host "Masaustu kisayolu: $masaustu\$kisayolAdi (cift tiklayinca panel acilir)"
 
 # --- kontrol
 Start-Sleep -Seconds 5
