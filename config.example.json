@@ -14,5 +14,9 @@
   "erken_tolerans_dk": 5,
   "tekrar_esik_dk": 3,
   "yonetim_sifresi": "",
-  "ek_yedek_klasoru": ""
+  "ek_yedek_klasoru": "",
+  "guncelleme_dali": "claude/stoic-cori-vz2i9g",
+  "guncelleme_taban": "https://raw.githubusercontent.com/bardrocks/fabe-personel-giris",
+  "guncelleme_api": "https://api.github.com/repos/bardrocks/fabe-personel-giris/commits/{dal}",
+  "otomatik_guncelleme": true
 }

@@ -52,7 +52,7 @@ Log: `C:\EnGoPerPanel\data\panel.log` · Veritabanı: `C:\EnGoPerPanel\data\pane
 
 ## Panel
 
-- **Şimdi:** içerideki personel, bugünün giriş/çıkışları, geç kalanlar; cumartesi ise nöbetçilerin durumu. Tatil günü başlıkta yazar;
+- **Şimdi (Bugün):** içerideki personel, bugünün giriş/çıkışları, geç kalanlar; cumartesi ise nöbetçilerin durumu. Mağaza kapalı günse başlıkta yazar;
   "ÇIKIŞ YOK" (ya da mesai bitmiş ve hâlâ içeride) satırlarında hızlı **Çıkış ekle** düğmesi vardır.
 - **Rapor:** tarih aralığı + kişi + durum filtresi (geç / çıkış yok), Excel ve CSV indirme.
 - **Nöbet:** aylık nöbet çizelgesi yükleme ve her cumartesi için *GELDİ / GELMEDİ / BEKLENİYOR / PLANLI*.
@@ -66,6 +66,32 @@ Log: `C:\EnGoPerPanel\data\panel.log` · Veritabanı: `C:\EnGoPerPanel\data\pane
 
 Cihaz giriş/çıkış ayırmadığı için günün ilk okutması giriş, son okutması çıkış sayılır;
 3 dk içindeki tekrar okutmalar tek sayılır.
+
+## Bugün sayfası, kart no ve hızlı arama
+
+- **Bugün:** KPI kartları ve bugünün listesi (kategoriye göre süzülebilir) altında şu kartlar vardır: **Dikkat edilecekler** (dün çıkış okutmayanlar [Düzelt: saat alanına kişinin mesai çıkışı önden yazılır],
+  mesai saati geçtiği halde gelmeyenler [İzin gir], son 14 günde okutması olan adı bilinmeyen kart numaraları [Tanımla], bu hafta başlayan/biten izinler; boş gruplar gizlenir, her grupta ilk 8 satır görünür),
+  **Şu an içeride · kategoriye göre** (içeride / bugün beklenen, ilerleme çubuğu; satıra tıklayınca liste o kategoriye süzülür), **Yaklaşanlar** (bu/gelecek cumartesi nöbet listesi, önümüzdeki 7 günün izinleri),
+  **Canlı okutma akışı** (son 10 okutma, ayıklanmış sıradan giriş/çıkış etiketi) ve **Bu ayın özeti** (en çok geç kalan / çıkış okutmayan 5 kişi). Kartlar özellik anahtarlarına uyar (izin kapalıysa izin kartları yok, vb.).
+  Sayfa 60 sn'de bir yenilenir.
+- **Kart no:** Personel giriş-çıkışı kişiye kayıtlı kartla yapılır; cihazın gönderdiği numara Personel.DBF'deki KARTNO'ya (int) eşittir. Arayüzde her yerde "Kart no" yazar ve DBF'deki metin gösterilir (örn. 0081);
+  elle eklenen kişide 4 haneye sıfırla doldurulur. Excel başlıkları da "Kart No"dur.
+- **Hızlı arama:** sol menüde logonun altındaki kutu (mobilde büyüteç ikonu): `81`, `0081` ya da isim parçası yazın; en fazla 8 sonuç (tam kart no eşleşmesi önce, silinenler "(silindi)"); Enter ya da tıklama kişi sayfasını açar.
+  Kayıtlı olmayan kart numarası için "Bu kart kimseye tanımlı değil: Tanımla" seçeneği çıkar. Personel sayfası ve Personel listesi aramaları da baştaki sıfırları yok sayar (81 → 0081).
+
+## Otomatik güncelleme
+
+Panel kendini GitHub'daki depodan güncelleyebilir (`guncelleme_taban` + `guncelleme_api` + `guncelleme_dali` (dosyalar dalın commit SHA adresinden iner, tutarlı set); varsayılan dal şimdilik `claude/stoic-cori-vz2i9g`, ileride `main`; üçü de `config.json`'dan değiştirilebilir).
+**Güncellenen dosyalar:** `panel.py`, `index.html`, `collector.ps1`, `baslat.pyw`, `panel.ico`, `DEGISIKLIKLER.md`, `README.md`. **Asla dokunulmayanlar:** `config.json`, `data\` (veritabanı), `port.txt`, kısayollar, zamanlanmış görev, güvenlik duvarı.
+
+- **Masaüstü simgesinden:** Panel açıldıktan sonra başlatıcı uzak sürümü kontrol eder (internet yoksa sessizce atlar). Yeni sürüm varsa ve "otomatik güncelle" açıksa küçük bir "Yeni sürüm yükleniyor…" penceresi çıkar,
+  güncelleme uygulanır, panel yeniden başlar ve tarayıcı açılır. Panel 45 sn içinde yeni sürümle dönmezse başlatıcı eski kod yedeğinden **otomatik geri alır** ve hata kutusu gösterir.
+- **Sistem sayfası > Güncelleme:** mevcut ve uzak sürüm, yenilik notları, **Kontrol et**, **Şimdi güncelle** ve "Masaüstü simgesinden açılırken otomatik güncelle" anahtarı (`ayar` tablosunda `otomatik_guncelleme`, config varsayılanını ezer).
+- **Uygulama adımları** (`POST /api/guncelleme/uygula`): sürüm kontrolü → veritabanı yedeği (`guncelleme-<eski>-<yeni>`) → tüm dosyalar `data\guncelleme_tmp\`'ye iner (boş olmamalı, `panel.py` derlenmeli ve sürümü uzak sürüme eşit olmalı,
+  `index.html` geçerli olmalı; biri başarısızsa hiçbir dosyaya dokunulmaz) → eski dosyalar `data\yedekler\kod_<eski>_<zaman>\` altına kopyalanır → dosyalar yerine konur (hata olursa yedekten geri yüklenir) →
+  `data\guncelleme.json` yazılır → panel kendini aynı komutla yeniden başlatır (cihaz okuması sürüyorsa en çok 3 dk beklenir). Yeni sürüm açılınca arayüz bir kerelik "vX sürümüne güncellendi · Yenilikler" gösterir.
+- **Yetki:** `127.0.0.1`'den gelen güncelleme isteği (masaüstü başlatıcı) oturum istemez; LAN'dan gelen istek giriş açıkken yönetici oturumu, kapalıyken `yonetim_sifresi` ister (izleyici 403, oturumsuz 401).
+- Elle güncelleme gerekirse: yeni dosyaları kopyalayıp `install.ps1`'i tekrar çalıştırın. Yazma izni hatası alırsanız `install.ps1`'i yönetici olarak çalıştırın (`C:\EnGoPerPanel` için Users grubuna Modify verir).
 
 ## Personel listesi, kategoriler ve toplu atama
 
@@ -84,9 +110,9 @@ Cihaz giriş/çıkış ayırmadığı için günün ilk okutması giriş, son ok
 Mağaza Pazar kapalıdır; diğer günler kişiden kişiye değişebilir (kimi Cumartesi hiç çalışmaz, kimi ayda bir nöbetle, kimi her Cumartesi çalışır;
 hafta içi izin günü olan da olabilir). **Ayarlar > Genel mesai** genel günleri, **Kategoriler** ve **Personel saatleri** tabloları kategori/kişi bazında günleri (Pt Sa Ça Pe Cu Ct) belirler.
 Öncelik: **personel → kategori → genel**; "devral" işaretliyse üst kademe geçerlidir ve kaynağı yanında yazar.
-Bir gün şu durumlarda kişi için **beklenmez** (gelmedi sayılmaz): Pazar, tam gün resmi tatil, tam gün izin, işten çıkış tarihinden sonra, işe giriş tarihinden önce,
+Bir gün şu durumlarda kişi için **beklenmez** (gelmedi sayılmaz): Pazar, mağaza kapalı gün, tam gün izin, işten çıkış tarihinden sonra, işe giriş tarihinden önce,
 kişinin çalışma günü olmayan gün. Cumartesi işaretli değilse kişi **sadece nöbet listesindeki cumartesilerde** beklenir (nöbet takibi açıkken).
-Toplu izin girişinde de kişinin çalışmadığı günler (ve tatiller) atlanır.
+Toplu izin girişinde de kişinin çalışmadığı günler (ve mağaza kapalı günler) atlanır.
 
 ## Okutma düzeltme
 
@@ -99,16 +125,18 @@ Okutmayı unutan ya da yanlış okutan personel için (Ayarlar > Özellikler > *
 - Düzeltilen günler rapor ve tablolarda ✎ ile işaretlenir; Excel'de "Düzeltme" sütunu vardır. `yonetim_sifresi` ayarlıysa düzeltme de şifre ister.
 - Düzeltme özelliği kapatılırsa düğmeler kalkar, ama yapılmış düzeltmeler hesaplarda geçerli kalır.
 
-## Resmi tatiller
+## Mağaza kapalı günler
 
-**Ayarlar > Resmi tatiller**: yıl seçimi, liste, ekleme (tarih, ad, yarım gün) ve silme. İlk kurulumda 2026-2027 sabit tatilleri ve 2026 dini bayramları yüklenir;
-**2027 dini bayramlarını Diyanet takviminden kontrol edip kendiniz ekleyin** (sayfada uyarı çıkar). Tam gün tatilde kimse beklenmez; yarım günde (arife) öğleden sonra tatildir,
-mesai çıkışı 13:00 kabul edilir. Tatilde çalışan kişi o günü normal çalışmış sayılır ve satırda "Tatil" rozeti görür (ileride puantajda "tatil çalışması" olacak).
+Resmi tatil özelliği kaldırıldı (mağaza resmi tatillerde de çalışabiliyor). Yerine **Ayarlar > Kapalı günler**: başlangıç, bitiş ve açıklama (örn. "Yılbaşı tatili") girilir; aralıktaki her gün kaydedilir,
+aynı seferde girilenler tek satırda listelenir ve **Sil** ile topluca silinir; yıl filtresi vardır. **Hiç gün girilmezse hiçbir etkisi yoktur.** Kapalı günde:
+kimse beklenmez (gelmedi / nöbete gelmedi sayılmaz, Gelmeyenler listesine girmez); o gün okutan olursa normal çalışmış sayılır ama geç / erken / çıkış yok sayılmaz;
+puantajda okutmasız kapalı gün **K**, okutma varsa X; kişi takviminde ayrı stil ("Mağaza kapalı"); Bugün başlığında "Mağaza kapalı: açıklama"; nöbet satırları "KAPALI" görünür; toplu izin aralıklarında kapalı günler atlanır;
+Telegram özetleri gönderilmez. Eski `tatil` tablosu ve `ozellik_resmi_tatil` ayarı veritabanında durur ama hiçbir yerde okunmaz.
 
 ## Özellik anahtarları
 
-**Ayarlar > Özellikler**: nöbet takibi, izin takibi, okutma düzeltme ve resmi tatiller tek tek kapatılabilir (`ayar` tablosunda `ozellik_<ad>` = 1/0).
-Kapalı özellik menü, kart ve düğmelerden kalkar **ve hesaplara katılmaz** (izin kapalıysa izinler mesai/gelmedi hesabını etkilemez, tatil kapalıysa tatiller yok sayılır,
+**Ayarlar > Özellikler**: nöbet takibi, izin takibi, okutma düzeltme, puantaj, izin bakiyesi, giriş ve Telegram tek tek kapatılabilir/açılabilir (`ayar` tablosunda `ozellik_<ad>` = 1/0).
+Kapalı özellik menü, kart ve düğmelerden kalkar **ve hesaplara katılmaz** (izin kapalıysa izinler mesai/gelmedi hesabını etkilemez,
 nöbet kapalıysa cumartesi beklentisi nöbetten gelmez). Veri silinmez, tekrar açınca geri gelir. Puantaj, izin bakiyesi, panel şifresi (giriş) ve Telegram bildirimi de bu sekmeden açılıp kapatılır (giriş ve bildirim varsayılan olarak kapalıdır).
 
 ## İşe giriş / işten çıkış
@@ -120,9 +148,9 @@ Ayarlar > Personel saatleri'nde ayrılanlar varsayılan olarak gizlenir.
 
 **Puantaj** menüsü (ay seçimi): satırlar personel, sütunlar ayın günleri, en solda (sabit) ad. Hücre kodları:
 **X** geldi · **İ** izinli (tam gün; Raporlu ve Ücretsiz hariç türler) · **R** raporlu · **Ü** ücretsiz izin · **HT** hafta tatili (kişinin beklenmediği gün: Pazar, çalışmadığı gün, nöbetsiz cumartesi) ·
-**RT** resmi tatil · **TÇ** tatilde çalıştı (tam gün resmi tatilde okutma var) · **G** gelmedi (beklenen gün, okutma yok) · boş: gelecek gün, sistemde veri yok ya da kişi o gün işte değil.
-Saatlik izinli gelinen gün X'tir, küçük nokta ile işaretlenir; okutması düzeltilmiş günde ✎ görünür. Hücre üzerine gelince giriş-çıkış saatleri, izin ve tatil adı çıkar.
-Satır sonunda: çalışılan gün, toplam çalışma, **fazla mesai**, **eksik süre** (geç + erken çıkış), geç (adet), izin / rapor / ücretsiz / gelmedi gün ve tatil çalışması gün.
+**K** mağaza kapalı (kapalı günde okutma yoksa; okutma varsa X) · **G** gelmedi (beklenen gün, okutma yok) · boş: gelecek gün, sistemde veri yok ya da kişi o gün işte değil.
+Saatlik izinli gelinen gün X'tir, küçük nokta ile işaretlenir; okutması düzeltilmiş günde ✎ görünür. Hücre üzerine gelince giriş-çıkış saatleri, izin ve kapalı gün açıklaması çıkar.
+Satır sonunda: çalışılan gün, toplam çalışma, **fazla mesai**, **eksik süre** (geç + erken çıkış), geç (adet), izin / rapor / ücretsiz / gelmedi gün. Toplamlar ızgaranın altında ayrı tablodadır.
 Listelenenler: o ay okutması olan ya da son 60 günde okutmuş kişiler (ay başından önce işten ayrılanlar hariç). **Excel** düğmesi aynı ızgarayı toplamlar ve kod açıklamalarıyla indirir
 (`/disa?tur=puantaj&ay=2026-11&bicim=xlsx`). Kişi sayfasında da dönem için fazla mesai ve eksik süre kartları vardır.
 
@@ -132,7 +160,7 @@ Listelenenler: o ay okutması olan ya da son 60 günde okutmuş kişiler (ay ba�
   **Ay sınırındaki haftalar haftanın tamamı üzerinden hesaplanır ve fazla mesai haftanın son gününün (Pazar) ayına yazılır.**
 - **Günlük**: her gün kişinin mesai bitişinden sonra çalıştığı süre fazla mesaidir (erken gelme sayılmaz).
 - **Mola** (`mola_dk`, varsayılan 0): çıkışı olan günlerin çalışma süresinden düşülür (negatif olmaz); haftalık yöntemde fazla mesaiyi azaltır, günlük yöntemde fazla mesaiyi etkilemez.
-- Çıkış okutulmamış gün çalışma süresine 0 dakika katılır (önce Düzelt ile çıkış ekleyin). Tatilde çalışılan saatler de toplam çalışmaya ve haftalık toplama dahildir.
+- Çıkış okutulmamış gün çalışma süresine 0 dakika katılır (önce Düzelt ile çıkış ekleyin). Kapalı günde çalışılan saatler de toplam çalışmaya ve haftalık toplama dahildir.
 
 ## Yıllık izin bakiyesi
 
@@ -168,7 +196,7 @@ Bu komut girişi kapatır ve açık oturumları siler (servisi yeniden başlatma
 3. **Test mesajı gönder** ile deneyin. Seçenekler: **sabah özeti** (varsayılan 09:45: geç kalanlar, gelmeyenler, bugün izinliler), **akşam özeti** (20:30: günün özeti, çıkış okutmayanlar, nöbet durumu),
    **cihaz uyarısı** (son başarılı okuma 60 dakikadan eskiyse; en fazla 3 saatte bir tekrarlanır, düzelince "cihaz tekrar okunuyor" gelir).
 
-Özetler aynı gün bir kez, planlı saatten en geç 3 saat sonrasına kadar gönderilir; Pazar ve tam gün resmi tatilde gönderilmez. Kontrol her toplama turunda (5 dk) yapılır.
+Özetler aynı gün bir kez, planlı saatten en geç 3 saat sonrasına kadar gönderilir; Pazar ve mağaza kapalı günlerde gönderilmez. Kontrol her toplama turunda (5 dk) yapılır.
 **Mesajlarda personel isimleri Telegram'a gönderilir.** Token panelde ve API'de yalnızca son 4 hanesiyle görünür, log'a yazılmaz (ama `panel.db` ve yedeklerinde durur; yedekleri paylaşmayın).
 Gönderim hataları log'a ve Sistem sayfasındaki "Telegram bildirimi" satırına yazılır; servis hatadan etkilenmez. (Test için gizli `telegram_api` ayarı `config.json`'dan başka bir adrese yönlendirilebilir.)
 

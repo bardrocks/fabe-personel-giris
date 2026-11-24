@@ -1,7 +1,8 @@
 # EnGoPer Panel baslatici (pythonw.exe ile calisir, konsol acmaz).
 # Panel kapaliysa baslatir, hazir olunca Chrome'da (yoksa varsayilan tarayicida) acar.
 # Sira: panel calisiyor mu -> "EnGoPer Panel" zamanlanmis gorevi -> panel.py dogrudan.
-# C:\EnGoPer altina hicbir sey yazmaz. Sadece standart kutuphane.
+# Panel hazir olunca (internet varsa ve otomatik guncelleme aciksa) yeni surum yuklenir; panel yeni surumle donmezse
+# eski kod yedeginden geri yuklenir. C:\EnGoPer altina hicbir sey yazmaz. Sadece standart kutuphane.
 import json
 import os
 import re
@@ -99,6 +100,133 @@ def tarayici_ac(port):
     webbrowser.open(url)
 
 
+def json_al(port, yol, zaman_asimi=10, veri=None):
+    data = json.dumps(veri).encode("utf-8") if veri is not None else None
+    req = urllib.request.Request("http://127.0.0.1:%d%s" % (port, yol), data=data, method="POST" if veri is not None else "GET",
+                                 headers={"Content-Type": "application/json"})
+    try:
+        with _ACICI.open(req, timeout=zaman_asimi) as r:
+            return json.loads(r.read().decode("utf-8", "replace") or "{}")
+    except urllib.error.HTTPError as e:
+        try:
+            ayr = json.loads(e.read().decode("utf-8", "replace")).get("hata", "")
+        except Exception:
+            ayr = ""
+        raise RuntimeError(ayr or "HTTP %d" % e.code)
+
+
+def surum_oku(port):
+    try:
+        return json_al(port, "/api/surum", 3).get("surum", "")
+    except Exception:
+        return ""
+
+
+def surum_bekle(port, yeni, saniye, bilgi=None):
+    for _ in range(int(saniye)):
+        time.sleep(1)
+        if bilgi:
+            bilgi.tazele()
+        if surum_oku(port) == yeni:
+            return True
+    return False
+
+
+class Bilgi:
+    """Kucuk 'yukleniyor' penceresi (tkinter yoksa ya da ekran yoksa sessizce hicbir sey gostermez)."""
+
+    def __init__(self, metin):
+        self.k = None
+        try:
+            import tkinter
+            self.k = tkinter.Tk()
+            self.k.title("Personel Paneli")
+            self.k.resizable(False, False)
+            self.k.attributes("-topmost", True)
+            tkinter.Label(self.k, text=metin, padx=28, pady=22, font=("Segoe UI", 11)).pack()
+            self.k.update()
+        except Exception:
+            self.k = None
+
+    def tazele(self):
+        try:
+            if self.k:
+                self.k.update()
+        except Exception:
+            self.k = None
+
+    def kapat(self):
+        try:
+            if self.k:
+                self.k.destroy()
+        except Exception:
+            pass
+        self.k = None
+
+
+def kod_geri_al(kok=None):
+    """data/guncelleme.json'daki kod yedeginden dosyalari geri kopyalar. -> True/False"""
+    kok = kok or KOK
+    try:
+        yol = os.path.join(kok, "data", "guncelleme.json")
+        with open(yol, encoding="utf-8") as f:
+            k = json.load(f)
+        yedek = k["kod_yedek"]
+        for ad in os.listdir(yedek):
+            import shutil
+            shutil.copy2(os.path.join(yedek, ad), os.path.join(kok, ad))
+        k["durum"] = "geri_alindi"
+        with open(yol, "w", encoding="utf-8") as f:
+            json.dump(k, f, ensure_ascii=False)
+        return True
+    except Exception as e:
+        try:
+            sys.stderr.write("Kod geri alinamadi: %s\n" % e)
+        except Exception:
+            pass
+        return False
+
+
+def guncelle_dene(port):
+    """Sessizce atlar: internet yok / guncel / otomatik kapali. Basarisizsa eski surume doner ve hata kutusu gosterir."""
+    try:
+        g = json_al(port, "/api/guncelleme", 10)
+    except Exception:
+        return
+    if g.get("hata") or not g.get("var") or not g.get("otomatik"):
+        return
+    eski, yeni = g.get("mevcut", "?"), g.get("uzak", "?")
+    bilgi = Bilgi("Yeni sürüm yükleniyor (%s → %s)…\nLütfen bekleyin." % (eski, yeni))
+    log_yolu = os.path.join(KOK, "data", "panel.log")
+    try:
+        try:
+            r = json_al(port, "/api/guncelleme/uygula", 180, {})
+        except Exception as e:
+            bilgi.kapat()
+            msg = str(e)
+            if "yönetici" in msg or "izin" in msg:
+                hata_goster("Güncelleme yapılamadı: %s" % msg)
+            else:
+                hata_goster("Güncelleme başlatılamadı, mevcut sürümle devam ediliyor: %s\nLog: %s" % (msg, log_yolu))
+            return
+        if not r.get("yeniden_baslatiliyor"):
+            return
+        yeni = r.get("yeni", yeni)
+        ok = surum_bekle(port, yeni, float(os.environ.get("PANEL_BEKLE_SN", "45")), bilgi)
+        if not ok and not calisiyor(port):  # yeniden baslatma olmadiysa yeni kodla dogrudan baslat
+            paneli_baslat(port)
+            ok = surum_bekle(port, yeni, float(os.environ.get("PANEL_BEKLE2_SN", "15")), bilgi)
+        if not ok:
+            bilgi.kapat()
+            geri = kod_geri_al()
+            if not calisiyor(port) or surum_oku(port) != eski:
+                paneli_baslat(port)
+                bekle(port, 15)
+            hata_goster("Güncelleme başarısız oldu, eski sürüme dönüldü%s. Log: %s" % ("" if geri else " (kod geri yüklenemedi!)", log_yolu))
+    finally:
+        bilgi.kapat()
+
+
 def hata_goster(mesaj):
     if WIN:
         try:
@@ -131,6 +259,13 @@ def main():
         hata_goster("Panel başlatılamadı. Log: %s. Yönetici olarak install.ps1'i tekrar çalıştırmayı deneyin."
                     % os.path.join(KOK, "data", "panel.log"))
         return 1
+    try:
+        guncelle_dene(port)
+    except Exception as e:  # guncelleme hicbir sekilde tarayicinin acilmasini engellemesin
+        try:
+            sys.stderr.write("Guncelleme hatasi: %s\n" % e)
+        except Exception:
+            pass
     tarayici_ac(port)
     return 0
 

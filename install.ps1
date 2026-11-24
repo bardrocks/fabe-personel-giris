@@ -24,8 +24,28 @@ if (-not $kimlik.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator
     throw 'Yonetici PowerShell gerekli (sag tik > Yonetici olarak calistir).'
 }
 
+# Panel kendini yeniden baslatinca (otomatik guncelleme) ya da baslatici dogrudan acinca surec gorevin disinda kalir;
+# Stop-ScheduledTask onu durduramaz. Komut satirinda EnGoPerPanel ve panel.py gecen python sureclerini de sonlandir.
+function Stop-PanelSurecleri {
+    $say = 0
+    try {
+        $liste = Get-CimInstance Win32_Process -Filter "Name='pythonw.exe' OR Name='python.exe'" -ErrorAction SilentlyContinue
+        foreach ($p in $liste) {
+            if ($p.CommandLine -like '*EnGoPerPanel*panel.py*') {
+                Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
+                $say++
+            }
+        }
+    } catch {
+        Write-Warning 'Surec listesi alinamadi; panel surecleri elle kapatilmali.'
+    }
+    Write-Host "Gorev disinda calisan panel sureci sonlandirildi: $say"
+    if ($say -gt 0) { Start-Sleep -Seconds 1 }
+}
+
 if ($Kaldir) {
     Stop-ScheduledTask -TaskName $GorevAdi -ErrorAction SilentlyContinue
+    Stop-PanelSurecleri
     Unregister-ScheduledTask -TaskName $GorevAdi -Confirm:$false -ErrorAction SilentlyContinue
     Get-NetFirewallRule -DisplayName $KuralAdi -ErrorAction SilentlyContinue | Remove-NetFirewallRule
     foreach ($klasor in [Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'), [Environment]::GetFolderPath('Startup')) {
@@ -46,6 +66,7 @@ if ($hedefTam.StartsWith('C:\EnGoPer\', [StringComparison]::OrdinalIgnoreCase)) 
 # --- calisan servisi durdur ve mevcut veritabanini yedekle (guncellemede veri kaybi olmasin)
 Stop-ScheduledTask -TaskName $GorevAdi -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 2
+Stop-PanelSurecleri
 $db = Join-Path $Hedef 'data\panel.db'
 if (Test-Path $db) {
     $yedekKlasor = Join-Path $Hedef 'data\yedekler'
@@ -65,9 +86,13 @@ New-Item -ItemType Directory -Force -Path $Hedef, (Join-Path $Hedef 'data') | Ou
 foreach ($eski in 'baslat.vbs', 'python_yolu.txt') {
     Remove-Item -LiteralPath (Join-Path $Hedef $eski) -ErrorAction SilentlyContinue
 }
-foreach ($dosya in 'panel.py', 'index.html', 'collector.ps1', 'baslat.pyw', 'panel.ico') {
-    Copy-Item -LiteralPath (Join-Path $kaynak $dosya) -Destination $Hedef -Force
+foreach ($dosya in 'panel.py', 'index.html', 'collector.ps1', 'baslat.pyw', 'panel.ico', 'DEGISIKLIKLER.md', 'README.md') {
+    if (Test-Path -LiteralPath (Join-Path $kaynak $dosya)) {
+        Copy-Item -LiteralPath (Join-Path $kaynak $dosya) -Destination $Hedef -Force
+    }
 }
+# Otomatik guncelleme ve geri yukleme her kullanici hesabiyla calissin: Users grubuna (S-1-5-32-545) Modify
+& icacls $Hedef /grant '*S-1-5-32-545:(OI)(CI)M' | Out-Null
 $ayar = Join-Path $Hedef 'config.json'
 if (-not (Test-Path $ayar)) {
     Copy-Item -LiteralPath (Join-Path $kaynak 'config.example.json') -Destination $ayar

@@ -3,6 +3,22 @@
 Sürüm numarası `panel.py` içindeki `SURUM` değeridir; panelde sol menünün altında ve Sistem sayfasında görünür.
 Yeni sürüm ilk açıldığında veritabanı, güncellenmeden önce `data\yedekler` klasörüne otomatik yedeklenir.
 
+## 1.10.0
+- **Güncelleme sağlamlaştırıldı** (3 düzeltme):
+  - Dosyalar artık dal adresinden değil, GitHub API'den (`guncelleme_api`, `{dal}` yer tutucusu) alınan **commit SHA** adresinden iner (`<taban>/<sha>/<dosya>`): raw CDN önbelleği yüzünden yeni panel.py + eski index.html gibi tutarsız set gelmez. SHA alınamazsa güncelleme yapılmaz (dal adresine düşülmez). Kurulu SHA `data/kurulu_sha.txt` ve `guncelleme.json` içinde saklanır, Sistem sayfasında gösterilir.
+  - Güncelleme sırasında tutulan toplayıcı kilidi, yeniden başlatma başarısız olursa hemen, süreç hiç çıkmazsa 60 sn sonra bırakılır (cihaz okuması durmaz).
+  - `install.ps1`, Görev Zamanlayıcı dışında kalmış (güncellemeyle yeniden başlatılmış) panel python süreçlerini komut satırından bulup sonlandırır (`-Kaldir` dahil).
+- **Bugün sayfası yenilendi**: "Son 14 gün" ve "Bugün giriş saatleri" grafikleri kaldırıldı; yerine **Dikkat edilecekler** (dün çıkış okutmayanlar → Düzelt, gelmeyenler → İzin gir, adı bilinmeyen kartlar → Tanımla,
+  bu hafta başlayan/biten izinler), **kategoriye göre içeride / beklenen** (tıklayınca liste süzülür), **Yaklaşanlar** (nöbet, izinler), **canlı okutma akışı** ve **bu ayın özeti** kartları geldi. Yeni uç noktalar: `GET /api/ana`, `GET /api/ara`.
+- **Kart no**: arayüzde ve Excel başlıklarında "Cihaz no" yerine "Kart no" (DBF'deki KARTNO metni, örn. 0081). Sol menüde **kart no / isim hızlı arama** (mobilde büyüteç). Personel aramaları baştaki sıfırları yok sayar.
+- **Resmi tatil özelliği kaldırıldı** (RT/TÇ kodları, 13:00 arife kuralı, tatil tohumu, `tatil`/`tatil_yarim` alanları, Ayarlar > Resmi tatiller). `tatil` tablosu silinmedi ama artık okunmaz.
+  Yerine **Mağaza kapalı günler** (Ayarlar > Kapalı günler): kapalı günde kimse beklenmez, okutan olursa geç/erken sayılmaz, puantajda **K**, takvimde ayrı stil, Bugün başlığında açıklama, nöbette "KAPALI".
+- **Otomatik güncelleme**: Sistem sayfasında Güncelleme kartı; masaüstü başlatıcı açılışta yeni sürümü indirip kurar ve panel yeni sürümle dönmezse eski sürüme geri alır. Kod ve DB yedeği alınır; `config.json`, `data\`, `port.txt`,
+  kısayol ve görev değişmez. Yeni uç noktalar: `GET /api/guncelleme`, `POST /api/guncelleme/uygula` (127.0.0.1'den oturumsuz), `GET /api/surum`, `GET /api/yenilikler`, `POST /api/ayar/guncelleme_ayar`.
+  Yeni ayarlar: `guncelleme_dali`, `guncelleme_taban`, `otomatik_guncelleme`. `install.ps1` `C:\EnGoPerPanel` için Users grubuna Modify izni verir.
+- `kapali_gun` tablosu eklendi (1.9.1 veritabanından geçişte ayarlar, kategoriler, görünen adlar, izinler ve kullanıcılar aynen korunur).
+- Tanımsız (personel listesinde olmayan) numaralar artık "Gelmeyenler"e ve ay özetine girmez.
+
 ## 1.9.1
 - Personeli bulması kolaylaşsın diye: kişi sayfası başlığında "✎ Adı düzenle" ve "Personeli sil / Geri al" düğmeleri (silinmişse kırmızı "silinmiş" rozeti), Personel sayfasında Ayarlar > Personel listesi'ne giden ipucu satırı (`#ayarlar/personelliste` bağlantısı).
 
