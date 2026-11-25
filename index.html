@@ -83,6 +83,19 @@ td .soluk{overflow-wrap:anywhere}
 .kp-satir input{width:auto;margin:0}
 .kp-satir .kp-ad{flex:1;min-width:0;overflow-wrap:anywhere}
 .kp-diger{font-size:11px;color:var(--soluk);border:1px solid var(--cizgi);border-radius:10px;padding:0 7px}
+@media (max-width:1100px){#p-tablo th,#p-tablo td{padding:7px 3px}#pz-toplam .pz-sum th,#pz-toplam .pz-sum td{padding:5px 3px}}
+.bugun-ust{display:grid;gap:14px;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);margin-bottom:14px;align-items:start}
+@media (max-width:1150px){.bugun-ust{grid-template-columns:minmax(0,1fr)}}
+.dk-uzun{border:2px solid var(--kirmizi);border-radius:10px;padding:10px 10px 6px;background:var(--kirmizi-z)}
+.dk-uzun h3{color:var(--kirmizi)}
+.dk-uzun .dk-satir{flex-wrap:wrap;background:var(--kart);cursor:pointer}
+.dk-uzun .dk-satir:hover{background:var(--kart2)}
+.dk-dugmeler{display:flex;gap:6px;flex-wrap:wrap}
+.uz-serit{border:2px solid var(--kirmizi);border-radius:10px;padding:10px 12px;background:var(--kirmizi-z);margin-bottom:14px;display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap}
+.uz-serit>span:first-child{flex:1 1 280px;min-width:0}
+.uz-ikon{display:inline-flex;vertical-align:-3px;color:var(--kirmizi);margin-left:4px}
+.b-sg{display:inline-flex;gap:8px;align-items:center;font-weight:400;font-size:12.5px}
+.pz-t td.h i.pz-y{position:absolute;left:2px;top:0;font-size:9px;line-height:1;font-style:normal;color:var(--kirmizi)}
 .dk-grup{margin-bottom:14px}.dk-grup:last-child{margin-bottom:0}
 .dk-grup h3{font-size:13px;margin:0 0 6px;font-weight:600}
 .dk-satir{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--kart2);margin-bottom:5px}
@@ -156,7 +169,7 @@ button.kucuk{padding:4px 9px;font-size:12.5px}
 .g.zamaninda{background:var(--yesil-z);color:var(--yesil);border-color:transparent}
 .g.gec{background:var(--sari-z);color:var(--sari);border-color:transparent}
 .g.erken{background:var(--mor-z);color:var(--mor);border-color:transparent}
-.g.cikis_yok,.g.gelmedi{background:var(--kirmizi-z);color:var(--kirmizi);border-color:transparent}
+.g.cikis_yok,.g.giris_yok,.g.gelmedi{background:var(--kirmizi-z);color:var(--kirmizi);border-color:transparent}
 .g.gelmedi{background:repeating-linear-gradient(45deg,var(--kirmizi-z),var(--kirmizi-z) 4px,transparent 4px,transparent 8px)}
 .g.icerde{background:var(--ana-z);color:var(--ana);border-color:transparent}
 .g.izinli{background:var(--turkuaz-z);color:var(--turkuaz);border-color:transparent}
@@ -312,16 +325,16 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
       <div class="sag"><span class="soluk" id="b-son"></span></div></div>
     <div class="kpi" id="b-kpi"></div>
     <div id="b-nobet"></div>
-    <div class="kart" style="margin-bottom:14px">
-      <h2 id="b-liste-baslik">Bugün gelenler <span class="sag"><span id="b-kat-chip" class="gizli"></span> <input type="search" id="b-ara" placeholder="İsim ara" style="width:160px"></span></h2>
-      <div class="tablo" id="b-tablo"></div>
-    </div>
-    <div class="izgara iki" style="margin-bottom:14px">
+    <div class="bugun-ust">
       <div class="kart"><h2><i data-ik="uyari"></i>Dikkat edilecekler</h2><div id="a-dikkat"></div></div>
       <div class="izgara" style="align-content:start">
         <div class="kart"><h2><i data-ik="personel"></i>Şu an içeride · kategoriye göre</h2><div id="a-kategori"></div></div>
         <div class="kart"><h2><i data-ik="takvim"></i>Yaklaşanlar</h2><div id="a-yaklasan"></div></div>
       </div>
+    </div>
+    <div class="kart" style="margin-bottom:14px" id="b-liste-kart">
+      <h2 id="b-liste-baslik">Bugün gelenler <span class="sag"><span id="b-kat-chip" class="gizli b-sg"></span> <input type="search" id="b-ara" placeholder="İsim ara" style="width:160px"></span></h2>
+      <div class="tablo" id="b-tablo"></div>
     </div>
     <div class="yan-yana">
       <div class="kart"><h2><i data-ik="saat"></i><span id="a-akis-baslik">Canlı okutma akışı</span></h2><div id="a-akis"></div></div>
@@ -360,12 +373,13 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
       <div class="kisi-bas" id="k-bas"></div>
       <div class="sag donem-sec"></div>
     </div>
+    <div id="k-uyari"></div>
     <div class="kpi" id="k-kpi"></div>
     <div class="izgara iki">
       <div class="kart"><h2><i data-ik="takvim"></i>Takvim</h2><div class="takvimler" id="k-takvim"></div>
         <div class="lejant">
           <span><i style="background:var(--yesil)"></i>Zamanında</span><span><i style="background:var(--sari)"></i>Geç</span>
-          <span><i style="background:var(--mor)"></i>Erken çıkış</span><span><i style="background:var(--kirmizi)"></i>Çıkış yok / gelmedi</span>
+          <span><i style="background:var(--mor)"></i>Erken çıkış</span><span><i style="background:var(--kirmizi)"></i>Giriş / çıkış yok / gelmedi</span>
           <span><i style="background:var(--ana)"></i>İçeride</span><span data-oz="izin"><i style="background:var(--turkuaz)"></i>İzinli</span>
           <span><i style="background:var(--gri-z);border:1px solid var(--soluk)"></i>Mağaza kapalı</span><span><i style="background:var(--gri)"></i>Kayıt yok / çalışılmayan gün</span>
           <span data-oz="duzeltme"><b class="duz-r">✎</b> Okutması düzeltilmiş</span></div>
@@ -469,7 +483,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <label>Bitiş<input type="date" id="r-bit"></label>
         <label>Personel<select id="r-kisi" class="kisi-sec"><option value="">Tümü</option></select></label>
         <label data-altgrup-icerik="rapor" data-alt="gunluk">Durum<select id="r-durum"><option value="">Tümü</option><option value="GEC">Geç kalan</option>
-          <option value="ERKEN">Erken çıkan</option><option value="ÇIKIŞ YOK">Çıkış yapmayan</option><option value="İÇERİDE">İçeride</option></select></label>
+          <option value="ERKEN">Erken çıkan</option><option value="ÇIKIŞ YOK">Çıkış yapmayan</option><option value="GİRİŞ YOK">Giriş okutmayan</option><option value="İÇERİDE">İçeride</option></select></label>
         <button class="d ana" id="r-getir">Göster</button>
         <span style="margin-left:auto;display:flex;gap:8px"><button class="d" id="r-xlsx">Excel</button><button class="d" id="r-csv">CSV</button></span>
       </div>
@@ -495,6 +509,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <label>Cumartesi çıkış<input type="time" id="g-cts_cikis"></label>
         <label>Geç tolerans (dk)<input type="number" min="0" max="240" id="g-gec_tolerans_dk" style="width:100px"></label>
         <label>Erken çıkış tol. (dk)<input type="number" min="0" max="240" id="g-erken_tolerans_dk" style="width:100px"></label>
+        <label title="Aktif bir personelin bu kadar gün hiç okutmaması Bugün sayfasında 'Uzun süredir okutma yok' olarak sorulur">Uzun süre okutmama uyarısı (gün)<input type="number" min="3" max="365" id="g-uzun_okutmama_gun" style="width:100px"></label>
         <button class="d ana" id="g-kaydet">Kaydet</button>
       </div>
       <h2 style="margin-top:18px">Fazla mesai ve mola</h2>
@@ -525,7 +540,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
       <div class="filtre">
         <label>Ara<input type="search" id="pl-ara" placeholder="Ad, kart no"></label>
         <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pl-silinen"> Silinenleri göster</label>
-        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pl-aktif"> Son 60 günde okutanlar</label>
+        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pl-aktif"> Sadece aktif personel</label>
         <span class="soluk" id="pl-sayi" style="margin-left:auto"></span>
       </div>
       <div id="pl-secim"></div>
@@ -542,7 +557,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
       <div class="filtre">
         <label>Ara<input type="search" id="a-ara" placeholder="Ad, kart no"></label>
         <label>Kategori<select id="a-kat-filtre"><option value="">Tümü</option><option value="-">Kategorisiz</option></select></label>
-        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="a-aktif" checked> Son 60 günde okutanlar</label>
+        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="a-aktif" checked> Sadece aktif personel</label>
         <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="a-ayrilan" checked> Ayrılanları gizle</label>
       </div>
       <div class="toplu-bar"><b>Seçili kişileri kategoriye ata:</b> <select id="a-toplu-kat"></select> <button class="d ana" id="a-toplu">Uygula</button>
@@ -579,7 +594,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <label>Chat id (virgülle birden çok)<input id="bd-chat" placeholder="123456789, -100123456789"></label>
         <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="bd-sabah"> Sabah özeti (geç kalanlar, gelmeyenler, izinliler)</label>
         <label>Sabah özeti saati<input type="time" id="bd-sabah-saat"></label>
-        <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="bd-aksam"> Akşam özeti (günün özeti, çıkış okutmayanlar, nöbet)</label>
+        <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="bd-aksam"> Akşam özeti (günün özeti, çıkış ve giriş okutmayanlar, nöbet)</label>
         <label>Akşam özeti saati<input type="time" id="bd-aksam-saat"></label>
         <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="bd-cihaz"> Cihaz uyarısı (okuma yapılamazsa)</label>
         <label>Uyarı eşiği (dakika)<input type="number" min="5" max="1440" id="bd-cihaz-dk"></label>
@@ -657,12 +672,22 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   <div class="kart">
     <h2><i data-ik="personel"></i><span id="kp-baslik"></span><span class="sag"><button class="d kucuk" data-kapat>✕</button></span></h2>
     <div class="filtre"><label>Ara<input type="search" id="kp-ara" placeholder="Ad, kart no"></label>
-      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="kp-aktif" checked> Sadece son 60 günde okutanlar</label>
+      <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="kp-aktif" checked> Sadece aktif personel</label>
       <span class="soluk" id="kp-sayi" style="margin-left:auto"></span></div>
     <div class="durum-satir gizli" id="kp-uyari"></div>
     <div class="kp-liste" id="kp-liste"></div>
     <p class="soluk" style="margin:8px 0 0">Kategoride olanlar işaretlidir; işareti kaldırırsanız kişi kategorisiz kalır. Başka kategoride olanın yanında o kategorinin adı yazar.</p>
     <p style="margin:12px 0 0;display:flex;gap:8px;justify-content:flex-end"><button class="d" data-kapat>Vazgeç</button><button class="d ana" id="kp-kaydet">Kaydet</button></p>
+  </div>
+</div>
+<div class="modal gizli" id="ayr-modal">
+  <div class="kart">
+    <h2><i data-ik="personel"></i><span id="ayr-baslik">İşten ayrıldı</span><span class="sag"><button class="d kucuk" data-kapat>✕</button></span></h2>
+    <div class="form">
+      <label class="tam">İşten çıkış tarihi<input type="date" id="ayr-tarih"></label>
+      <p class="tam soluk" id="ayr-not" style="margin:0"></p>
+    </div>
+    <p style="margin:14px 0 0;display:flex;gap:8px;justify-content:flex-end"><button class="d" data-kapat>Vazgeç</button><button class="d ana" id="ayr-kaydet">Kaydet</button></p>
   </div>
 </div>
 <div class="modal genis gizli" id="duz-modal">
@@ -745,10 +770,10 @@ const AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz",
 const GUNLER = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 const GUN_KISA = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 const tarihTR = t => { const [y, m, d] = t.split("-"); return `${d}.${m}.${y} ${GUN_KISA[new Date(t + "T12:00").getDay()]}`; };
-const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GELDİ": "yesil", "GELMEDİ": "kirmizi",
+const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GİRİŞ YOK": "kirmizi", "GELDİ": "yesil", "GELMEDİ": "kirmizi",
   "BEKLENİYOR": "sari", "İZİNLİ": "turkuaz", "KAPALI": "", "PLANLI": "", "VERİ YOK": "", "HATA": "kirmizi", "ATLANDI": "sari",
   "tam": "yesil", "kayıtlı": "yesil", "tahmini": "sari", "belirsiz": "kirmizi", "yok": "kirmizi"};
-const IPUCU = {"VERİ YOK": "O gün cihazdan hiç kayıt alınamamış; gelip gelmediği bilinemiyor",
+const IPUCU = {"GİRİŞ YOK": "Giriş okutulmamış: günün tek okutması mesainin ortasından sonra, çıkış sayıldı", "ÇIKIŞ YOK": "Çıkış okutulmamış", "VERİ YOK": "O gün cihazdan hiç kayıt alınamamış; gelip gelmediği bilinemiyor",
   "tahmini": "Kısmi isimle eşleşti, kontrol edin", "kayıtlı": "Daha önce onayladığınız eşleşme", "belirsiz": "Birden fazla personel uyuyor, listeden seçin"};
 const etiket = d => `<span class="e ${RENK[d] ?? ""}"${IPUCU[d] ? ` title="${IPUCU[d]}"` : ""}>${esc(d)}</span>`;
 // 70 -> "1 saat 10 dakika"
@@ -805,7 +830,7 @@ function dahaBagla(kap, ciz) { const b = kap.querySelector("[data-daha]"); if (b
 
 function kisiSecenek(liste, secili, bos = "— seçin —") {
   return (bos === null ? "" : `<option value="">${bos}</option>`) +
-    [["Son 60 günde okutanlar", true], ["Diğer personel", false]].map(([lbl, akt]) => `<optgroup label="${lbl}">` +
+    [["Aktif personel", true], ["Diğer personel", false]].map(([lbl, akt]) => `<optgroup label="${lbl}">` +
       liste.filter(p => p.aktif === akt).map(p => `<option value="${p.kisi_no}"${p.kisi_no === secili ? " selected" : ""}>${esc(p.ad)}</option>`).join("") +
       `</optgroup>`).join("");
 }
@@ -902,17 +927,59 @@ async function yukleBugun() {
   $("#b-nobet").innerHTML = n && oz("nobet") ? `<div style="margin-bottom:14px">${nobetKarti(n, "Bugünkü nöbet")}</div>` : "";
 }
 const sureKisa = dk => sureYaz(dk) || "–";
+const tarihNokta = t => t ? t.split("-").reverse().join(".") : "";
+const uzunBilgi = u => u.hic ? `<span class="kirmizi-y">hiç okutmadı</span>` : `son okutma ${tarihNokta(u.son_okutma)} · <b class="kirmizi-y">${u.gun} gündür okutmuyor</b>`;
+const okutmuyorEtiket = x => x.okutmuyor_gun === null ? ` <span class="e kirmizi">hiç okutmadı</span>` : x.okutmuyor_gun > 0 ? ` <span class="e sari">${x.okutmuyor_gun} gündür okutmuyor</span>` : "";
+function uzunDugmeler(u, ertele = true) {
+  const a = `data-k="${u.kisi_no}" data-ad="${esc(u.ad)}" data-son="${esc(u.son_okutma || "")}"`;
+  return `<span class="dk-dugmeler"><button class="d kucuk ana" data-uz="ayr" ${a}>İşten ayrıldı</button>` + (oz("izin") ? `<button class="d kucuk" data-uz="izin" ${a}>İzin gir</button>` : "") +
+    `<button class="d kucuk" data-uz="sil" ${a}>Personeli sil</button>` + (ertele ? `<button class="d kucuk" data-uz="gizle" ${a} title="7 gün boyunca bu listede gösterilmez">Şimdilik gizle</button>` : "") + `</span>`;
+}
+let AYR = null;
+function ayrAc(k, ad, son) {
+  AYR = {k, ad};
+  $("#ayr-baslik").textContent = `${ad} · işten ayrıldı`;
+  $("#ayr-tarih").value = son || bugun();
+  $("#ayr-not").textContent = "Varsayılan tarih son okutma günüdür; gerekirse değiştirin. Kişi bu tarihten sonra aktif sayılmaz ve sayılara girmez. Kategori üyeliği ve geçmiş kayıtlar silinmez; Ayarlar'dan tarih geri alınabilir.";
+  $("#ayr-modal").classList.remove("gizli");
+}
+$("#ayr-modal").addEventListener("click", e => { if (e.target.id === "ayr-modal" || e.target.closest("[data-kapat]")) $("#ayr-modal").classList.add("gizli"); });
+$("#ayr-kaydet").onclick = async () => {
+  const t = $("#ayr-tarih").value; if (!t) return alert("Çıkış tarihini girin");
+  try { await postJ("/api/ayar/isten_ayrildi", {kisi_no: AYR.k, tarih: t}); $("#ayr-modal").classList.add("gizli"); await rota(); toast(`${AYR.ad}: ${tarihNokta(t)} tarihinde işten ayrıldı olarak kaydedildi`); }
+  catch (e) { alert(e.message); }
+};
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-uz]");
+  if (b) {
+    e.preventDefault(); const {k, ad, son} = b.dataset, tur = b.dataset.uz;
+    if (tur === "ayr") return ayrAc(+k, ad, son);
+    if (tur === "izin") return izinFormAc({kisi_no: +k, tarih: bugun()});
+    if (tur === "sil") {
+      if (!confirm(`${ad} personel listesinden silinsin mi? Geçmiş kayıtları silinmez; Ayarlar > Personel listesi > Silinenleri göster'den geri alabilirsiniz.`)) return;
+      try { await postJ("/api/ayar/personel_sil", {kisi_no: +k}); await rota(); toast(`${ad} silindi`); } catch (x) { alert(x.message); }
+      return;
+    }
+    if (tur === "gizle") { try { await postJ("/api/ayar/uyari_ertele", {kisi_no: +k, gun: 7}); await rota(); toast(`${ad}: uyarı 7 gün gizlendi`); } catch (x) { alert(x.message); } return; }
+  }
+  const row = e.target.closest("[data-git]");
+  if (row && !e.target.closest("a,button")) location.hash = "#personel/" + row.dataset.git;
+});
 function anaCiz() {
   if (!ANA) return;
   const a = ANA, dz = oz("duzeltme"), iz = oz("izin");
   // ---- dikkat edilecekler
-  const gr = (id, baslik, satirlar) => !satirlar.length ? "" : `<div class="dk-grup"><h3>${baslik} (${satirlar.length})</h3>${(DK_ACIK.has(id) ? satirlar : satirlar.slice(0, 8)).join("")}` +
+  const gr = (id, baslik, satirlar, sinif = "") => !satirlar.length ? "" : `<div class="dk-grup ${sinif}"><h3>${baslik} (${satirlar.length})</h3>${(DK_ACIK.has(id) ? satirlar : satirlar.slice(0, 8)).join("")}` +
     (satirlar.length > 8 && !DK_ACIK.has(id) ? `<button class="d kucuk" data-dk-hepsi="${id}">Tümünü göster (${satirlar.length})</button>` : "") + `</div>`;
   const dk = a.dikkat, dun = dk.dun_tarih === isoGun(new Date(Date.now() - 864e5)) ? "Dün" : (dk.dun_tarih ? tarihTR(dk.dun_tarih) : "Dün");
   const html = [
+    gr("uzun", `Uzun süredir okutma yok · işten mi ayrıldı?`, dk.uzun.map(u => `<div class="dk-satir" data-git="${u.kisi_no}"><span>${kisiLink(u.kisi_no, u.ad)}` +
+      `${u.kategori ? ` <span class="e mavi">${esc(u.kategori)}</span>` : ""}<br><span class="soluk">${uzunBilgi(u)}</span></span>${uzunDugmeler(u)}</div>`), "dk-uzun"),
     gr("dun", `${dun} çıkış okutmayanlar`, dk.dun_cikis_yok.map(x => `<div class="dk-satir"><span>${kisiLink(x.kisi_no, x.ad)} <span class="soluk">giriş ${x.giris}</span></span>` +
       (dz ? `<button class="d kucuk" data-dk-duzelt="${x.kisi_no}|${x.tarih}|${esc(x.mesai_cikis || "")}">Düzelt</button>` : "") + `</div>`)),
-    gr("gelmeyen", "Mesai saati geçtiği halde gelmeyenler", dk.gelmeyen.map(x => `<div class="dk-satir"><span>${kisiLink(x.kisi_no, x.ad)} <span class="soluk">mesai ${esc(x.mesai)}</span></span>` +
+    gr("dun_giris", `${dun} giriş okutmayanlar`, dk.dun_giris_yok.map(x => `<div class="dk-satir"><span>${kisiLink(x.kisi_no, x.ad)} <span class="soluk">çıkış ${x.cikis} · mesai girişi ${esc(x.mesai_giris)}</span></span>` +
+      (dz ? `<button class="d kucuk" data-dk-duzelt="${x.kisi_no}|${x.tarih}|${esc(x.mesai_giris || "")}|g">Düzelt</button>` : "") + `</div>`)),
+    gr("gelmeyen", "Mesai saati geçtiği halde gelmeyenler", dk.gelmeyen.map(x => `<div class="dk-satir"><span>${kisiLink(x.kisi_no, x.ad)} <span class="soluk">mesai ${esc(x.mesai)}</span>${okutmuyorEtiket(x)}</span>` +
       (iz ? `<button class="d kucuk" data-dk-izin="${x.kisi_no}">İzin gir</button>` : "") + `</div>`)),
     gr("tanimsiz", "Adı bilinmeyen kart numaraları", dk.tanimsiz.map(x => `<div class="dk-satir"><span>Kart <b>${esc(x.kart)}</b> <span class="soluk">son okutma ${esc(x.son)} · ${x.sayi} okutma</span></span>` +
       `<button class="d kucuk ana" data-dk-tanimla="${x.kisi_no}">Tanımla</button></div>`)),
@@ -923,7 +990,8 @@ function anaCiz() {
   $("#a-kategori").innerHTML = a.kategori.length ? a.kategori.map(k => {
     const renk = k.beklenen > 0 && k.icerde === 0 ? "kirmizi" : k.icerde < k.beklenen ? "sari" : "yesil";
     const yuzde = k.beklenen > 0 ? Math.min(100, Math.round(k.icerde / k.beklenen * 100)) : (k.icerde > 0 ? 100 : 0);
-    return `<div class="kat-satir" data-bkat="${esc(k.kategori)}" title="Bugünün listesini bu kategoriye göre süz"><span>${esc(k.ad)} <span class="soluk">· bugün gelen ${k.gelen}</span></span>` +
+    const uz = k.uzun ? `<span class="uz-ikon" title="${k.uzun} kişi ${k.uzun_esik}+ gündür okutmuyor">${ikon("uyari", 15)}</span>` : "";
+    return `<div class="kat-satir" data-bkat="${esc(k.kategori)}" title="Bugünün listesini bu kategoriye göre süz"><span>${esc(k.ad)} <span class="soluk">· toplam ${k.toplam} · bugün gelen ${k.gelen}</span>${uz}</span>` +
       `<b class="${renk}-y">${k.icerde} / ${k.beklenen}</b><div class="bar"><i style="width:${yuzde}%;background:var(--${renk})"></i></div></div>`;
   }).join("") : `<p class="soluk" style="margin:0">Bugün için veri yok</p>`;
   // ---- yaklasanlar
@@ -937,18 +1005,18 @@ function anaCiz() {
   $("#a-akis-baslik").textContent = a.akis.tarih === a.tarih ? "Canlı okutma akışı" : `Son okutmalar · ${tarihTR(a.akis.tarih)}`;
   $("#a-akis").innerHTML = a.akis.olaylar.map(o => `<div class="akis-satir"><span class="sa">${o.saat}</span>${kisiLink(o.kisi_no, o.ad)}<span class="e ${o.etiket === "giriş" ? "yesil" : "mor"}">${o.etiket}</span></div>`).join("") || `<p class="soluk" style="margin:0">Okutma yok</p>`;
   // ---- bu ayin ozeti
-  const liste = (l, birim) => l.map(x => `<a href="#personel/${x.kisi_no}" class="dk-satir" style="color:inherit"><span>${esc(x.ad)}</span><b class="${birim === "kez" ? "sari-y" : "kirmizi-y"}">${x.adet} ${birim}${x.dk ? " · " + sureYaz(x.dk) : ""}</b></a>`).join("") || `<p class="soluk" style="margin:0 0 6px">Yok</p>`;
-  $("#a-ay").innerHTML = `<div class="dk-grup"><h3>En çok geç kalan 5 kişi</h3>${liste(a.ay.gec, "kez")}</div><div class="dk-grup"><h3>En çok çıkış okutmayan 5 kişi</h3>${liste(a.ay.cikis_yok, "gün")}</div>`;
+  const liste = (l, birim) => l.map(x => `<a href="#personel/${x.kisi_no}" class="dk-satir" style="color:inherit"><span>${esc(x.ad)}</span><b class="${birim === "kez" ? "sari-y" : "kirmizi-y"}">${x.adet} ${birim}${x.dk ? " · " + sureYaz(x.dk) : ""}${x.giris_yok !== undefined ? ` <span class="soluk" style="font-weight:400">(${x.giris_yok} giriş, ${x.cikis_yok} çıkış)</span>` : ""}</b></a>`).join("") || `<p class="soluk" style="margin:0 0 6px">Yok</p>`;
+  $("#a-ay").innerHTML = `<div class="dk-grup"><h3>En çok geç kalan 5 kişi</h3>${liste(a.ay.gec, "kez")}</div><div class="dk-grup"><h3>En çok okutma eksiği olan 5 kişi</h3>${liste(a.ay.eksik, "gün")}</div>`;
 }
 document.addEventListener("click", e => {
   const h = e.target.closest("[data-dk-hepsi]"); if (h) { DK_ACIK.add(h.dataset.dkHepsi); anaCiz(); return; }
   const d = e.target.closest("[data-dk-duzelt]");
-  if (d) { const [k, t, m] = d.dataset.dkDuzelt.split("|"); duzeltmeAc({kisi_no: +k, tarih: t, saat: m, aciklama: "Çıkışta okutmayı unuttu"}); return; }
+  if (d) { const [k, t, m, g] = d.dataset.dkDuzelt.split("|"); duzeltmeAc({kisi_no: +k, tarih: t, saat: m, aciklama: g ? "Girişte okutmayı unuttu" : "Çıkışta okutmayı unuttu"}); return; }
   const i = e.target.closest("[data-dk-izin]"); if (i) { izinFormAc({kisi_no: +i.dataset.dkIzin, tarih: bugun()}); return; }
   const t = e.target.closest("[data-dk-tanimla]"); if (t) { pdAc({mod: "ekle", kisi_no: +t.dataset.dkTanimla, sonra: () => rota()}); return; }
   const k = e.target.closest("[data-bkat]");
   if (k) { bKat = {k: k.dataset.bkat, ad: k.querySelector("span").firstChild.textContent.trim()}; bFiltre = "gelen"; bugunCiz(); $("#b-liste-baslik").scrollIntoView({behavior: "smooth", block: "start"}); return; }
-  if (e.target.closest("#b-kat-temizle")) { bKat = null; bugunCiz(); }
+  if (e.target.closest("#b-kat-temizle")) { bKat = null; bFiltre = "gelen"; bugunCiz(); }
 });
 function bugunCiz() {
   const d = BUGUN;
@@ -957,17 +1025,20 @@ function bugunCiz() {
     {tikla: "gelen", deger: d.satirlar.length, ad: "Bugün gelen", renk: "yesil", ikon: "gelen"},
     {tikla: "gec", deger: d.gec.length, ad: "Geç kalan", renk: "sari", ikon: "gec", alt: d.gec.length ? `toplam ${sureYaz(d.gec.reduce((a, s) => a + s.gec_dk, 0))}` : ""},
     {tikla: "erken", deger: d.erken.length, ad: "Erken çıkan", renk: "mor", ikon: "erken"},
-    {tikla: "gelmeyen", deger: d.gelmeyen.length, ad: "Gelmeyen", renk: "kirmizi", ikon: "gelmeyen", alt: "son 2 haftada çalışan"},
-    {tikla: "izinli", deger: d.izinli.length, ad: "İzinli", renk: "turkuaz", ikon: "izin"}].filter(k => k.tikla !== "izinli" || oz("izin"));
+    {tikla: "gelmeyen", deger: d.gelmeyen.length, ad: "Gelmeyen", renk: "kirmizi", ikon: "gelmeyen", alt: "kategori üyeleri + son 2 haftada çalışan"},
+    {tikla: "izinli", deger: d.izinli.length, ad: "İzinli", renk: "turkuaz", ikon: "izin"},
+    {tikla: "giris_yok", deger: d.giris_yok.length, ad: "Giriş okutmadı", renk: "kirmizi", ikon: "uyari", alt: "tek okutma, mesai ortasından sonra"}]
+    .filter(k => (k.tikla !== "izinli" || oz("izin")) && (k.tikla !== "giris_yok" || d.giris_yok.length || bFiltre === "giris_yok"));
   if (bFiltre === "izinli" && !oz("izin")) bFiltre = "gelen";
   $("#b-kpi").innerHTML = kartlar.map(k => kpiKart(Object.assign(k, {secili: k.tikla === bFiltre}))).join("");
-  $$("#b-kpi [data-kpi]").forEach(b => b.onclick = () => { bFiltre = b.dataset.kpi; bugunCiz(); });
-  const basliklar = {icerde: "Şu an içeride", gelen: "Bugün gelenler", gec: "Geç kalanlar", erken: "Erken çıkanlar", gelmeyen: "Gelmeyenler", izinli: "Bugün izinli olanlar"};
+  $$("#b-kpi [data-kpi]").forEach(b => b.onclick = () => { bFiltre = b.dataset.kpi; bugunCiz(); $("#b-liste-kart").scrollIntoView({behavior: "smooth", block: "start"}); });
+  const basliklar = {icerde: "Şu an içeride", gelen: "Bugün gelenler", gec: "Geç kalanlar", erken: "Erken çıkanlar", gelmeyen: "Gelmeyenler", izinli: "Bugün izinli olanlar", giris_yok: "Giriş okutmayanlar"};
   $("#b-liste-baslik").firstChild.textContent = basliklar[bFiltre] + " ";
   const ara = $("#b-ara").value;
   const uy = s => uyar(ara, s.ad, s.kisi_no, s.kart) && (!bKat || (s.kategori || "") === bKat.k);
-  $("#b-kat-chip").classList.toggle("gizli", !bKat);
-  $("#b-kat-chip").innerHTML = bKat ? `<span class="e mavi">Kategori: ${esc(bKat.ad)} <a href="javascript:void 0" id="b-kat-temizle" title="Süzmeyi kaldır">✕</a></span>` : "";
+  const sg = [bFiltre !== "gelen" ? basliklar[bFiltre] : "", bKat ? "Kategori: " + bKat.ad : ""].filter(Boolean);
+  $("#b-kat-chip").classList.toggle("gizli", !sg.length);
+  $("#b-kat-chip").innerHTML = sg.length ? `<span class="e mavi">Süzgeç: ${esc(sg.join(" · "))}</span> <a href="javascript:void 0" id="b-kat-temizle">Süzgeci kaldır</a>` : "";
   if (bFiltre === "izinli") {
     const l = d.izinli.filter(uy);
     $("#b-tablo").innerHTML = tablo(["İzin", "Ad Soyad", "Açıklama", "Bugün"], l.map(s => [`<span class="e turkuaz">${esc(s.izin)}</span>`, kisiLink(s.kisi_no, s.ad),
@@ -977,7 +1048,7 @@ function bugunCiz() {
   }
   if (bFiltre === "gelmeyen") {
     const l = d.gelmeyen.filter(uy);
-    $("#b-tablo").innerHTML = tablo(["Durum", "Ad Soyad", "Kategori", "Mesai"], l.map(s => [etiket("GELMEDİ"), kisiLink(s.kisi_no, s.ad), esc(s.kategori), `<span class="soluk">${s.mesai}</span>`]),
+    $("#b-tablo").innerHTML = tablo(["Durum", "Ad Soyad", "Kategori", "Mesai"], l.map(s => [etiket("GELMEDİ"), kisiLink(s.kisi_no, s.ad), esc(s.kategori), `<span class="soluk">${s.mesai}</span>${okutmuyorEtiket(s)}`]),
       "Gelmeyen yok", {tikla: i => "#personel/" + l[i].kisi_no});
     return;
   }
@@ -994,6 +1065,7 @@ function cikisEkleDugme(s, tarih) {
   const bitis = ((s.mesai || "").split("-")[1] || "").trim(), an = new Date();
   const simdiDk = an.getHours() * 60 + an.getMinutes();
   const bitti = bitis && simdiDk >= (+bitis.slice(0, 2)) * 60 + (+bitis.slice(3, 5));
+  if (s.durum === "GİRİŞ YOK") return `<button class="d kucuk" data-giris-ekle="${s.kisi_no}|${tarih}|${esc(((s.mesai || "").split("-")[0] || "").trim())}">Giriş ekle</button>`;
   if (!(s.durum === "ÇIKIŞ YOK" || (s.durum === "İÇERİDE" && bitti))) return "";
   const oneri = bitis && tarih === bugun() && !bitti ? "" : bitis || "";
   return `<button class="d kucuk" data-cikis-ekle="${s.kisi_no}|${tarih}|${esc(oneri)}">Çıkış ekle</button>`;
@@ -1062,6 +1134,7 @@ async function yuklePersonel() {
     {deger: PER.length, ad: "Çalışan personel", renk: "ana", ikon: "personel"},
     {deger: t("gec"), ad: "Geç kalma", renk: "sari", ikon: "gec", alt: t("gec_dk") ? `toplam ${sureYaz(t("gec_dk"))}` : "", fark: fk("gec")},
     {deger: t("erken"), ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: t("erken_dk") ? `toplam ${sureYaz(t("erken_dk"))}` : "", fark: fk("erken")},
+    {deger: t("giris_yok"), ad: "Giriş okutmadı", renk: "kirmizi", ikon: "uyari", fark: fk("giris_yok")},
     {deger: t("cikis_yok"), ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari", fark: fk("cikis_yok")},
     {deger: t("gelmedi"), ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: "beklenen günlerde kayıt olmayan", fark: fk("gelmedi")}]
     .concat(oz("nobet") ? [{deger: t("nobet_gelmedi"), ad: "Nöbete gelmedi", renk: "kirmizi", ikon: "nobet", alt: `${t("nobet")} planlı nöbet`, fark: fk("nobet_gelmedi")}] : []).map(kpiKart).join("");
@@ -1071,7 +1144,7 @@ async function yuklePersonel() {
   personelCiz();
 }
 const P_SUTUN = [["ad", "Ad Soyad"], ["kategori", "Kategori"], ["gun", "Gün"], ["gec", "Geç"], ["gec_dk", "Geç süre"], ["erken", "Erken"],
-  ["cikis_yok", "Çıkış yok"], ["gelmedi", "Gelmedi"], ["izinli_gun", "İzin"], ["nobet_gelmedi", "Nöbet"], ["ort_giris", "Ort. giriş"], ["calisma_dk", "Çalışma"]];
+  ["giris_yok", "Giriş yok"], ["cikis_yok", "Çıkış yok"], ["gelmedi", "Gelmedi"], ["izinli_gun", "İzin"], ["nobet_gelmedi", "Nöbet"], ["ort_giris", "Ort. giriş"], ["calisma_dk", "Çalışma"]];
 function personelCiz() {
   const ara = $("#p-ara").value.toLocaleUpperCase("tr"), kf = $("#p-kat").value, hat = $("#p-goster").value;
   let l = PER.filter(p => uyar($("#p-ara").value, p.ad, p.kisi_no, p.kart) &&
@@ -1083,7 +1156,7 @@ function personelCiz() {
   $("#p-tablo").innerHTML = tablo(bas, l.map(p => {
     const h = {ad: kisiLink(p.kisi_no, p.ad), kategori: `<span class="soluk">${esc(p.kategori)}</span>`, gun: p.gun,
       gec: say(p.gec, "sari-y"), gec_dk: p.gec_dk ? `<span class="sari-y">${sureYaz(p.gec_dk)}</span>` : `<span class="soluk">–</span>`,
-      erken: say(p.erken, "mor-y"), cikis_yok: say(p.cikis_yok, "kirmizi-y"), gelmedi: say(p.gelmedi, "kirmizi-y"), izinli_gun: say(p.izinli_gun, "turkuaz-y"),
+      erken: say(p.erken, "mor-y"), giris_yok: say(p.giris_yok, "kirmizi-y"), cikis_yok: say(p.cikis_yok, "kirmizi-y"), gelmedi: say(p.gelmedi, "kirmizi-y"), izinli_gun: say(p.izinli_gun, "turkuaz-y"),
       nobet_gelmedi: p.nobet ? `${say(p.nobet_gelmedi, "kirmizi-y")}<span class="soluk">/${p.nobet}</span>` : `<span class="soluk">–</span>`,
       ort_giris: p.ort_giris, calisma_dk: p.calisma};
     return [secKutu("p", p.kisi_no)].concat(sutunlar.map(([a]) => h[a]));
@@ -1124,10 +1197,14 @@ async function yukleKisi(k) {
     ${KISI_PL && KISI_PL.silindi ? ` <span class="e kirmizi" title="Personel listesinden silinmiş; geçmiş kayıtlar durur">silinmiş</span>` : ""}</div>
     ${KISI_PL ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><button class="d kucuk" id="k-ad-duzenle">✎ Adı düzenle</button>` +
       (KISI_PL.silindi ? `<button class="d kucuk" id="k-geri-al">Geri al</button>` : `<button class="d kucuk" id="k-sil">Personeli sil</button>`) + `</div>` : ""}</div>`;
+  const uz = d.uzun_uyari;
+  $("#k-uyari").innerHTML = uz ? `<div class="uz-serit"><span><b class="kirmizi-y">Uzun süredir okutma yok · işten mi ayrıldı?</b><br>${uzunBilgi(uz)}` +
+    `${uz.ertelendi ? ` <span class="e">uyarı ${tarihNokta(uz.ertelendi)} tarihine kadar gizli</span>` : ""}</span>${uzunDugmeler(uz, !uz.ertelendi)}</div>` : "";
   $("#k-kpi").innerHTML = [
     {deger: o.gun, ad: "Geldiği gün", renk: "yesil", ikon: "gelen", alt: `ort. giriş ${o.ort_giris || "–"}`},
     {deger: o.gec, ad: "Geç kalma", renk: "sari", ikon: "gec", alt: o.gec ? `toplam ${sureYaz(o.gec_dk)}` : ""},
     {deger: o.erken, ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: o.erken ? `toplam ${sureYaz(o.erken_dk)}` : ""},
+    {deger: o.giris_yok, ad: "Giriş okutmadı", renk: "kirmizi", ikon: "uyari"},
     {deger: o.cikis_yok, ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
     {deger: o.gelmedi, ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: o.izinli_gun || o.saatlik_izin ? `${o.izinli_gun} gün izinli${o.saatlik_izin ? `, ${o.saatlik_izin} saatlik` : ""}` : ""},
     {deger: o.calisma, ad: "Toplam çalışma", renk: "ana", ikon: "saat"}]
@@ -1149,7 +1226,7 @@ async function yukleKisi(k) {
   // takvim: aylara böl
   const aylar = {};
   d.takvim.forEach(t => (aylar[t.tarih.slice(0, 7)] ||= []).push(t));
-  const IP = {izinli: "İzinli", zamaninda: "Zamanında", gec: "Geç", erken: "Erken çıkış", cikis_yok: "Çıkış yok", gelmedi: "Gelmedi", icerde: "İçeride", gelecek: "", veri_yok: "Sistemde veri yok", bos: "Kayıt yok / çalışılmayan gün", kapali: "Mağaza kapalı"};
+  const IP = {izinli: "İzinli", zamaninda: "Zamanında", gec: "Geç", erken: "Erken çıkış", cikis_yok: "Çıkış yok", giris_yok: "Giriş okutulmamış", gelmedi: "Gelmedi", icerde: "İçeride", gelecek: "", veri_yok: "Sistemde veri yok", bos: "Kayıt yok / çalışılmayan gün", kapali: "Mağaza kapalı"};
   $("#k-takvim").innerHTML = Object.entries(aylar).map(([ay, gunler]) => {
     const [y, m] = ay.split("-").map(Number);
     const ilk = (new Date(gunler[0].tarih + "T12:00").getDay() + 6) % 7;
@@ -1174,7 +1251,7 @@ async function yukleKisi(k) {
       <a href="javascript:void 0" title="Sil" data-izin-sil="${iz.ids.join(",")}">✕</a></span>`).join("") || "–"] : null].filter(Boolean)).replace("<thead><tr><th></th><th></th></tr></thead>", "");
   $("#k-tablo").innerHTML = tablo(["Tarih", "Durum", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken"].concat(duzeltme ? [""] : []),
     d.gunler.map(s => [tarihTR(s.tarih), etiket(s.durum) + rozetler(s), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y")]
-      .concat(duzeltme ? [`<button class="d kucuk" data-duzelt="${s.tarih}">Düzelt</button>`] : [])), "Bu dönemde kayıt yok");
+      .concat(duzeltme ? [`<button class="d kucuk" data-duzelt="${s.tarih}"${s.durum === "GİRİŞ YOK" ? ` data-gsaat="${esc(((s.mesai || "").split("-")[0] || "").trim())}"` : ""}>Düzelt</button>`] : [])), "Bu dönemde kayıt yok");
 }
 $("#k-izin-ekle").onclick = () => izinFormAc({kisi_no: +KISI_NO, tarih: bugun()});
 // işe giriş / işten çıkış düzenleme
@@ -1216,7 +1293,9 @@ document.addEventListener("click", e => {
   if (mn) { const t = $("#gun-menu").dataset.tarih; menuKapat();
     if (mn.dataset.menu === "izin") izinFormAc({kisi_no: +KISI_NO, tarih: t}); else duzeltmeAc({kisi_no: +KISI_NO, tarih: t}); }
   const dz = e.target.closest("[data-duzelt]");
-  if (dz) duzeltmeAc({kisi_no: +KISI_NO, tarih: dz.dataset.duzelt});
+  if (dz) duzeltmeAc(dz.dataset.gsaat ? {kisi_no: +KISI_NO, tarih: dz.dataset.duzelt, saat: dz.dataset.gsaat, aciklama: "Girişte okutmayı unuttu"} : {kisi_no: +KISI_NO, tarih: dz.dataset.duzelt});
+  const ge = e.target.closest("[data-giris-ekle]");
+  if (ge) { const [k, t, m] = ge.dataset.girisEkle.split("|"); duzeltmeAc({kisi_no: +k, tarih: t, saat: m, aciklama: "Girişte okutmayı unuttu"}); }
   const ce = e.target.closest("[data-cikis-ekle]");
   if (ce) { const [k, t, oneri] = ce.dataset.cikisEkle.split("|");
     duzeltmeAc({kisi_no: +k, tarih: t, saat: oneri || (t === bugun() ? new Date().toTimeString().slice(0, 5) : ""), aciklama: "Çıkışta okutmayı unuttu"}); }
@@ -1473,7 +1552,7 @@ function raporCiz(hepsi) {
     $("#r-tablo").innerHTML = tablo(["Zaman", "Ad Soyad", "Kart no", "Kaynak"], d.map(s => [s.zaman, kisiLink(s.kisi_no, s.ad), esc(s.kart),
       s.kaynak === "elle" ? `<span class="e mor" title="Elle eklenmiş okutma">elle</span>` : `<span class="soluk">cihaz</span>`]), "Kayıt yok", {sinir});
   } else {
-    $("#r-ozet").textContent = `${d.length} satır · ${d.filter(s => s.gec_dk).length} geç · ${d.filter(s => s.erken_dk).length} erken çıkış · ${d.filter(s => s.durum === "ÇIKIŞ YOK").length} çıkış yok`;
+    $("#r-ozet").textContent = `${d.length} satır · ${d.filter(s => s.gec_dk).length} geç · ${d.filter(s => s.erken_dk).length} erken çıkış · ${d.filter(s => s.durum === "ÇIKIŞ YOK").length} çıkış yok · ${d.filter(s => s.durum === "GİRİŞ YOK").length} giriş yok`;
     $("#r-tablo").innerHTML = tablo(["Tarih", "Ad Soyad", "Kategori", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken", "Durum"],
       d.map(s => [tarihTR(s.tarih), kisiLink(s.kisi_no, s.ad), `<span class="soluk">${esc(s.kategori)}</span>`, mesaiHucre(s), s.giris, s.cikis, s.sure,
         dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y"), etiket(s.durum) + rozetler(s)]), "Kayıt yok", {sinir});
@@ -1595,7 +1674,7 @@ $("#a-toplu").onclick = async () => {
   try { await postJ("/api/ayar/personel", {kisi_nolar: kisiler, degisiklik: {kategori_id: kid ? +kid : null}}); yukleAyar(); } catch (e) { alert(e.message); }
 };
 $("#g-kaydet").onclick = async () => {
-  const v = {}; ["giris", "cikis", "cts_giris", "cts_cikis", "gec_tolerans_dk", "erken_tolerans_dk", "fm_yontem", "fm_haftalik_esik", "mola_dk"].forEach(a => v[a] = $("#g-" + a).value);
+  const v = {}; ["giris", "cikis", "cts_giris", "cts_cikis", "gec_tolerans_dk", "erken_tolerans_dk", "fm_yontem", "fm_haftalik_esik", "mola_dk", "uzun_okutmama_gun"].forEach(a => v[a] = $("#g-" + a).value);
   const g = gunOku("genel");
   if (!g) return alert("En az bir çalışma günü seçin");
   v.calisma_gunleri = g;
@@ -1806,7 +1885,7 @@ async function yuklePuantaj() {
   if (!$("#pz-ay").value) $("#pz-ay").value = bugun().slice(0, 7);
   PZ = await api(`/api/puantaj?ay=${$("#pz-ay").value}`);
   $("#pz-kodlar").innerHTML = PZ.kodlar.filter(k => k[0]).map(k => `<span class="pz-kod"><b class="lg-${PZ_SINIF[k[0]]}">${esc(k[0])}</b>${esc(k[1].split(" (")[0])}</span>`).join("") +
-    `<span class="pz-kod"><b style="background:var(--kart2)">•</b>saatlik izinli gelinen gün</span><span class="pz-kod"><b class="duz-r">✎</b>okutması düzeltilmiş</span>`;
+    `<span class="pz-kod"><b style="background:var(--kart2)">•</b>saatlik izinli gelinen gün</span><span class="pz-kod"><b class="duz-r">✎</b>okutması düzeltilmiş</span><span class="pz-kod"><b style="background:var(--kirmizi-z);color:var(--kirmizi)">g</b>giriş okutulmamış</span><span class="pz-kod"><b style="background:var(--kirmizi-z);color:var(--kirmizi)">ç</b>çıkış okutulmamış</span>`;
   $("#pz-fm").textContent = `Fazla mesai: ${PZ.fm.aciklama}${PZ.fm.yontem === "haftalik" ? ` Eşik ${PZ.fm.esik} saat.` : ""}${PZ.fm.mola_dk ? ` Günlük mola ${PZ.fm.mola_dk} dk çalışma süresinden düşülür.` : ""} (Değiştirmek için Ayarlar > Genel mesai.)`;
   puantajCiz();
 }
@@ -1817,16 +1896,16 @@ function puantajCiz() {
   const HG = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
   const KA = Object.fromEntries(PZ.kodlar.map(k => [k[0], k[1]]));
   const TOP = [["calisilan", "Çalışılan gün"], ["calisma_dk", "Toplam çalışma"], ["fazla_mesai_dk", "Fazla mesai"], ["eksik_dk", "Eksik süre"], ["gec", "Geç (adet)"],
-    ["izin", "İzin gün"], ["rapor", "Rapor gün"], ["ucretsiz", "Ücretsiz gün"], ["gelmedi", "Gelmedi gün"]];
+    ["izin", "İzin gün"], ["rapor", "Rapor gün"], ["ucretsiz", "Ücretsiz gün"], ["gelmedi", "Gelmedi gün"], ["giris_yok", "Giriş okutmadı"], ["cikis_yok", "Çıkış okutmadı"]];
   const sureH = (a, v) => /_dk$/.test(a) ? (v ? sureYaz(v) : "–") : (v || "–");
   $("#pz-tablo").innerHTML = l.length ? `<table class="pz-t"><thead><tr><th class="ad">Ad Soyad</th>` +
     PZ.gunler.map(g => `<th class="hs${g.hafta_gunu >= 5 ? " hsonu" : ""}${g.kapali ? " kp" : ""}" title="${tarihTR(g.tarih)}${g.kapali ? " · Mağaza kapalı: " + esc(g.kapali) : ""}">${g.gun}<br><span style="font-size:9px">${HG[g.hafta_gunu]}</span></th>`).join("") +
     `</tr></thead><tbody>` +
     l.map(r => `<tr><td class="ad">${kisiLink(r.kisi_no, r.ad)}</td>` + r.hucreler.map((h, i) => {
-      const g = PZ.gunler[i], ip = [tarihTR(g.tarih), KA[h.k] ? KA[h.k].split(" (")[0] : "", h.t && `Mağaza kapalı: ${h.t}`, h.i, h.g && `Giriş ${h.g}`, h.c && `Çıkış ${h.c}`, h.d && "okutması düzeltilmiş"].filter(Boolean).join(" · ");
-      return `<td class="h ${PZ_SINIF[h.k] || ""}" title="${esc(ip)}">${esc(h.k)}${h.s ? "<sub>•</sub>" : ""}${h.d ? "<small>✎</small>" : ""}</td>`; }).join("") +
+      const g = PZ.gunler[i], ip = [tarihTR(g.tarih), KA[h.k] ? KA[h.k].split(" (")[0] : "", h.t && `Mağaza kapalı: ${h.t}`, h.i, h.g && `Giriş ${h.g}`, h.c && `Çıkış ${h.c}`, h.d && "okutması düzeltilmiş", h.y === "g" && "Giriş okutulmamış", h.y === "c" && "Çıkış okutulmamış"].filter(Boolean).join(" · ");
+      return `<td class="h ${PZ_SINIF[h.k] || ""}" title="${esc(ip)}">${esc(h.k)}${h.s ? "<sub>•</sub>" : ""}${h.d ? "<small>✎</small>" : ""}${h.y ? `<i class="pz-y">${h.y === "g" ? "g" : "ç"}</i>` : ""}</td>`; }).join("") +
       `</tr>`).join("") + `</tbody></table>` : `<p class="soluk">Bu ay için kayıt yok</p>`;
-  const KISA = ["Çalışılan gün", "Toplam çalışma", "Fazla mesai", "Eksik süre", "Geç (adet)", "İzin gün", "Rapor gün", "Ücretsiz gün", "Gelmedi gün"];
+  const KISA = ["Çalışılan gün", "Toplam çalışma", "Fazla mesai", "Eksik süre", "Geç (adet)", "İzin gün", "Rapor gün", "Ücretsiz gün", "Gelmedi gün", "Giriş okutmadı", "Çıkış okutmadı"];
   $("#pz-toplam").innerHTML = l.length ? `<table class="pz-sum"><thead><tr><th>Ad Soyad</th>${KISA.map(t => `<th>${t}</th>`).join("")}</tr></thead><tbody>` +
     l.map(r => `<tr><td class="ad">${kisiLink(r.kisi_no, r.ad)}</td>${TOP.map(([a]) => `<td>${sureH(a, r.toplam[a])}</td>`).join("")}</tr>`).join("") + `</tbody></table>` : "";
 }

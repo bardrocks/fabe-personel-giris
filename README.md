@@ -69,7 +69,10 @@ Cihaz giriş/çıkış ayırmadığı için günün ilk okutması giriş, son ok
 
 ## Bugün sayfası, kart no ve hızlı arama
 
-- **Bugün:** KPI kartları ve bugünün listesi (kategoriye göre süzülebilir) altında şu kartlar vardır: **Dikkat edilecekler** (dün çıkış okutmayanlar [Düzelt: saat alanına kişinin mesai çıkışı önden yazılır],
+- **Bugün (1.11.0 sırası):** KPI kartları (tıklayınca liste süzülür ve sayfa listeye kayar; başlıkta "Süzgeci kaldır"), üst ızgara (solda geniş **Dikkat edilecekler**, sağda kategori ve yaklaşanlar), bugünün listesi, canlı akış | ay özeti.
+  **Dikkat edilecekler** en üstte **Uzun süredir okutma yok · işten mi ayrıldı?** (aktif kişi N gündür okutmuyor: İşten ayrıldı / İzin gir / Personeli sil / Şimdilik gizle; N: Ayarlar > Genel mesai), ardından dün çıkış okutmayanlar ve
+  **dün giriş okutmayanlar** [tek okutma mesai ortasından sonraysa "GİRİŞ YOK": o okutma çıkış sayılır; Düzelt'te mesai giriş saati önden yazılır]. Diğer gruplar:
+  dün çıkış okutmayanlar [Düzelt: saat alanına kişinin mesai çıkışı önden yazılır],
   mesai saati geçtiği halde gelmeyenler [İzin gir], son 14 günde okutması olan adı bilinmeyen kart numaraları [Tanımla], bu hafta başlayan/biten izinler; boş gruplar gizlenir, her grupta ilk 8 satır görünür),
   **Şu an içeride · kategoriye göre** (içeride / bugün beklenen, ilerleme çubuğu; satıra tıklayınca liste o kategoriye süzülür), **Yaklaşanlar** (bu/gelecek cumartesi nöbet listesi, önümüzdeki 7 günün izinleri),
   **Canlı okutma akışı** (son 10 okutma, ayıklanmış sıradan giriş/çıkış etiketi) ve **Bu ayın özeti** (en çok geç kalan / çıkış okutmayan 5 kişi). Kartlar özellik anahtarlarına uyar (izin kapalıysa izin kartları yok, vb.).
@@ -97,7 +100,7 @@ Panel kendini GitHub'daki depodan güncelleyebilir (`guncelleme_taban` + `guncel
 
 - **Kategoriye atama (3 yol):** (1) Personel sayfasında kişileri onay kutusuyla seçin, çıkan çubuktan kategoriyi seçip **Uygula**'ya basın (Kategorisiz yap da var). (2) Ayarlar > Kategoriler'de kategori satırındaki
   **Personel (N)** düğmesiyle kişi ekleyip çıkarın. (3) Kişi sayfası > **Düzenle**'de Kategori seçin.
-- **Ayarlar > Personel listesi:** tüm personel (EnGoPer'den gelen ve elle eklenen), arama, "Silinenleri göster", "Son 60 günde okutanlar". Satır işlemleri: **Düzenle** (görünen ad, kategori; cihaz no salt okunur),
+- **Ayarlar > Personel listesi:** tüm personel (EnGoPer'den gelen ve elle eklenen), arama, "Silinenleri göster", "Sadece aktif personel" (aktif: silinmemiş, ayrılmamış ve kategorisi olan ya da son 60 günde okutan). Satır işlemleri: **Düzenle** (görünen ad, kategori; cihaz no salt okunur),
   **Sil / Geri al**. **+ Personel ekle**: cihaz no ve ad soyad zorunlu; numara başka kişide ya da silinmiş birindeyse hata verir. **Cihazda olup adı bilinmeyen numaralar** kartında **Tanımla** ile ad verilir;
   numaranın geçmiş okutmaları o isimle görünür (okutmalar zaten cihaz numarasıyla bağlıdır).
 - Adlar EnGoPer'in Personel.DBF'inden **salt okunur** alınır; görünen ad, silme ve elle ekleme panelin kendi veritabanında tutulur (DBF'e, EnGoPer'e ya da cihaza yazılmaz). DBF yenilemesi bunları ezmez;
@@ -151,7 +154,7 @@ Ayarlar > Personel saatleri'nde ayrılanlar varsayılan olarak gizlenir.
 **K** mağaza kapalı (kapalı günde okutma yoksa; okutma varsa X) · **G** gelmedi (beklenen gün, okutma yok) · boş: gelecek gün, sistemde veri yok ya da kişi o gün işte değil.
 Saatlik izinli gelinen gün X'tir, küçük nokta ile işaretlenir; okutması düzeltilmiş günde ✎ görünür. Hücre üzerine gelince giriş-çıkış saatleri, izin ve kapalı gün açıklaması çıkar.
 Satır sonunda: çalışılan gün, toplam çalışma, **fazla mesai**, **eksik süre** (geç + erken çıkış), geç (adet), izin / rapor / ücretsiz / gelmedi gün. Toplamlar ızgaranın altında ayrı tablodadır.
-Listelenenler: o ay okutması olan ya da son 60 günde okutmuş kişiler (ay başından önce işten ayrılanlar hariç). **Excel** düğmesi aynı ızgarayı toplamlar ve kod açıklamalarıyla indirir
+Listelenenler: o ay okutması olan, aktif personel (kategorisi olan ya da son 60 günde okutan) kişiler (ay başından önce işten ayrılanlar hariç). Giriş/çıkış okutulmamış günde hücrede küçük g / ç işareti vardır. **Excel** düğmesi aynı ızgarayı toplamlar ve kod açıklamalarıyla indirir
 (`/disa?tur=puantaj&ay=2026-11&bicim=xlsx`). Kişi sayfasında da dönem için fazla mesai ve eksik süre kartları vardır.
 
 **Ayarlar > Genel mesai > Fazla mesai ve mola** (`ayar` tablosunda `fm_yontem`, `fm_haftalik_esik`, `mola_dk`):

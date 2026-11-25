@@ -3,6 +3,23 @@
 Sürüm numarası `panel.py` içindeki `SURUM` değeridir; panelde sol menünün altında ve Sistem sayfasında görünür.
 Yeni sürüm ilk açıldığında veritabanı, güncellenmeden önce `data\yedekler` klasörüne otomatik yedeklenir.
 
+## 1.11.0
+- **Bugün sayfası yerleşimi**: sıra artık KPI kartları, üst ızgara (solda geniş **Dikkat edilecekler**, sağda **Şu an içeride · kategoriye göre** ve **Yaklaşanlar**), bugünün listesi, canlı akış | bu ayın özeti.
+  KPI kartına tıklayınca liste süzülür ve sayfa listeye yumuşakça kayar; liste başlığında aktif süzgeç yazar ve **Süzgeci kaldır** bağlantısı vardır (kategori satırı da aynı şekilde çalışır).
+- **Aktif personel tanımı (tek fonksiyon)**: silinmemiş, işten çıkış tarihi geçmemiş ve (bir kategoride ya da son 60 günde okutması olan) kişi. Kategorisi olan kişi okutmasa da aktiftir; kategori sayıları, gelmeyen listesi,
+  Personel sayfası, puantaj ve tüm personel listeleri bunu kullanır. "Son 60 günde okutanlar" kutuları **Sadece aktif personel** oldu. Personel sayfasında dönem içinde hiç okutması olmayan aktif kişiler de satır olur (gün 0, gelmedi sayısıyla).
+- **Kategori kartı**: "içeride / beklenen" yanında **toplam N** yazar; uzun süredir okutmayan üye varsa uyarı simgesi ve ipucu ("1 kişi 14+ gündür okutmuyor") çıkar. Beklenen ve gelmeyen listelerine kategori üyeleri 14 gün şartı olmadan girer;
+  uzun süredir okutmayanların yanında "X gündür okutmuyor" ya da "hiç okutmadı" etiketi görünür.
+- **Dikkat edilecekler > Uzun süredir okutma yok · işten mi ayrıldı?** (en üstte, çerçeveli): aktif kişilerden son okutması N gün (Ayarlar > Genel mesai > "Uzun süre okutmama uyarısı (gün)", varsayılan 14) ya da daha eski olanlar ve hiç okutmayan kategori üyeleri.
+  Satır: ad, kategori, "son okutma 29.04.2026 · 210 gündür okutmuyor". Düğmeler: **İşten ayrıldı** (tarih son okutma günüyle dolu gelir, düzenlenebilir; `isten_cikis` yazılır, kişi sayılara girmez, kategori üyeliği kalır),
+  **İzin gir**, **Personeli sil** (onaylı), **Şimdilik gizle** (7 gün; `personel_ayar.uyari_erteleme`). Satıra tıklayınca kişi sayfası açılır; kişi sayfasında aynı uyarı şeridi ve düğmeler vardır.
+  Yeni uç noktalar: `POST /api/ayar/isten_ayrildi`, `POST /api/ayar/uyari_ertele`; işlemler `personel_log`'a yazılır.
+- **GİRİŞ YOK**: tek okutmalı günde okutma saati o günkü mesai başlangıcı ile bitişinin ORTASINDAN sonraysa (bitiş tanımsızsa 14:00) durum **GİRİŞ YOK** olur: o okutma çıkış sayılır, giriş boştur, geç hesabı yapılmaz,
+  erken çıkış okutma saatine göre hesaplanır. Bugün için de geçerlidir (akşam tek okutma "İÇERİDE" değil "GİRİŞ YOK"; sabah tek okutma yine İÇERİDE; sonra yeni okutma gelirse normal akış). Tam gün izinli ya da mağaza kapalı günde tek akşam okutması normal çalışılmış (OK) sayılır.
+  Her yerde yansıdı: Dikkat edilecekler'de **Dün giriş okutmayanlar** (Düzelt: saat alanına mesai GİRİŞ saati önden yazılır), Bugün KPI'ı ve satırında **Giriş ekle**, rapor filtresi/Excel, kişi takvimi ("Giriş okutulmamış", ÇIKIŞ YOK ile aynı kırmızı),
+  Personel istatistikleri (`giris_yok` + döneme göre karşılaştırma), puantaj (hücrede g/ç işareti, iki yeni toplam sütunu, Excel), Telegram akşam özeti ve Bu ayın özeti ("en çok okutma eksiği olan": giriş yok + çıkış yok).
+- Veritabanı: `personel_ayar.uyari_erteleme` sütunu eklendi (eski veritabanları açılışta otomatik yükseltilir; mevcut veri değişmez).
+
 ## 1.10.0
 - **Güncelleme sağlamlaştırıldı** (3 düzeltme):
   - Dosyalar artık dal adresinden değil, GitHub API'den (`guncelleme_api`, `{dal}` yer tutucusu) alınan **commit SHA** adresinden iner (`<taban>/<sha>/<dosya>`): raw CDN önbelleği yüzünden yeni panel.py + eski index.html gibi tutarsız set gelmez. SHA alınamazsa güncelleme yapılmaz (dal adresine düşülmez). Kurulu SHA `data/kurulu_sha.txt` ve `guncelleme.json` içinde saklanır, Sistem sayfasında gösterilir.
