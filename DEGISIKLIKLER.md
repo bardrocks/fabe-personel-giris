@@ -3,6 +3,16 @@
 Sürüm numarası `panel.py` içindeki `SURUM` değeridir; panelde sol menünün altında ve Sistem sayfasında görünür.
 Yeni sürüm ilk açıldığında veritabanı, güncellenmeden önce `data\yedekler` klasörüne otomatik yedeklenir.
 
+## 1.11.1
+- **Gelinmeyen günler artık görünür**: kişi sayfasındaki *Günlük kayıtlar* dönemdeki her gün için satır içerir (en yeni üstte): okutmasız beklenen geçmiş günler **GELMEDİ** (nöbet cumartesisi **NÖBETE GELMEDİ**; [İzin gir] ve [Düzelt] düğmeleriyle),
+  tam gün izinli günler **İZİNLİ**, mağaza kapalı günler **KAPALI**. Beklenmeyen günler (Pazar, çalışmadığı gün, nöbetsiz cumartesi, işe giriş öncesi/çıkış sonrası) ve sistemde hiç verisi olmayan günler satır olmaz.
+  Bugün beklenen, okutması yok ve saat mesai girişi + geç toleransını geçtiyse "GELMEDİ (bugün)" satırı çıkar (takvimde de gelmedi stili); "Gelmedi (gün)" sayısı yalnızca geçmiş günleri sayar ("bugün dahil değil").
+  Takvim, "Gelmediği günler" ve liste tek kaynaktan (`eksik_gun_satirlari`) beslenir.
+- **Raporlar > Günlük giriş-çıkış**: **Gelmeyen günleri de göster** kutusu (varsayılan kapalı; tek kişi ya da tüm aktif personel) ve durum süzgecinde **Gelmedi** (kutuyu kendiliğinden açar). Özet satırında gelmedi sayısı; Excel/CSV kutuya uyar (`/disa?...&gelmeyen=1`).
+- **Bugün sayfasında gün seçici**: [‹] [Bugün] [Dün] [tarih] [›]; adres `#bugun` ya da `#bugun/2026-11-24` (gelecek tarih seçilemez, geçersiz adres bugüne döner; `GET /api/bugun?tarih=` geçersiz/gelecek için 400).
+  Geçmiş günde başlıkta "geçmiş gün" rozeti, "Şu an içeride" yerine gelen/beklenen kategori kartı, KPI'lar (gelen, geç, erken, giriş/çıkış okutmayan, gelmeyen, izinli), gelmeyen / izinli satırları (aktif personel, 14 günlük pencere o güne göre) ve her satırda Düzelt (GELMEDİ'de İzin gir);
+  Dikkat edilecekler, Yaklaşanlar ve Canlı akış gizlenir; otomatik 60 sn yenileme yalnızca bugün görünümünde çalışır. Veritabanı şeması değişmedi.
+
 ## 1.11.0
 - **Bugün sayfası yerleşimi**: sıra artık KPI kartları, üst ızgara (solda geniş **Dikkat edilecekler**, sağda **Şu an içeride · kategoriye göre** ve **Yaklaşanlar**), bugünün listesi, canlı akış | bu ayın özeti.
   KPI kartına tıklayınca liste süzülür ve sayfa listeye yumuşakça kayar; liste başlığında aktif süzgeç yazar ve **Süzgeci kaldır** bağlantısı vardır (kategori satırı da aynı şekilde çalışır).

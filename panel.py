@@ -36,7 +36,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, quote, unquote, urlparse
 from xml.sax.saxutils import escape
 
-SURUM = "1.11.0"  # her yeni ozellikte artirilir; degisiklikler DEGISIKLIKLER.md'de
+SURUM = "1.11.1"  # her yeni ozellikte artirilir; degisiklikler DEGISIKLIKLER.md'de
 KOK = os.path.dirname(os.path.abspath(__file__))
 WIN = os.name == "nt"
 ENGOPER_KLASOR = r"C:\EnGoPer"
@@ -817,11 +817,62 @@ def gun_ozeti(gun, ts, bugun, mesai, genel):
             "mesai": f"{m_giris}-{m_cikis}" if m_cikis else m_giris, "mesai_kaynak": m_kaynak}
 
 
-def gunluk_rapor(bas, bit, kisi=None, durum_filtre=None):
+def _bos_gun_satiri(mc, per, k, iso, durum, bugun_mi=False):
+    """Okutmasi olmayan gun icin gunluk_rapor satiri (GELMEDİ / NÖBETE GELMEDİ / İZİNLİ / KAPALI)."""
+    p = per.get(k)
+    m = mc.mesai(k, iso)
+    return {"tarih": iso, "kisi_no": k, "ad": ad_soyad(p, k), "sicil": p["sicilno"] if p else "", "kategori": mc.kategori_adi(k),
+            "kart": kart_no(p, k), "giris": "", "cikis": "", "sure": "", "sure_dk": 0, "okutma": 0, "gec_dk": 0, "erken_dk": 0, "durum": durum,
+            "mesai": f"{m[0]}-{m[1]}" if m[1] else m[0], "mesai_kaynak": m[2], "izin": izin_yazi(mc.izin(k, iso)), "duzeltildi": False,
+            "silindi": bool(p and p["silindi"]), "kapali": mc.kapali_mi(iso) or "", "bugun": bugun_mi}
+
+
+def eksik_gun_satirlari(mc, per, k, bas, bit, gelinen, veri_gunleri, nobetler, ilk_gun, an):
+    """TEK KAYNAK: kisinin [bas, bit] araligindaki okutmasiz gunleri (gelinen disinda) ve durumu. Kisi sayfasi (takvim, gelmedi gunleri,
+    gunluk kayitlar), rapor ve gecmis gun gorunumu bunu kullanir.
+    - tam gun izinli: İZİNLİ; magaza kapali: KAPALI; beklenmeyen gun (Pazar, calismadigi gun, nobetsiz cumartesi, ise giris oncesi/cikis sonrasi): satir yok
+    - gecmis beklenen gun: GELMEDİ (nobet gunuyse NÖBETE GELMEDİ) - sadece sistemde o gun veri varsa ve ilk kayit/ise giris tarihinden sonra
+    - bugun: beklenen ve simdi > mesai girisi + gec tolerans ise GELMEDİ (veri sarti yok); gelecek gun: yok."""
+    bugun = an.date()
+    out = []
+    g, son = _tarih(bas), min(_tarih(bit), bugun)
+    while g <= son:
+        iso = g.isoformat()
+        if iso not in gelinen and mc.istihdamda(k, iso):
+            durum = None
+            if mc.tam_izinli(k, iso):
+                durum = "İZİNLİ"
+            elif mc.kapali_mi(iso):
+                durum = "KAPALI"
+            else:
+                nb = iso in nobetler
+                if mc.beklenen_gun_mu(k, iso, nb):
+                    if g == bugun:
+                        if an.hour * 60 + an.minute > dk(mc.mesai(k, iso)[0]) + mc.genel["gec_tolerans_dk"]:
+                            durum = "NÖBETE GELMEDİ" if nb else "GELMEDİ"
+                    elif iso in veri_gunleri and iso >= ilk_gun:
+                        durum = "NÖBETE GELMEDİ" if nb else "GELMEDİ"
+            if durum:
+                out.append(_bos_gun_satiri(mc, per, k, iso, durum, g == bugun))
+        g += dt.timedelta(days=1)
+    return out
+
+
+def gunluk_rapor(bas, bit, kisi=None, durum_filtre=None, gelmeyen=False):
     bugun = simdi().date()
+    if durum_filtre == "GELMEDİ":
+        gelmeyen = True
+    ek = None
     with db() as con:
         per = personel_sozluk(con)
         mc = MesaiCozucu(con)
+        if gelmeyen:
+            ek = {"veri": _veri_gunleri(con, bas, bit),
+                  "ilk": {r[0]: r[1][:10] for r in con.execute("SELECT kisi_no, MIN(zaman) FROM okutma WHERE gizli=0 GROUP BY kisi_no")},
+                  "nobet": {}, "kisiler": [int(kisi)] if kisi else sorted(k for k in aktif_kisiler(con, mc, per) if k in per)}
+            if mc.oz["nobet"]:
+                for r in con.execute("SELECT tarih, kisi_no FROM nobet WHERE tarih >= ? AND tarih <= ?", (bas, bit)):
+                    ek["nobet"].setdefault(r[1], set()).add(r[0])
         gruplar = {}
         for r in okutmalar(con, bas, bit, kisi):
             gruplar.setdefault((r["kisi_no"], r["zaman"][:10]), []).append(r["zaman"])
@@ -849,13 +900,24 @@ def gunluk_rapor(bas, bit, kisi=None, durum_filtre=None):
             elif o["durum"] == "ÇIKIŞ YOK":
                 o["durum"] = "OK"
         satirlar.append(o)
-    if durum_filtre == "GEC":
+    if ek is not None:
+        an = simdi()
+        gelinen = {}
+        for s_ in satirlar:
+            gelinen.setdefault(s_["kisi_no"], set()).add(s_["tarih"])
+        for k in ek["kisiler"]:
+            pa = mc.per.get(k) or {}
+            satirlar += eksik_gun_satirlari(mc, per, k, bas, bit, gelinen.get(k, set()), ek["veri"], ek["nobet"].get(k, set()),
+                                            pa.get("ise_giris") or ek["ilk"].get(k, "0000-00-00"), an)
+    if durum_filtre == "GELMEDİ":
+        satirlar = [s_ for s_ in satirlar if s_["durum"] in ("GELMEDİ", "NÖBETE GELMEDİ")]
+    elif durum_filtre == "GEC":
         satirlar = [s for s in satirlar if s["gec_dk"]]
     elif durum_filtre == "ERKEN":
         satirlar = [s for s in satirlar if s["erken_dk"]]
     elif durum_filtre:
         satirlar = [s for s in satirlar if s["durum"] == durum_filtre]
-    satirlar.sort(key=lambda s: (s["tarih"], s["giris"] or s["cikis"]), reverse=False)
+    satirlar.sort(key=lambda s: (s["tarih"], s["giris"] or s["cikis"], s["ad"]), reverse=False)
     satirlar.sort(key=lambda s: s["tarih"], reverse=True)
     return satirlar
 
@@ -969,9 +1031,83 @@ def uzun_okutmayanlar(erteleme_dahil=False):
     return out
 
 
-def bugun_ozeti():
+def gun_tarihi(tarih):
+    """None -> bugun; gecersiz/gelecek tarih ValueError."""
+    if not tarih:
+        return None
+    try:
+        d = dt.date.fromisoformat(str(tarih))
+    except ValueError:
+        raise ValueError("Tarih YYYY-AA-GG biçiminde olmalı")
+    if d > simdi().date():
+        raise ValueError("Gelecek bir gün seçilemez")
+    return d
+
+
+def gecmis_gun_ozeti(gd):
+    """Gecmis bir gunun Bugun-benzeri ozeti: icerde yok; gelmeyenler/izinliler ortak eksik_gun_satirlari mantigiyla o gune gore."""
+    an = simdi()
+    g = gd.isoformat()
+    satirlar = gunluk_rapor(g, g)
+    satirlar.sort(key=lambda s: s["giris"] or s["cikis"])
+    gelen = {s["kisi_no"] for s in satirlar}
+    with db() as con:
+        mc = MesaiCozucu(con)
+        per = personel_sozluk(con)
+        akt = aktif_kisiler(con, mc, per, gun=gd)
+        son14 = (gd - dt.timedelta(days=14)).isoformat()
+        yakin = {r[0] for r in con.execute("SELECT DISTINCT kisi_no FROM okutma WHERE gizli=0 AND zaman >= ? AND zaman < ?", (son14, g))}
+        sonlar = {r[0]: r[1] for r in con.execute("SELECT kisi_no, MAX(zaman) FROM okutma WHERE gizli=0 AND zaman < ? GROUP BY kisi_no", (g + " 23:59:59",))}
+        ilk = {r[0]: r[1][:10] for r in con.execute("SELECT kisi_no, MIN(zaman) FROM okutma WHERE gizli=0 GROUP BY kisi_no")}
+        veri = _veri_gunleri(con, g, g)
+        nobetliler = ({r[0] for r in con.execute("SELECT kisi_no FROM nobet WHERE tarih=?", (g,))} if mc.oz["nobet"] else set())
+        izinli = []
+        if mc.oz["izin"]:
+            izinli = [dict(kisi_no=r["kisi_no"], kart=kart_no(per.get(r["kisi_no"]), r["kisi_no"]), kategori=mc.kategori_adi(r["kisi_no"]),
+                           ad=ad_soyad(per.get(r["kisi_no"]), r["kisi_no"]), izin=izin_yazi(dict(r)),
+                           aciklama=r["aciklama"] or "", geldi=r["kisi_no"] in gelen)
+                      for r in con.execute("SELECT * FROM izin WHERE tarih=?", (g,))]
+    aday = {k for k in akt if (mc.per.get(k) or {}).get("kategori_id") in mc.kat or k in yakin} | nobetliler
+    esik = mc.genel["uzun_okutmama_gun"]
+    gelmeyen, izinli_satir = [], []
+    for k in sorted((akt | nobetliler) & set(per)):
+        if k in gelen:
+            continue
+        pa = mc.per.get(k) or {}
+        for r in eksik_gun_satirlari(mc, per, k, g, g, set(), veri, {g} if k in nobetliler else set(), pa.get("ise_giris") or ilk.get(k, "0000-00-00"), an):
+            if r["durum"] == "İZİNLİ":
+                izinli_satir.append(r)
+            elif r["durum"] in ("GELMEDİ", "NÖBETE GELMEDİ") and k in aday:
+                z = sonlar.get(k)
+                uz = (gd - dt.date.fromisoformat(z[:10])).days if z else None
+                r["son_okutma"] = z[:10] if z else ""
+                r["okutmuyor_gun"] = uz if (uz is None or uz >= esik) else 0
+                gelmeyen.append(r)
+    gelmeyen.sort(key=lambda x: x["ad"])
+    izinli_satir.sort(key=lambda x: x["ad"])
+    izinli.sort(key=lambda x: x["ad"])
+    # kategoriye gore: gelen / beklenen (o gun)
+    beklenen = {k for k in aday if k in per and mc.beklenen_gun_mu(k, gd, k in nobetliler)}
+    gel = {x["kisi_no"] for x in satirlar if not x["silindi"]}
+    kat = {}
+    for k in beklenen | gel | {k for k in akt if k in per}:
+        ad = mc.kategori_adi(k)
+        d = kat.setdefault(ad, {"kategori": ad, "ad": ad or "Kategorisiz", "beklenen": 0, "gelen": 0, "icerde": 0, "toplam": 0, "uzun": 0, "uzun_esik": esik})
+        d["beklenen"] += 1 if k in beklenen else 0
+        d["gelen"] += 1 if k in gel else 0
+        d["toplam"] += 1 if k in akt else 0
+    return {"tarih": g, "gecmis": True, "satirlar": satirlar, "gelmeyen": gelmeyen, "izinli": izinli, "izinli_satirlar": izinli_satir, "icerde": [],
+            "giris_yok": [s for s in satirlar if s["durum"] == "GİRİŞ YOK"], "gec": [s for s in satirlar if s["gec_dk"]],
+            "erken": [s for s in satirlar if s["erken_dk"]], "nobet": nobet_durumu(g, g), "kapali": mc.kapali_mi(gd),
+            "kategori": sorted(kat.values(), key=lambda x: (x["kategori"] == "", x["ad"]))}
+
+
+def bugun_ozeti(tarih=None):
     an = simdi()
     bugun = an.date()
+    gd = gun_tarihi(tarih)
+    if gd and gd < bugun:
+        return gecmis_gun_ozeti(gd)
     g = bugun.isoformat()
     satirlar = gunluk_rapor(g, g)
     satirlar.sort(key=lambda s: s["giris"] or s["cikis"])
@@ -1143,7 +1279,15 @@ def personel_detay(kisi, bas, bit):
     ozet["eksik"] = sure_yaz(ozet["eksik_dk"]) or "0 dakika"
     ozet["fm_yontem"] = mc.genel["fm_yontem"]
     bugun = simdi().date()
-    gelmedi, nobet_gelmedi = set(ozet["gelmedi_gunler"]), set(ozet["nobet_gelmedi_gunler"])
+    with db() as con:
+        ilk_okutma = con.execute("SELECT MIN(zaman) FROM okutma WHERE gizli=0 AND kisi_no=?", (k,)).fetchone()[0]
+    bos = eksik_gun_satirlari(mc, per, k, bas, bit, set(gunler), veri_gunleri, nobetler,
+                              (mc.per.get(k) or {}).get("ise_giris") or (ilk_okutma or "0000-00-00")[:10], simdi())
+    bos_d = {x["tarih"]: x for x in bos}
+    # gelmedi sayilari/gunleri takvim ve gunluk kayitlarla AYNI kaynaktan (bugun sayilmaz: gunun sonu belli degil)
+    ozet["gelmedi_gunler"] = [x["tarih"] for x in bos if x["durum"] == "GELMEDİ" and not x["bugun"]]
+    ozet["nobet_gelmedi_gunler"] = [x["tarih"] for x in bos if x["durum"] == "NÖBETE GELMEDİ" and not x["bugun"]]
+    ozet["gelmedi"], ozet["nobet_gelmedi"] = len(ozet["gelmedi_gunler"]), len(ozet["nobet_gelmedi_gunler"])
     takvim = []
     g = dt.date.fromisoformat(bas)
     while g <= dt.date.fromisoformat(bit):
@@ -1165,7 +1309,7 @@ def personel_detay(kisi, bas, bit):
                 d = "erken"
             else:
                 d = "zamaninda"
-        elif t in nobet_gelmedi or t in gelmedi:
+        elif t in bos_d and bos_d[t]["durum"] in ("GELMEDİ", "NÖBETE GELMEDİ"):
             d = "gelmedi"
         elif kapali:
             d = "kapali"
@@ -1193,7 +1337,7 @@ def personel_detay(kisi, bas, bit):
             "ozet": ozet, "takvim": takvim, "izinler": izin_listesi(bas, bit, k),
             "uzun_uyari": next((u for u in uzun_okutmayanlar(True) if u["kisi_no"] == k), None),
             "izin_bakiye": (izin_bakiye(k) or [None])[0] if mc.oz["izin_bakiye"] else None,
-            "gunler": sorted(gunler.values(), key=lambda s: s["tarih"], reverse=True)}
+            "gunler": sorted(list(gunler.values()) + bos, key=lambda s: s["tarih"], reverse=True)}
 
 
 # ----------------------------------------------------------------- izinler
@@ -3345,7 +3489,7 @@ def disa_tablo(tur, q):
          "Geç", "Erken çıkış", "Durum", "İzin", "Düzeltme"]
     return b, [[r["tarih"], r["kart"], r["sicil"], r["ad"], r["kategori"], r["mesai"], r["giris"], r["cikis"],
                 r["sure"], r["okutma"], sure_yaz(r["gec_dk"]), sure_yaz(r["erken_dk"]), r["durum"], r["izin"],
-                "Düzeltildi" if r["duzeltildi"] else ""] for r in gunluk_rapor(bas, bit, kisi, q.get("durum") or None)]
+                "Düzeltildi" if r["duzeltildi"] else ""] for r in gunluk_rapor(bas, bit, kisi, q.get("durum") or None, q.get("gelmeyen") == "1")]
 
 
 def nobet_sablon():
@@ -3450,9 +3594,12 @@ class Istek(BaseHTTPRequestHandler):
             if yol == "/api/bildirim":
                 return self.gonder(200, bildirim_ayarlari())
             if yol == "/api/bugun":
-                return self.gonder(200, bugun_ozeti())
+                try:
+                    return self.gonder(200, bugun_ozeti(q.get("tarih")))
+                except ValueError as e:
+                    return self.gonder(400, {"hata": str(e)})
             if yol == "/api/rapor":
-                return self.gonder(200, gunluk_rapor(q["bas"], q["bit"], q.get("kisi"), q.get("durum")))
+                return self.gonder(200, gunluk_rapor(q["bas"], q["bit"], q.get("kisi"), q.get("durum"), q.get("gelmeyen") == "1"))
             if yol == "/api/ham":
                 return self.gonder(200, ham_kayitlar(q["bas"], q["bit"], q.get("kisi")))
             if yol == "/api/personel":

@@ -69,6 +69,7 @@ Cihaz giriş/çıkış ayırmadığı için günün ilk okutması giriş, son ok
 
 ## Bugün sayfası, kart no ve hızlı arama
 
+- **Gün seçici (1.11.1):** Bugün başlığında [‹] [Bugün] [Dün] [tarih] [›]; `#bugun/YYYY-AA-GG` adresi geçmiş günü açar (gelmeyenler, izinliler, gelen/beklenen kategori kartı; Dikkat/Yaklaşanlar/Canlı akış yok). Kişi sayfası Günlük kayıtlar ve Raporlar ("Gelmeyen günleri de göster") gelinmeyen günleri GELMEDİ / NÖBETE GELMEDİ / İZİNLİ / KAPALI satırı olarak gösterir.
 - **Bugün (1.11.0 sırası):** KPI kartları (tıklayınca liste süzülür ve sayfa listeye kayar; başlıkta "Süzgeci kaldır"), üst ızgara (solda geniş **Dikkat edilecekler**, sağda kategori ve yaklaşanlar), bugünün listesi, canlı akış | ay özeti.
   **Dikkat edilecekler** en üstte **Uzun süredir okutma yok · işten mi ayrıldı?** (aktif kişi N gündür okutmuyor: İşten ayrıldı / İzin gir / Personeli sil / Şimdilik gizle; N: Ayarlar > Genel mesai), ardından dün çıkış okutmayanlar ve
   **dün giriş okutmayanlar** [tek okutma mesai ortasından sonraysa "GİRİŞ YOK": o okutma çıkış sayılır; Düzelt'te mesai giriş saati önden yazılır]. Diğer gruplar:

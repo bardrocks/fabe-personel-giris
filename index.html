@@ -96,6 +96,11 @@ td .soluk{overflow-wrap:anywhere}
 .uz-ikon{display:inline-flex;vertical-align:-3px;color:var(--kirmizi);margin-left:4px}
 .b-sg{display:inline-flex;gap:8px;align-items:center;font-weight:400;font-size:12.5px}
 .pz-t td.h i.pz-y{position:absolute;left:2px;top:0;font-size:9px;line-height:1;font-style:normal;color:var(--kirmizi)}
+.gun-sec{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.gun-sec input[type=date]{width:auto;padding:5px 6px}
+.gecmis .bugun-ust{grid-template-columns:minmax(0,1fr)}
+.gecmis #k-dikkat,.gecmis #k-yaklasan,.gecmis #k-akis{display:none}
+.gecmis .yan-yana{grid-template-columns:minmax(0,1fr)}
 .dk-grup{margin-bottom:14px}.dk-grup:last-child{margin-bottom:0}
 .dk-grup h3{font-size:13px;margin:0 0 6px;font-weight:600}
 .dk-satir{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;background:var(--kart2);margin-bottom:5px}
@@ -320,16 +325,17 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
   <div id="gunc-serit" class="gunc-serit gizli"></div>
 
   <!-- ================= BUGÜN ================= -->
-  <section data-sayfa="bugun">
+  <section data-sayfa="bugun" id="s-bugun">
     <div class="ust"><h1>Bugün</h1><span class="alt" id="b-tarih"></span>
-      <div class="sag"><span class="soluk" id="b-son"></span></div></div>
+      <div class="sag"><div class="gun-sec"><button class="d kucuk" id="b-onceki" title="Önceki gün">‹</button><button class="d kucuk" id="b-btn-bugun">Bugün</button><button class="d kucuk" id="b-btn-dun">Dün</button>
+        <input type="date" id="b-tarih-sec" title="Tarih seç" aria-label="Tarih seç"><button class="d kucuk" id="b-sonraki" title="Sonraki gün">›</button></div><span class="soluk" id="b-son"></span></div></div>
     <div class="kpi" id="b-kpi"></div>
     <div id="b-nobet"></div>
     <div class="bugun-ust">
-      <div class="kart"><h2><i data-ik="uyari"></i>Dikkat edilecekler</h2><div id="a-dikkat"></div></div>
+      <div class="kart" id="k-dikkat"><h2><i data-ik="uyari"></i>Dikkat edilecekler</h2><div id="a-dikkat"></div></div>
       <div class="izgara" style="align-content:start">
-        <div class="kart"><h2><i data-ik="personel"></i>Şu an içeride · kategoriye göre</h2><div id="a-kategori"></div></div>
-        <div class="kart"><h2><i data-ik="takvim"></i>Yaklaşanlar</h2><div id="a-yaklasan"></div></div>
+        <div class="kart"><h2><i data-ik="personel"></i><span id="a-kat-baslik">Şu an içeride · kategoriye göre</span></h2><div id="a-kategori"></div></div>
+        <div class="kart" id="k-yaklasan"><h2><i data-ik="takvim"></i>Yaklaşanlar</h2><div id="a-yaklasan"></div></div>
       </div>
     </div>
     <div class="kart" style="margin-bottom:14px" id="b-liste-kart">
@@ -337,7 +343,7 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
       <div class="tablo" id="b-tablo"></div>
     </div>
     <div class="yan-yana">
-      <div class="kart"><h2><i data-ik="saat"></i><span id="a-akis-baslik">Canlı okutma akışı</span></h2><div id="a-akis"></div></div>
+      <div class="kart" id="k-akis"><h2><i data-ik="saat"></i><span id="a-akis-baslik">Canlı okutma akışı</span></h2><div id="a-akis"></div></div>
       <div class="kart"><h2><i data-ik="grafik"></i>Bu ayın özeti</h2><div id="a-ay"></div></div>
     </div>
   </section>
@@ -483,7 +489,8 @@ details summary{cursor:pointer;color:var(--soluk);font-size:13px;margin:6px 0}
         <label>Bitiş<input type="date" id="r-bit"></label>
         <label>Personel<select id="r-kisi" class="kisi-sec"><option value="">Tümü</option></select></label>
         <label data-altgrup-icerik="rapor" data-alt="gunluk">Durum<select id="r-durum"><option value="">Tümü</option><option value="GEC">Geç kalan</option>
-          <option value="ERKEN">Erken çıkan</option><option value="ÇIKIŞ YOK">Çıkış yapmayan</option><option value="GİRİŞ YOK">Giriş okutmayan</option><option value="İÇERİDE">İçeride</option></select></label>
+          <option value="ERKEN">Erken çıkan</option><option value="ÇIKIŞ YOK">Çıkış yapmayan</option><option value="GİRİŞ YOK">Giriş okutmayan</option><option value="İÇERİDE">İçeride</option><option value="GELMEDİ">Gelmedi</option></select></label>
+        <label data-altgrup-icerik="rapor" data-alt="gunluk" style="flex-direction:row;align-items:center;gap:6px" title="Beklenen ama okutması olmayan günleri GELMEDİ / NÖBETE GELMEDİ, izinli ve mağaza kapalı günleri satır olarak ekler"><input type="checkbox" id="r-gelmeyen"> Gelmeyen günleri de göster</label>
         <button class="d ana" id="r-getir">Göster</button>
         <span style="margin-left:auto;display:flex;gap:8px"><button class="d" id="r-xlsx">Excel</button><button class="d" id="r-csv">CSV</button></span>
       </div>
@@ -770,7 +777,7 @@ const AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz",
 const GUNLER = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 const GUN_KISA = ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"];
 const tarihTR = t => { const [y, m, d] = t.split("-"); return `${d}.${m}.${y} ${GUN_KISA[new Date(t + "T12:00").getDay()]}`; };
-const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GİRİŞ YOK": "kirmizi", "GELDİ": "yesil", "GELMEDİ": "kirmizi",
+const RENK = {"İÇERİDE": "mavi", "OK": "yesil", "ÇIKIŞ YOK": "kirmizi", "GİRİŞ YOK": "kirmizi", "NÖBETE GELMEDİ": "kirmizi", "GELDİ": "yesil", "GELMEDİ": "kirmizi",
   "BEKLENİYOR": "sari", "İZİNLİ": "turkuaz", "KAPALI": "", "PLANLI": "", "VERİ YOK": "", "HATA": "kirmizi", "ATLANDI": "sari",
   "tam": "yesil", "kayıtlı": "yesil", "tahmini": "sari", "belirsiz": "kirmizi", "yok": "kirmizi"};
 const IPUCU = {"GİRİŞ YOK": "Giriş okutulmamış: günün tek okutması mesainin ortasından sonra, çıkış sayıldı", "ÇIKIŞ YOK": "Çıkış okutulmamış", "VERİ YOK": "O gün cihazdan hiç kayıt alınamamış; gelip gelmediği bilinemiyor",
@@ -913,19 +920,36 @@ function cubukGrafik(veri, seriler, opt = {}) {
 }
 
 // ===================================================================== BUGÜN
-let BUGUN = null, bFiltre = "gelen", bKat = null, ANA = null;
+let BUGUN = null, bFiltre = "gelen", bKat = null, ANA = null, bGun = null;  // bGun: null = bugün, "YYYY-AA-GG" = geçmiş gün
 const DK_ACIK = new Set();
-async function yukleBugun() {
-  const [d, ana] = await Promise.all([api("/api/bugun"), api("/api/ana").catch(() => null)]);
+const gunKaydir = (iso, n) => { const t = new Date(iso + "T12:00"); t.setDate(t.getDate() + n); return isoGun(t); };
+const bFiltreVarsayilan = () => bGun ? "hepsi" : "gelen";
+async function yukleBugun(arg) {
+  const yeniGun = arg && /^\d{4}-\d{2}-\d{2}$/.test(arg) && arg < bugun() ? arg : null;
+  if (arg && !yeniGun && /^\d{4}-\d{2}-\d{2}$/.test(arg)) { location.replace("#bugun"); return; }  // bugün/gelecek: bugün görünümü
+  if (yeniGun !== bGun) { bGun = yeniGun; bFiltre = bFiltreVarsayilan(); bKat = null; }
+  $("#s-bugun").classList.toggle("gecmis", !!bGun);
+  const [d, ana] = await Promise.all([api("/api/bugun" + (bGun ? "?tarih=" + bGun : "")), api("/api/ana").catch(() => null)]);
   BUGUN = d; ANA = ana;
-  const t = new Date(d.tarih + "T12:00");
-  $("#b-tarih").innerHTML = `${t.getDate()} ${AYLAR[t.getMonth()]} ${GUNLER[t.getDay()]}` +
-    (d.kapali ? ` · <span class="e">Mağaza kapalı: ${esc(d.kapali)}</span>` : "");
+  const t = new Date(d.tarih + "T12:00"), dun = d.tarih === gunKaydir(bugun(), -1);
+  $("#b-tarih").innerHTML = bGun ? `${dun ? "Dün · " : ""}${t.getDate()} ${AYLAR[t.getMonth()]}${dun ? "" : " " + t.getFullYear()} ${GUNLER[t.getDay()]} <span class="e sari">geçmiş gün</span>` +
+      (d.kapali ? ` · <span class="e">Mağaza kapalı: ${esc(d.kapali)}</span>` : "") :
+    `${t.getDate()} ${AYLAR[t.getMonth()]} ${GUNLER[t.getDay()]}` + (d.kapali ? ` · <span class="e">Mağaza kapalı: ${esc(d.kapali)}</span>` : "");
+  $("#b-tarih-sec").max = gunKaydir(bugun(), -1); $("#b-tarih-sec").value = bGun || "";
+  $("#b-btn-bugun").classList.toggle("ana", !bGun); $("#b-btn-dun").classList.toggle("ana", bGun === gunKaydir(bugun(), -1));
+  $("#b-sonraki").disabled = !bGun;
+  $("#b-son").classList.toggle("gizli", !!bGun);
   bugunCiz();
   anaCiz();
   const n = d.nobet[0];
-  $("#b-nobet").innerHTML = n && oz("nobet") ? `<div style="margin-bottom:14px">${nobetKarti(n, "Bugünkü nöbet")}</div>` : "";
+  $("#b-nobet").innerHTML = n && oz("nobet") ? `<div style="margin-bottom:14px">${nobetKarti(n, bGun ? "Nöbet" : "Bugünkü nöbet")}</div>` : "";
 }
+const gunaGit = iso => { location.hash = iso && iso < bugun() ? "#bugun/" + iso : "#bugun"; };
+$("#b-btn-bugun").onclick = () => gunaGit(null);
+$("#b-btn-dun").onclick = () => gunaGit(gunKaydir(bugun(), -1));
+$("#b-onceki").onclick = () => gunaGit(gunKaydir(bGun || bugun(), -1));
+$("#b-sonraki").onclick = () => gunaGit(bGun ? gunKaydir(bGun, 1) : null);
+$("#b-tarih-sec").onchange = e => { if (e.target.value) gunaGit(e.target.value); };
 const sureKisa = dk => sureYaz(dk) || "–";
 const tarihNokta = t => t ? t.split("-").reverse().join(".") : "";
 const uzunBilgi = u => u.hic ? `<span class="kirmizi-y">hiç okutmadı</span>` : `son okutma ${tarihNokta(u.son_okutma)} · <b class="kirmizi-y">${u.gun} gündür okutmuyor</b>`;
@@ -965,7 +989,23 @@ document.addEventListener("click", async e => {
   const row = e.target.closest("[data-git]");
   if (row && !e.target.closest("a,button")) location.hash = "#personel/" + row.dataset.git;
 });
+function kategoriCiz(liste, gecmis) {
+  $("#a-kat-baslik").textContent = gecmis ? "Gelen / beklenen · kategoriye göre" : "Şu an içeride · kategoriye göre";
+  $("#a-kategori").innerHTML = liste.length ? liste.map(k => {
+    const n = gecmis ? k.gelen : k.icerde;
+    const renk = k.beklenen > 0 && n === 0 ? "kirmizi" : n < k.beklenen ? "sari" : "yesil";
+    const yuzde = k.beklenen > 0 ? Math.min(100, Math.round(n / k.beklenen * 100)) : (n > 0 ? 100 : 0);
+    const uz = k.uzun && !gecmis ? `<span class="uz-ikon" title="${k.uzun} kişi ${k.uzun_esik}+ gündür okutmuyor">${ikon("uyari", 15)}</span>` : "";
+    return `<div class="kat-satir" data-bkat="${esc(k.kategori)}" title="Günün listesini bu kategoriye göre süz"><span>${esc(k.ad)} <span class="soluk">· toplam ${k.toplam}${gecmis ? "" : ` · bugün gelen ${k.gelen}`}</span>${uz}</span>` +
+      `<b class="${renk}-y">${n} / ${k.beklenen}</b><div class="bar"><i style="width:${yuzde}%;background:var(--${renk})"></i></div></div>`;
+  }).join("") : `<p class="soluk" style="margin:0">Bu gün için veri yok</p>`;
+}
+function ayCiz(a) {
+  const liste = (l, birim) => l.map(x => `<a href="#personel/${x.kisi_no}" class="dk-satir" style="color:inherit"><span>${esc(x.ad)}</span><b class="${birim === "kez" ? "sari-y" : "kirmizi-y"}">${x.adet} ${birim}${x.dk ? " · " + sureYaz(x.dk) : ""}${x.giris_yok !== undefined ? ` <span class="soluk" style="font-weight:400">(${x.giris_yok} giriş, ${x.cikis_yok} çıkış)</span>` : ""}</b></a>`).join("") || `<p class="soluk" style="margin:0 0 6px">Yok</p>`;
+  $("#a-ay").innerHTML = `<div class="dk-grup"><h3>En çok geç kalan 5 kişi</h3>${liste(a.ay.gec, "kez")}</div><div class="dk-grup"><h3>En çok okutma eksiği olan 5 kişi</h3>${liste(a.ay.eksik, "gün")}</div>`;
+}
 function anaCiz() {
+  if (bGun && BUGUN) { kategoriCiz(BUGUN.kategori || [], true); if (ANA) ayCiz(ANA); return; }
   if (!ANA) return;
   const a = ANA, dz = oz("duzeltme"), iz = oz("izin");
   // ---- dikkat edilecekler
@@ -987,13 +1027,7 @@ function anaCiz() {
       `${x.bas === x.bit ? tarihTR(x.bas) : tarihTR(x.bas) + " – " + tarihTR(x.bit)} · ${x.baslayan && x.biten ? "başlıyor ve bitiyor" : x.baslayan ? "başlıyor" : "bitiyor"}</span></span></div>`)) : ""].join("");
   $("#a-dikkat").innerHTML = html || `<p class="soluk" style="margin:0">Bugün dikkat edilecek bir şey yok 👍</p>`;
   // ---- kategoriye gore
-  $("#a-kategori").innerHTML = a.kategori.length ? a.kategori.map(k => {
-    const renk = k.beklenen > 0 && k.icerde === 0 ? "kirmizi" : k.icerde < k.beklenen ? "sari" : "yesil";
-    const yuzde = k.beklenen > 0 ? Math.min(100, Math.round(k.icerde / k.beklenen * 100)) : (k.icerde > 0 ? 100 : 0);
-    const uz = k.uzun ? `<span class="uz-ikon" title="${k.uzun} kişi ${k.uzun_esik}+ gündür okutmuyor">${ikon("uyari", 15)}</span>` : "";
-    return `<div class="kat-satir" data-bkat="${esc(k.kategori)}" title="Bugünün listesini bu kategoriye göre süz"><span>${esc(k.ad)} <span class="soluk">· toplam ${k.toplam} · bugün gelen ${k.gelen}</span>${uz}</span>` +
-      `<b class="${renk}-y">${k.icerde} / ${k.beklenen}</b><div class="bar"><i style="width:${yuzde}%;background:var(--${renk})"></i></div></div>`;
-  }).join("") : `<p class="soluk" style="margin:0">Bugün için veri yok</p>`;
+  kategoriCiz(a.kategori, false);
   // ---- yaklasanlar
   const y = a.yaklasan, par = [];
   if (oz("nobet") && y.nobet) par.push(`<div class="dk-grup"><h3>${tarihTR(y.nobet.tarih)} nöbet listesi (${y.nobet.kisiler.length})</h3>` +
@@ -1004,9 +1038,7 @@ function anaCiz() {
   // ---- canli akis
   $("#a-akis-baslik").textContent = a.akis.tarih === a.tarih ? "Canlı okutma akışı" : `Son okutmalar · ${tarihTR(a.akis.tarih)}`;
   $("#a-akis").innerHTML = a.akis.olaylar.map(o => `<div class="akis-satir"><span class="sa">${o.saat}</span>${kisiLink(o.kisi_no, o.ad)}<span class="e ${o.etiket === "giriş" ? "yesil" : "mor"}">${o.etiket}</span></div>`).join("") || `<p class="soluk" style="margin:0">Okutma yok</p>`;
-  // ---- bu ayin ozeti
-  const liste = (l, birim) => l.map(x => `<a href="#personel/${x.kisi_no}" class="dk-satir" style="color:inherit"><span>${esc(x.ad)}</span><b class="${birim === "kez" ? "sari-y" : "kirmizi-y"}">${x.adet} ${birim}${x.dk ? " · " + sureYaz(x.dk) : ""}${x.giris_yok !== undefined ? ` <span class="soluk" style="font-weight:400">(${x.giris_yok} giriş, ${x.cikis_yok} çıkış)</span>` : ""}</b></a>`).join("") || `<p class="soluk" style="margin:0 0 6px">Yok</p>`;
-  $("#a-ay").innerHTML = `<div class="dk-grup"><h3>En çok geç kalan 5 kişi</h3>${liste(a.ay.gec, "kez")}</div><div class="dk-grup"><h3>En çok okutma eksiği olan 5 kişi</h3>${liste(a.ay.eksik, "gün")}</div>`;
+  ayCiz(a);
 }
 document.addEventListener("click", e => {
   const h = e.target.closest("[data-dk-hepsi]"); if (h) { DK_ACIK.add(h.dataset.dkHepsi); anaCiz(); return; }
@@ -1016,9 +1048,46 @@ document.addEventListener("click", e => {
   const t = e.target.closest("[data-dk-tanimla]"); if (t) { pdAc({mod: "ekle", kisi_no: +t.dataset.dkTanimla, sonra: () => rota()}); return; }
   const k = e.target.closest("[data-bkat]");
   if (k) { bKat = {k: k.dataset.bkat, ad: k.querySelector("span").firstChild.textContent.trim()}; bFiltre = "gelen"; bugunCiz(); $("#b-liste-baslik").scrollIntoView({behavior: "smooth", block: "start"}); return; }
-  if (e.target.closest("#b-kat-temizle")) { bKat = null; bFiltre = "gelen"; bugunCiz(); }
+  if (e.target.closest("#b-kat-temizle")) { bKat = null; bFiltre = bFiltreVarsayilan(); bugunCiz(); }
 });
+function gunTablo(l, d) {
+  const dz = oz("duzeltme"), iz = oz("izin");
+  const dugme = s => (iz && (s.durum === "GELMEDİ" || s.durum === "NÖBETE GELMEDİ") ? `<button class="d kucuk" data-bgun-izin="${s.kisi_no}|${s.tarih || d.tarih}">İzin gir</button> ` : "") +
+    (dz ? cikisEkleDugme(s, d.tarih) + ` <button class="d kucuk" data-bgun-duzelt="${s.kisi_no}|${s.tarih || d.tarih}">Düzelt</button>` : "");
+  return tablo(["Durum", "Ad Soyad", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken", ""],
+    l.map(s => [etiket(s.durum) + okutmuyorEtiket(s) + rozetler(s), kisiLink(s.kisi_no, s.ad), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y"), dugme(s)]),
+    "Kayıt yok", {tikla: i => "#personel/" + l[i].kisi_no});
+}
+function bugunCizGecmis() {
+  const d = BUGUN, cy = d.satirlar.filter(x => x.durum === "ÇIKIŞ YOK");
+  const kartlar = [
+    {tikla: "gelen", deger: d.satirlar.length, ad: "Gelen", renk: "yesil", ikon: "gelen"},
+    {tikla: "gec", deger: d.gec.length, ad: "Geç kalan", renk: "sari", ikon: "gec", alt: d.gec.length ? `toplam ${sureYaz(d.gec.reduce((a, s) => a + s.gec_dk, 0))}` : ""},
+    {tikla: "erken", deger: d.erken.length, ad: "Erken çıkan", renk: "mor", ikon: "erken"},
+    {tikla: "giris_yok", deger: d.giris_yok.length, ad: "Giriş okutmayan", renk: "kirmizi", ikon: "uyari"},
+    {tikla: "cikis_yok", deger: cy.length, ad: "Çıkış okutmayan", renk: "kirmizi", ikon: "uyari"},
+    {tikla: "gelmeyen", deger: d.gelmeyen.length, ad: "Gelmeyen", renk: "kirmizi", ikon: "gelmeyen", alt: "o güne göre aktif personel"},
+    {tikla: "izinli", deger: d.izinli.length, ad: "İzinli", renk: "turkuaz", ikon: "izin"}].filter(k => k.tikla !== "izinli" || oz("izin"));
+  $("#b-kpi").innerHTML = kartlar.map(k => kpiKart(Object.assign(k, {secili: k.tikla === bFiltre}))).join("");
+  $$("#b-kpi [data-kpi]").forEach(b => b.onclick = () => { bFiltre = b.dataset.kpi; bugunCiz(); $("#b-liste-kart").scrollIntoView({behavior: "smooth", block: "start"}); });
+  const basliklar = {hepsi: "Günün listesi", gelen: "Gelenler", gec: "Geç kalanlar", erken: "Erken çıkanlar", giris_yok: "Giriş okutmayanlar", cikis_yok: "Çıkış okutmayanlar", gelmeyen: "Gelmeyenler", izinli: "İzinli olanlar"};
+  $("#b-liste-baslik").firstChild.textContent = basliklar[bFiltre] + " ";
+  const ara = $("#b-ara").value;
+  const uy = s => uyar(ara, s.ad, s.kisi_no, s.kart) && (!bKat || (s.kategori || "") === bKat.k);
+  const sg = [bFiltre !== "hepsi" ? basliklar[bFiltre] : "", bKat ? "Kategori: " + bKat.ad : ""].filter(Boolean);
+  $("#b-kat-chip").classList.toggle("gizli", !sg.length);
+  $("#b-kat-chip").innerHTML = sg.length ? `<span class="e mavi">Süzgeç: ${esc(sg.join(" · "))}</span> <a href="javascript:void 0" id="b-kat-temizle">Süzgeci kaldır</a>` : "";
+  if (bFiltre === "izinli") {
+    const l = d.izinli.filter(uy);
+    $("#b-tablo").innerHTML = tablo(["İzin", "Ad Soyad", "Açıklama", "O gün"], l.map(s => [`<span class="e turkuaz">${esc(s.izin)}</span>`, kisiLink(s.kisi_no, s.ad),
+      `<span class="soluk">${esc(s.aciklama)}</span>`, s.geldi ? `<span class="yesil-y">okuttu</span>` : `<span class="soluk">okutmadı</span>`]), "İzinli yok", {tikla: i => "#personel/" + l[i].kisi_no});
+    return;
+  }
+  const kaynak = {hepsi: d.satirlar.concat(d.gelmeyen, d.izinli_satirlar), gelen: d.satirlar, gec: d.gec, erken: d.erken, giris_yok: d.giris_yok, cikis_yok: cy, gelmeyen: d.gelmeyen}[bFiltre] || d.satirlar;
+  $("#b-tablo").innerHTML = gunTablo(kaynak.filter(uy), d);
+}
 function bugunCiz() {
+  if (bGun) return bugunCizGecmis();
   const d = BUGUN;
   const kartlar = [
     {tikla: "icerde", deger: d.icerde.length, ad: "Şu an içeride", renk: "ana", ikon: "icerde"},
@@ -1206,7 +1275,7 @@ async function yukleKisi(k) {
     {deger: o.erken, ad: "Erken çıkış", renk: "mor", ikon: "erken", alt: o.erken ? `toplam ${sureYaz(o.erken_dk)}` : ""},
     {deger: o.giris_yok, ad: "Giriş okutmadı", renk: "kirmizi", ikon: "uyari"},
     {deger: o.cikis_yok, ad: "Çıkış okutmadı", renk: "kirmizi", ikon: "uyari"},
-    {deger: o.gelmedi, ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: o.izinli_gun || o.saatlik_izin ? `${o.izinli_gun} gün izinli${o.saatlik_izin ? `, ${o.saatlik_izin} saatlik` : ""}` : ""},
+    {deger: o.gelmedi, ad: "Gelmedi (gün)", renk: "kirmizi", ikon: "gelmeyen", alt: "bugün dahil değil" + (o.izinli_gun || o.saatlik_izin ? ` · ${o.izinli_gun} gün izinli${o.saatlik_izin ? `, ${o.saatlik_izin} saatlik` : ""}` : "")},
     {deger: o.calisma, ad: "Toplam çalışma", renk: "ana", ikon: "saat"}]
     .concat(oz("puantaj") ? [{deger: o.fazla_mesai, ad: "Fazla mesai", renk: "mor", ikon: "saat", alt: o.fm_yontem === "haftalik" ? "haftalık eşik üstü (dönemle kesişen haftalar)" : "mesai bitişinden sonra"},
       {deger: o.eksik, ad: "Eksik süre", renk: "sari", ikon: "gec", alt: "geç + erken çıkış toplamı"}] : []).map(kpiKart).join("");
@@ -1250,8 +1319,8 @@ async function yukleKisi(k) {
     izinli ? ["İzinler", d.izinler.map(iz => `<span class="cip">${iz.bas_tarih === iz.bit_tarih ? tarihTR(iz.bas_tarih) : `${tarihTR(iz.bas_tarih)} – ${tarihTR(iz.bit_tarih)}`} · ${esc(iz.yazi)}
       <a href="javascript:void 0" title="Sil" data-izin-sil="${iz.ids.join(",")}">✕</a></span>`).join("") || "–"] : null].filter(Boolean)).replace("<thead><tr><th></th><th></th></tr></thead>", "");
   $("#k-tablo").innerHTML = tablo(["Tarih", "Durum", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken"].concat(duzeltme ? [""] : []),
-    d.gunler.map(s => [tarihTR(s.tarih), etiket(s.durum) + rozetler(s), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y")]
-      .concat(duzeltme ? [`<button class="d kucuk" data-duzelt="${s.tarih}"${s.durum === "GİRİŞ YOK" ? ` data-gsaat="${esc(((s.mesai || "").split("-")[0] || "").trim())}"` : ""}>Düzelt</button>`] : [])), "Bu dönemde kayıt yok");
+    d.gunler.map(s => [tarihTR(s.tarih), etiket(s.durum) + (s.bugun ? ` <span class="soluk">(bugün)</span>` : "") + rozetler(s), mesaiHucre(s), s.giris, s.cikis, s.sure, dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y")]
+      .concat(duzeltme ? [(izinli && (s.durum === "GELMEDİ" || s.durum === "NÖBETE GELMEDİ") ? `<button class="d kucuk" data-gizin="${s.tarih}">İzin gir</button> ` : "") + `<button class="d kucuk" data-duzelt="${s.tarih}"${s.durum === "GİRİŞ YOK" ? ` data-gsaat="${esc(((s.mesai || "").split("-")[0] || "").trim())}"` : ""}>Düzelt</button>`] : [])), "Bu dönemde kayıt yok");
 }
 $("#k-izin-ekle").onclick = () => izinFormAc({kisi_no: +KISI_NO, tarih: bugun()});
 // işe giriş / işten çıkış düzenleme
@@ -1292,8 +1361,11 @@ document.addEventListener("click", e => {
   const mn = e.target.closest("#gun-menu [data-menu]");
   if (mn) { const t = $("#gun-menu").dataset.tarih; menuKapat();
     if (mn.dataset.menu === "izin") izinFormAc({kisi_no: +KISI_NO, tarih: t}); else duzeltmeAc({kisi_no: +KISI_NO, tarih: t}); }
+  const gi = e.target.closest("[data-gizin]"); if (gi) izinFormAc({kisi_no: +KISI_NO, tarih: gi.dataset.gizin});
   const dz = e.target.closest("[data-duzelt]");
   if (dz) duzeltmeAc(dz.dataset.gsaat ? {kisi_no: +KISI_NO, tarih: dz.dataset.duzelt, saat: dz.dataset.gsaat, aciklama: "Girişte okutmayı unuttu"} : {kisi_no: +KISI_NO, tarih: dz.dataset.duzelt});
+  const bgi = e.target.closest("[data-bgun-izin]"); if (bgi) { const [k, t] = bgi.dataset.bgunIzin.split("|"); izinFormAc({kisi_no: +k, tarih: t}); }
+  const bgd = e.target.closest("[data-bgun-duzelt]"); if (bgd) { const [k, t] = bgd.dataset.bgunDuzelt.split("|"); duzeltmeAc({kisi_no: +k, tarih: t}); }
   const ge = e.target.closest("[data-giris-ekle]");
   if (ge) { const [k, t, m] = ge.dataset.girisEkle.split("|"); duzeltmeAc({kisi_no: +k, tarih: t, saat: m, aciklama: "Girişte okutmayı unuttu"}); }
   const ce = e.target.closest("[data-cikis-ekle]");
@@ -1541,7 +1613,9 @@ function izinSonrasi(mesaj) { if (mesaj) console.log(mesaj); rota(); }
 let RAPOR = null;
 async function yukleRapor() {
   const ham = altAktif("rapor") === "ham";
+  if (!ham && $("#r-durum").value === "GELMEDİ") $("#r-gelmeyen").checked = true;  // "Gelmedi" süzgeci kutuyu açık sayar
   const q = new URLSearchParams({bas: $("#r-bas").value, bit: $("#r-bit").value, kisi: $("#r-kisi").value, durum: ham ? "" : $("#r-durum").value});
+  if (!ham && $("#r-gelmeyen").checked) q.set("gelmeyen", "1");
   RAPOR = {ham, d: await api((ham ? "/api/ham?" : "/api/rapor?") + q)};
   raporCiz(false);
 }
@@ -1552,7 +1626,8 @@ function raporCiz(hepsi) {
     $("#r-tablo").innerHTML = tablo(["Zaman", "Ad Soyad", "Kart no", "Kaynak"], d.map(s => [s.zaman, kisiLink(s.kisi_no, s.ad), esc(s.kart),
       s.kaynak === "elle" ? `<span class="e mor" title="Elle eklenmiş okutma">elle</span>` : `<span class="soluk">cihaz</span>`]), "Kayıt yok", {sinir});
   } else {
-    $("#r-ozet").textContent = `${d.length} satır · ${d.filter(s => s.gec_dk).length} geç · ${d.filter(s => s.erken_dk).length} erken çıkış · ${d.filter(s => s.durum === "ÇIKIŞ YOK").length} çıkış yok · ${d.filter(s => s.durum === "GİRİŞ YOK").length} giriş yok`;
+    $("#r-ozet").textContent = `${d.length} satır · ${d.filter(s => s.gec_dk).length} geç · ${d.filter(s => s.erken_dk).length} erken çıkış · ${d.filter(s => s.durum === "ÇIKIŞ YOK").length} çıkış yok · ${d.filter(s => s.durum === "GİRİŞ YOK").length} giriş yok` +
+      ($("#r-gelmeyen").checked ? ` · ${d.filter(s => s.durum === "GELMEDİ" || s.durum === "NÖBETE GELMEDİ").length} gelmedi` : "");
     $("#r-tablo").innerHTML = tablo(["Tarih", "Ad Soyad", "Kategori", "Mesai", "Giriş", "Çıkış", "Süre", "Geç", "Erken", "Durum"],
       d.map(s => [tarihTR(s.tarih), kisiLink(s.kisi_no, s.ad), `<span class="soluk">${esc(s.kategori)}</span>`, mesaiHucre(s), s.giris, s.cikis, s.sure,
         dkYaz(s.gec_dk, "sari-y"), dkYaz(s.erken_dk, "mor-y"), etiket(s.durum) + rozetler(s)]), "Kayıt yok", {sinir});
@@ -1561,7 +1636,8 @@ function raporCiz(hepsi) {
 }
 $("#r-getir").onclick = yukleRapor;
 const raporDisa = bicim => location.href = "/disa?" + new URLSearchParams({tur: altAktif("rapor") === "ham" ? "ham" : "rapor", bicim,
-  bas: $("#r-bas").value, bit: $("#r-bit").value, kisi: $("#r-kisi").value, durum: altAktif("rapor") === "ham" ? "" : $("#r-durum").value});
+  bas: $("#r-bas").value, bit: $("#r-bit").value, kisi: $("#r-kisi").value, durum: altAktif("rapor") === "ham" ? "" : $("#r-durum").value,
+  ...(altAktif("rapor") !== "ham" && ($("#r-gelmeyen").checked || $("#r-durum").value === "GELMEDİ") ? {gelmeyen: "1"} : {})});
 $("#r-xlsx").onclick = () => raporDisa("xlsx");
 $("#r-csv").onclick = () => raporDisa("csv");
 
@@ -2081,7 +2157,7 @@ const g0 = bugun();
 $("#r-bas").value = g0.slice(0, 8) + "01"; $("#r-bit").value = g0; $("#n-ay").value = g0.slice(0, 7); $("#i-ay").value = g0.slice(0, 7);
 personelDoldur().catch(() => {});
 ustDurum().then(rota);  // özellik anahtarları gelmeden menü/sayfa çizilmesin
-setInterval(() => { ustDurum(); if (!$('[data-sayfa="bugun"]').classList.contains("gizli")) yukleBugun(); }, 60000);
+setInterval(() => { ustDurum(); if (!$('[data-sayfa="bugun"]').classList.contains("gizli") && !bGun) yukleBugun(); }, 60000);  // otomatik yenileme sadece bugün görünümünde
 </script>
 </body>
 </html>
