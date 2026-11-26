@@ -1,0 +1,85 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 14px;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; cursor: pointer; }
+.hidden { display: none !important; }
+
+.titlebar {
+  -webkit-app-region: drag;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 8px 8px 14px;
+  background: #111c33;
+  border-bottom: 1px solid #1e293b;
+}
+.title { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.actions { -webkit-app-region: no-drag; display: flex; gap: 2px; }
+.actions button {
+  background: transparent; color: #94a3b8; border: 0; width: 30px; height: 26px; border-radius: 6px; font-size: 14px;
+}
+.actions button:hover { background: #1e293b; color: #fff; }
+#btnClose:hover { background: #dc2626; }
+
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dot.ok { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.dot.wait { background: #f59e0b; }
+.dot.bad { background: #ef4444; }
+
+main { padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow: auto; flex: 1; }
+.card { background: #16213a; border: 1px solid #1e293b; border-radius: 12px; padding: 12px; }
+.label { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+
+.amount-wrap { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.cur { font-size: 28px; color: #64748b; font-weight: 600; }
+#amount {
+  flex: 1; min-width: 0; font-size: 32px; font-weight: 700; background: transparent; border: 0; color: #fff; outline: none;
+  user-select: text;
+}
+
+.results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.result {
+  text-align: left; background: #1d2b4a; border: 1px solid #2b3d63; border-radius: 12px; padding: 12px; color: inherit;
+}
+.result:hover { border-color: #3b82f6; }
+.r-label { color: #94a3b8; font-size: 12px; }
+.r-value { font-size: 22px; font-weight: 700; color: #fff; margin: 4px 0; word-break: break-all; }
+.r-value small { font-size: 14px; color: #94a3b8; }
+#resTl .r-value { color: #fde68a; }
+#resEur .r-value { color: #93c5fd; }
+.r-sub { color: #64748b; font-size: 12px; }
+
+.warn { background: #422006; border: 1px solid #a16207; color: #fde68a; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+
+.rates table { width: 100%; border-collapse: collapse; }
+.rates th { color: #64748b; font-weight: 500; font-size: 11px; text-align: right; padding: 2px 4px 6px; }
+.rates th:first-child { text-align: left; }
+.rates td { padding: 5px 4px; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid #1e293b; }
+.rates td:first-child { text-align: left; font-weight: 600; }
+.rates td.used { color: #fbbf24; font-weight: 700; }
+.status { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; color: #64748b; font-size: 11px; gap: 8px; }
+.link { background: none; border: 0; color: #60a5fa; padding: 0; font-size: 11px; }
+
+.toast {
+  position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+  background: #22c55e; color: #052e16; padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 12px;
+}
+
+.form h3 { margin: 6px 0 8px; font-size: 13px; color: #93c5fd; }
+.form h3:not(:first-child) { margin-top: 16px; }
+.form label { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 8px; }
+.form select, .form input:not([type=checkbox]) {
+  display: block; width: 100%; margin-top: 4px; padding: 7px 9px; border-radius: 8px; border: 1px solid #334155;
+  background: #0f172a; color: #fff; font: inherit; user-select: text;
+}
+.form .check { display: flex; align-items: center; gap: 8px; color: #e2e8f0; font-size: 13px; }
+.hint { color: #64748b; font-size: 11px; margin: 4px 0 0; }
+.buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.buttons button { border: 0; border-radius: 8px; padding: 8px 16px; background: #2563eb; color: #fff; font-weight: 600; }
+.buttons button.secondary { background: #334155; }
