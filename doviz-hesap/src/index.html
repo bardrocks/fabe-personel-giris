@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'">
+  <title>Fabe Döviz Hesap</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="titlebar">
+    <div class="title"><span id="dot" class="dot wait"></span> Fabe Döviz Hesap</div>
+    <div class="actions">
+      <button id="btnSettings" title="Ayarlar">⚙</button>
+      <button id="btnMin" title="Küçült">–</button>
+      <button id="btnClose" title="Gizle (Ctrl+Shift+D ile tekrar aç)">✕</button>
+    </div>
+  </header>
+
+  <main id="viewMain">
+    <section class="card">
+      <label for="amount" class="label">Ödenecek tutar (USD)</label>
+      <div class="amount-wrap">
+        <span class="cur">$</span>
+        <input id="amount" inputmode="decimal" autocomplete="off" placeholder="0" autofocus>
+      </div>
+    </section>
+
+    <section class="results">
+      <button class="result" id="resTl" title="Kopyalamak için tıkla">
+        <div class="r-label">TL olarak</div>
+        <div class="r-value"><span id="valTl">–</span> <small>₺</small></div>
+        <div class="r-sub" id="subTl">&nbsp;</div>
+      </button>
+      <button class="result" id="resEur" title="Kopyalamak için tıkla">
+        <div class="r-label">EUR olarak</div>
+        <div class="r-value"><span id="valEur">–</span> <small>€</small></div>
+        <div class="r-sub" id="subEur">&nbsp;</div>
+      </button>
+    </section>
+
+    <div id="warn" class="warn hidden"></div>
+
+    <section class="card rates">
+      <table>
+        <thead><tr><th>nadirdoviz.com</th><th>Alış</th><th>Satış</th></tr></thead>
+        <tbody>
+          <tr><td>USD/TL</td><td id="usdtl-alis">…</td><td id="usdtl-satis">…</td></tr>
+          <tr><td>EUR/TL</td><td id="eurtl-alis">…</td><td id="eurtl-satis">…</td></tr>
+          <tr><td>EUR/USD</td><td id="eurusd-alis">…</td><td id="eurusd-satis">…</td></tr>
+        </tbody>
+      </table>
+      <div class="status"><span id="status">Kurlar yükleniyor…</span><button id="btnRefresh" class="link">Yenile</button></div>
+    </section>
+    <div id="toast" class="toast hidden">Kopyalandı</div>
+  </main>
+
+  <main id="viewSettings" class="hidden">
+    <section class="card form">
+      <h3>USD → TL</h3>
+      <label>Kullanılacak kur
+        <select id="tlSide"><option value="alis">Alış</option><option value="satis">Satış</option></select>
+      </label>
+      <label>Kura düzeltme (ör. -0,0500)
+        <input id="tlAdjust" inputmode="decimal">
+      </label>
+
+      <h3>USD → EUR (parite)</h3>
+      <label>Kullanılacak parite
+        <select id="pariteSide"><option value="alis">Alış</option><option value="satis">Satış</option></select>
+      </label>
+      <label>Pariteye düzeltme (ör. -0,0100)
+        <input id="pariteAdjust" inputmode="decimal">
+      </label>
+      <p class="hint">Örnek: parite 1,0941 ve düzeltme -0,0100 ise hesap 1,0841'den yapılır.</p>
+
+      <h3>Genel</h3>
+      <label class="check"><input type="checkbox" id="alwaysOnTop"> Her zaman üstte</label>
+      <label class="check"><input type="checkbox" id="openAtLogin"> Bilgisayar açılınca başlat</label>
+      <p class="hint">Kısayol: <b id="shortcut">Ctrl+Shift+D</b> ile her yerden aç/kapat.</p>
+      <div id="settingsErr" class="warn hidden"></div>
+      <div class="buttons">
+        <button id="btnCancel" class="secondary">Vazgeç</button>
+        <button id="btnSave">Kaydet</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="calc.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

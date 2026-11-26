@@ -1,0 +1,27 @@
+{
+  "name": "fabe-doviz-hesap",
+  "productName": "Fabe Döviz Hesap",
+  "version": "1.0.0",
+  "description": "Nadir Döviz fiyat ekranından canlı kurları alıp USD tutarını TL ve EUR'ya çeviren masaüstü pop-up",
+  "main": "src/main.js",
+  "author": "Fabe",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/calc.test.js",
+    "dist:win": "electron-builder --win portable nsis --x64 --publish never"
+  },
+  "build": {
+    "appId": "com.fabe.dovizhesap",
+    "productName": "Fabe Döviz Hesap",
+    "files": ["src/**/*", "build/icon.png"],
+    "win": { "icon": "build/icon.png" },
+    "portable": { "artifactName": "FabeDovizHesap-Portable-${version}.exe" },
+    "nsis": { "artifactName": "FabeDovizHesap-Kurulum-${version}.exe", "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true }
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  }
+}
